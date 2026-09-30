@@ -1,0 +1,3 @@
+setting = key "=" value
+key = ALPHA *7(ALPHA / DIGIT / "-")
+value = %s"on" / %s"off" / 1*3DIGIT

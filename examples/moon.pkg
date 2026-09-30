@@ -1,0 +1,2 @@
+import { "local/moonabnf" @abnf }
+pkgtype(kind: "executable")
