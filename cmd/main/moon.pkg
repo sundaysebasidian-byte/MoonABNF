@@ -1,5 +1,8 @@
-// import {
-//   "local/moonabnf" @lib,
-// }
-
+import {
+  "local/moonabnf" @abnf,
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
 pkgtype(kind: "executable")
+supported_targets = "js"
+options(link: { "js": { "format": "cjs" } })
