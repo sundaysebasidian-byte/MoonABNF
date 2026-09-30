@@ -38,7 +38,7 @@ pub fn compile(source : Bytes, limits? : ParseLimits = default_parse_limits(), m
     Ok(g) => try {
       if g.rules.is_empty() { raise ParseFailure(diagnostic(source, 0, "no-rules", "compilation requires a user rule")) }
       let rules = core_rules()
-      let defined : Map[String, Bool] = {}
+      let defined : Map[String, Bool] = Map([])
       for rule in g.rules {
         if rule.incremental {
           match rules.get(rule.name) {
@@ -58,6 +58,7 @@ pub fn compile(source : Bytes, limits? : ParseLimits = default_parse_limits(), m
       }
       let a = { source, work: 0, max_work }
       for _, e in rules { validate_references(e, rules, a) }
+      validate_recursion(rules, a)
       Ok({ rules, })
     } catch { ParseFailure(d) => Err(d) }
   }
