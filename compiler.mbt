@@ -48,6 +48,7 @@ pub fn compile(source : Bytes, limits? : ParseLimits = default_parse_limits(), m
               let es = match old { Choice(es, _) => es.copy(); _ => [old] }
               es.push(rule.expression)
               rules[rule.name] = Choice(es, rule.offset)
+              defined[rule.name] = true
             }
           }
         } else {

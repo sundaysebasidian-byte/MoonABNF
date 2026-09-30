@@ -21,3 +21,7 @@ test "productive and nullable-prefix cycles are diagnosed" {
   assert_true(@moonabnf.compile(b"x = 0x\r\n") is Ok(_))
   assert_true(@moonabnf.compile(b"x = \"a\"\r\n", max_work=1) is Err(d) && d.code == "compile-budget")
 }
+
+test "core extension cannot be silently discarded by later base" {
+  assert_true(@moonabnf.compile(b"DIGIT =/ \"x\"\r\nDIGIT = \"y\"\r\n") is Err(d) && d.code == "duplicate-rule")
+}
