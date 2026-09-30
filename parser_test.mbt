@@ -27,3 +27,24 @@ test "strict syntax and locations" {
   }
   assert_true(@moonabnf.parse(b"\r\n; comment only\r\n") is Ok(_))
 }
+
+test "every AST node and parser resource ceiling is enforced" {
+  let base = @moonabnf.default_parse_limits()
+  assert_true(@moonabnf.parse(b"x = \"a\" / \"b\"\r\n", limits={ ..base, max_nodes: 2 }) is Err(d) && d.code == "parse-budget")
+  assert_true(@moonabnf.parse(b"x = 2\"a\"\r\n", limits={ ..base, max_nodes: 1 }) is Err(d) && d.code == "parse-budget")
+  assert_true(@moonabnf.parse(b"x = %x00.01\r\n", limits={ ..base, max_nodes: 2 }) is Err(d) && d.code == "parse-budget")
+  assert_true(@moonabnf.parse(b"x = (((\"a\")))\r\n", limits={ ..base, max_depth: 2 }) is Err(d) && d.code == "parse-budget")
+  assert_true(@moonabnf.parse(b"x = \"a\"\r\ny = \"b\"\r\n", limits={ ..base, max_rules: 1 }) is Err(d) && d.code == "parse-budget")
+  assert_true(@moonabnf.parse(b"x = \"a\"\r\n", limits={ ..base, max_bytes: 4 }) is Err(d) && d.code == "parse-budget")
+  assert_true(@moonabnf.parse(b"x = \"a\"\r\n", limits={ ..base, max_depth: 65 }) is Err(d) && d.code == "invalid-limits")
+  assert_true(@moonabnf.parse(b"x = 1000001\"\"\r\n") is Err(d) && d.code == "number-limit")
+  assert_true(@moonabnf.parse(b"x = %") is Err(d) && d.offset == 5)
+}
+
+test "folding inside groups, comments and semicolon literals" {
+  assert_true(@moonabnf.parse(b"x = (\r\n \"a\" / ; alternatives\r\n \"b\")\r\n") is Ok(_))
+  assert_true(@moonabnf.parse(b"x = \"a;b\";fold\r\n \"c\"\r\n") is Ok(_))
+  assert_true(@moonabnf.parse(b"x = \"a\"\r\n;standalone\r\ny = \"b\"\r\n") is Ok(_))
+  assert_true(@moonabnf.parse(b"x = []\r\n") is Err(_))
+  assert_true(@moonabnf.parse(b"x = <description>\r\n") is Ok(_))
+}

@@ -29,6 +29,13 @@ fn Parser::need(self : Parser, c : Int) -> Unit raise ParseFailure {
   if !self.take(c) { self.fail("syntax", "expected byte \{c}") }
 }
 
+///|
+fn Parser::node(self : Parser, e : Expr) -> Expr raise ParseFailure {
+  self.nodes = self.nodes + 1
+  if self.nodes > self.limits.max_nodes { self.fail("parse-budget", "AST node budget exhausted") }
+  e
+}
+
 ///| Exact RFC c-nl: CRLF, optionally preceded by a printable ASCII comment.
 fn Parser::newline(self : Parser) -> Bool raise ParseFailure {
   if self.take(59) {
@@ -93,16 +100,14 @@ fn Parser::literal(self : Parser, sensitive : Bool, start : Int) -> Expr raise P
     bytes.push(c.to_byte())
     self.pos = self.pos + 1
   }
-  Literal(Bytes::from_array(bytes), sensitive, start)
+  self.node(Literal(Bytes::from_array(bytes), sensitive, start))
 }
 
 ///|
 fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
   if depth > self.limits.max_depth { self.fail("parse-budget", "grammar nesting depth exhausted") }
-  self.nodes = self.nodes + 1
-  if self.nodes > self.limits.max_nodes { self.fail("parse-budget", "AST node budget exhausted") }
   let start = self.pos
-  if alpha(self.peek()) { return Ref(self.name(), start) }
+  if alpha(self.peek()) { return self.node(Ref(self.name(), start)) }
   if self.peek() == 34 { return self.literal(false, start) }
   if self.take(40) {
     ignore(self.space())
@@ -116,7 +121,7 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
     let e = self.alternation(depth + 1)
     ignore(self.space())
     self.need(93)
-    return Repeat(0, Some(1), e, start)
+    return self.node(Repeat(0, Some(1), e, start))
   }
   if self.take(60) {
     let text = StringBuilder()
@@ -126,9 +131,10 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
       text.write_char(c.unsafe_to_char())
       self.pos = self.pos + 1
     }
-    return Prose(text.to_string(), start)
+    return self.node(Prose(text.to_string(), start))
   }
   if self.take(37) {
+    if self.peek() < 0 { self.fail("syntax", "missing percent prefix") }
     let prefix = ascii_lower(self.peek())
     self.pos = self.pos + 1
     if prefix == 105 || prefix == 115 { return self.literal(prefix == 115, start) }
@@ -137,11 +143,11 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
     if self.take(45) {
       let hi = self.number(base, 255)
       if lo > hi { self.fail("range", "descending numeric range") }
-      return Range(lo, hi, start)
+      return self.node(Range(lo, hi, start))
     }
-    let es = [Range(lo, lo, start)]
-    while self.take(46) { let n = self.number(base, 255); es.push(Range(n, n, start)) }
-    return if es.length() == 1 { es[0] } else { Sequence(es, start) }
+    let es = [self.node(Range(lo, lo, start))]
+    while self.take(46) { let n = self.number(base, 255); es.push(self.node(Range(n, n, start))) }
+    return if es.length() == 1 { es[0] } else { self.node(Sequence(es, start)) }
   }
   self.fail("syntax", "expected ABNF element")
 }
@@ -155,10 +161,10 @@ fn Parser::repetition(self : Parser, depth : Int) -> Expr raise ParseFailure {
     let lo = exact.unwrap_or(0)
     if hi is Some(n) && n < lo { self.fail("repeat", "minimum exceeds maximum") }
     let e = self.element(depth)
-    return Repeat(lo, hi, e, start)
+    return self.node(Repeat(lo, hi, e, start))
   }
   let e = self.element(depth)
-  match exact { Some(n) => Repeat(n, Some(n), e, start); None => e }
+  match exact { Some(n) => self.node(Repeat(n, Some(n), e, start)); None => e }
 }
 
 ///|
@@ -175,7 +181,7 @@ fn Parser::concatenation(self : Parser, depth : Int) -> Expr raise ParseFailure 
     }
     es.push(self.repetition(depth))
   }
-  if es.length() == 1 { es[0] } else { Sequence(es, start) }
+  if es.length() == 1 { es[0] } else { self.node(Sequence(es, start)) }
 }
 
 ///|
@@ -189,7 +195,7 @@ fn Parser::alternation(self : Parser, depth : Int) -> Expr raise ParseFailure {
     ignore(self.space())
     es.push(self.concatenation(depth))
   }
-  if es.length() == 1 { es[0] } else { Choice(es, start) }
+  if es.length() == 1 { es[0] } else { self.node(Choice(es, start)) }
 }
 
 ///| Strict grammar input: CRLF required, including the final rule terminator.
