@@ -1,8 +1,8 @@
 ///|
-suberror ParseFailure { ParseFailure(Diagnostic) }
+priv suberror ParseFailure { ParseFailure(Diagnostic) }
 
 ///|
-struct Parser {
+priv struct Parser {
   source : Bytes
   mut pos : Int
   mut nodes : Int
@@ -61,7 +61,7 @@ fn Parser::name(self : Parser) -> String raise ParseFailure {
   let out = StringBuilder()
   if !alpha(self.peek()) { self.fail("syntax", "expected rule name") }
   while alpha(self.peek()) || digit(self.peek()) || self.peek() == 45 {
-    out.write_char(Char::from_int(ascii_lower(self.peek())))
+    out.write_char(ascii_lower(self.peek()).unsafe_to_char())
     self.pos = self.pos + 1
   }
   out.to_string()
@@ -123,7 +123,7 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
     while !self.take(62) {
       let c = self.peek()
       if c < 32 || c > 126 { self.fail("syntax", "invalid prose value") }
-      text.write_char(Char::from_int(c))
+      text.write_char(c.unsafe_to_char())
       self.pos = self.pos + 1
     }
     return Prose(text.to_string(), start)
@@ -219,6 +219,6 @@ pub fn parse(source : Bytes, limits? : ParseLimits = default_parse_limits()) -> 
       if rules.length() > limits.max_rules { p.fail("parse-budget", "rule budget exhausted") }
     }
     if source.is_empty() { p.fail("syntax", "empty rulelist") }
-    Ok({ rules })
+    Ok({ rules, })
   } catch { ParseFailure(d) => Err(d) }
 }
