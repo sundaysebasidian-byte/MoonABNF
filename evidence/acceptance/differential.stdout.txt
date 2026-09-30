@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "seed": 20260930,
+  "grammars": 80,
+  "comparisons": 5440,
+  "mismatch_count": 0,
+  "mismatches": [],
+  "oracle": "Python stdlib re.fullmatch on bytes, independently generated regular subset",
+  "not_tested": [
+    "third-party full ABNF grammar parser",
+    "left-recursive recognition (explicitly rejected)",
+    "general recursive grammars against regex oracle"
+  ]
+}

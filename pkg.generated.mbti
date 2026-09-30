@@ -1,0 +1,110 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "local/moonabnf"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn compile(Bytes, limits? : ParseLimits, max_work? : Int) -> Result[Program, Diagnostic]
+
+pub fn default_match_limits() -> MatchLimits
+
+pub fn default_parse_limits() -> ParseLimits
+
+pub fn parse(Bytes, limits? : ParseLimits) -> Result[Grammar, Diagnostic]
+
+// Errors
+
+// Types and methods
+pub(all) struct Diagnostic {
+  code : String
+  message : String
+  offset : Int
+  line : Int
+  column : Int
+} derive(Eq, @debug.Debug)
+pub fn Diagnostic::equal(Self, Self) -> Bool
+pub fn Diagnostic::not_equal(Self, Self) -> Bool
+pub fn Diagnostic::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Expr {
+  Ref(String, Int)
+  Literal(Bytes, Bool, Int)
+  Range(Int, Int, Int)
+  Sequence(Array[Expr], Int)
+  Choice(Array[Expr], Int)
+  Repeat(Int, Int?, Expr, Int)
+  Prose(String, Int)
+} derive(Eq, @debug.Debug)
+pub fn Expr::equal(Self, Self) -> Bool
+pub fn Expr::not_equal(Self, Self) -> Bool
+pub fn Expr::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Grammar {
+  rules : Array[Rule]
+} derive(Eq, @debug.Debug)
+pub fn Grammar::equal(Self, Self) -> Bool
+pub fn Grammar::not_equal(Self, Self) -> Bool
+pub fn Grammar::to_repr(Self) -> @debug.Repr
+
+pub(all) struct MatchLimits {
+  max_input_bytes : Int
+  max_work : Int
+  max_states : Int
+  max_depth : Int
+} derive(Eq, @debug.Debug)
+pub fn MatchLimits::equal(Self, Self) -> Bool
+pub fn MatchLimits::not_equal(Self, Self) -> Bool
+pub fn MatchLimits::to_repr(Self) -> @debug.Repr
+
+pub(all) struct MatchReport {
+  status : MatchStatus
+  offset : Int
+  work : Int
+  states : Int
+} derive(Eq, @debug.Debug)
+pub fn MatchReport::equal(Self, Self) -> Bool
+pub fn MatchReport::not_equal(Self, Self) -> Bool
+pub fn MatchReport::to_repr(Self) -> @debug.Repr
+
+pub(all) enum MatchStatus {
+  Matched
+  NoMatch
+  BudgetExceeded(String)
+  UnknownRule
+  InvalidLimits
+} derive(Eq, @debug.Debug)
+pub fn MatchStatus::equal(Self, Self) -> Bool
+pub fn MatchStatus::not_equal(Self, Self) -> Bool
+pub fn MatchStatus::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ParseLimits {
+  max_bytes : Int
+  max_rules : Int
+  max_nodes : Int
+  max_depth : Int
+} derive(Eq, @debug.Debug)
+pub fn ParseLimits::equal(Self, Self) -> Bool
+pub fn ParseLimits::not_equal(Self, Self) -> Bool
+pub fn ParseLimits::to_repr(Self) -> @debug.Repr
+
+pub struct Program {
+  // private fields
+}
+pub fn Program::recognize(Self, String, Bytes, limits? : MatchLimits) -> MatchReport
+pub fn Program::rule_names(Self) -> Array[String]
+
+pub(all) struct Rule {
+  name : String
+  expression : Expr
+  incremental : Bool
+  offset : Int
+} derive(Eq, @debug.Debug)
+pub fn Rule::equal(Self, Self) -> Bool
+pub fn Rule::not_equal(Self, Self) -> Bool
+pub fn Rule::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

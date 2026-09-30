@@ -1,0 +1,34 @@
+name: MoonABNF check build test
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    env:
+      MOONBIT_VERSION: 0.10.14+7d59c7ec9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned official toolchain
+        env:
+          MOON_HOME: ${{ runner.temp }}/moonabnf-sdk
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s "$MOONBIT_VERSION"
+          echo "MOON_HOME=$MOON_HOME" >> "$GITHUB_ENV"
+          echo "MOONABNF_SDK=$MOON_HOME" >> "$GITHUB_ENV"
+          echo "$MOON_HOME/bin" >> "$GITHUB_PATH"
+      - name: Confirm exact compiler
+        run: |
+          case "$(moonc -v)" in
+            "v${MOONBIT_VERSION} "*) ;;
+            *) echo "Unexpected compiler" >&2; exit 1 ;;
+          esac
+          moon version --all
+      - name: Check build test examples CLI and differential
+        run: python3 scripts/acceptance.py --output "$RUNNER_TEMP/moonabnf-evidence"
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moonabnf-evidence
+          path: ${{ runner.temp }}/moonabnf-evidence

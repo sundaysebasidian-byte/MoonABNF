@@ -1,4 +1,5 @@
-///| Core terminals are constructed as AST semantics, not copied RFC text.
+///|
+/// Core terminals are constructed as AST semantics, not copied RFC text.
 fn core_rules() -> Map[String, Expr] {
   let r = (lo, hi) => Range(lo, hi, 0)
   let reference = name => Ref(name, 0)
@@ -16,7 +17,12 @@ fn core_rules() -> Map[String, Expr] {
     "hexdig": alt([reference("digit"), r(65, 70), r(97, 102)]),
     "htab": r(9, 9),
     "lf": r(10, 10),
-    "lwsp": Repeat(0, None, alt([reference("wsp"), seq([reference("crlf"), reference("wsp")])]), 0),
+    "lwsp": Repeat(
+      0,
+      None,
+      alt([reference("wsp"), seq([reference("crlf"), reference("wsp")])]),
+      0,
+    ),
     "octet": r(0, 255),
     "sp": r(32, 32),
     "vchar": r(33, 126),

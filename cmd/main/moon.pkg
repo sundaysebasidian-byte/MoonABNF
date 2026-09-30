@@ -3,6 +3,11 @@ import {
   "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
+
 pkgtype(kind: "executable")
+
 supported_targets = "js"
-options(link: { "js": { "format": "cjs" } })
+
+options(
+  link: { "js": { "format": "cjs" } },
+)

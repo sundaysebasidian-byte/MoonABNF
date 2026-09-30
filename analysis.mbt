@@ -1,26 +1,45 @@
-///| Monotone boolean analysis: nullable=true checks epsilon; false checks that
+///|
+/// Monotone boolean analysis: nullable=true checks epsilon; false checks that
 /// some finite terminal string can be generated (including epsilon).
-fn property(e : Expr, state : Map[String, Bool], nullable : Bool, a : Analysis) -> Bool raise ParseFailure {
+fn property(
+  e : Expr,
+  state : Map[String, Bool],
+  nullable : Bool,
+  a : Analysis,
+) -> Bool raise ParseFailure {
   a.tick(e.offset())
   match e {
     Ref(n, _) => state.get(n).unwrap_or(false)
     Literal(s, _, _) => !nullable || s.is_empty()
     Range(_, _, _) => !nullable
     Prose(_, _) => false
-    Repeat(lo, hi, child, _) => lo == 0 || hi == Some(0) || property(child, state, nullable, a)
+    Repeat(lo, hi, child, _) =>
+      lo == 0 || hi == Some(0) || property(child, state, nullable, a)
     Sequence(es, _) => {
-      for e in es { if !property(e, state, nullable, a) { return false } }
+      for e in es {
+        if !property(e, state, nullable, a) {
+          return false
+        }
+      }
       true
     }
     Choice(es, _) => {
-      for e in es { if property(e, state, nullable, a) { return true } }
+      for e in es {
+        if property(e, state, nullable, a) {
+          return true
+        }
+      }
       false
     }
   }
 }
 
 ///|
-fn fixed_point(rules : Map[String, Expr], nullable : Bool, a : Analysis) -> Map[String, Bool] raise ParseFailure {
+fn fixed_point(
+  rules : Map[String, Expr],
+  nullable : Bool,
+  a : Analysis,
+) -> Map[String, Bool] raise ParseFailure {
   let state : Map[String, Bool] = Map([])
   let mut changed = true
   while changed {
@@ -35,29 +54,55 @@ fn fixed_point(rules : Map[String, Expr], nullable : Bool, a : Analysis) -> Map[
   state
 }
 
-///| Only references reachable before consuming a byte can cause left recursion.
-fn leading(e : Expr, nullable : Map[String, Bool], out : Array[String], a : Analysis) -> Unit raise ParseFailure {
+///|
+/// Only references reachable before consuming a byte can cause left recursion.
+fn leading(
+  e : Expr,
+  nullable : Map[String, Bool],
+  out : Array[String],
+  a : Analysis,
+) -> Unit raise ParseFailure {
   a.tick(e.offset())
   match e {
     Ref(n, _) => out.push(n)
-    Choice(es, _) => for e in es { leading(e, nullable, out, a) }
-    Sequence(es, _) => for e in es {
-      leading(e, nullable, out, a)
-      if !property(e, nullable, true, a) { break }
-    }
-    Repeat(_, hi, child, _) => if hi != Some(0) { leading(child, nullable, out, a) }
+    Choice(es, _) =>
+      for e in es {
+        leading(e, nullable, out, a)
+      }
+    Sequence(es, _) =>
+      for e in es {
+        leading(e, nullable, out, a)
+        if !property(e, nullable, true, a) {
+          break
+        }
+      }
+    Repeat(_, hi, child, _) =>
+      if hi != Some(0) {
+        leading(child, nullable, out, a)
+      }
     _ => ()
   }
 }
 
-///| Iterative reachability avoids recursion proportional to the number of rules.
-fn validate_recursion(rules : Map[String, Expr], a : Analysis) -> Unit raise ParseFailure {
+///|
+/// Iterative reachability avoids recursion proportional to the number of rules.
+fn validate_recursion(
+  rules : Map[String, Expr],
+  a : Analysis,
+) -> Unit raise ParseFailure {
   let names = rules.keys().collect()
   names.sort()
   let productive = fixed_point(rules, false, a)
   for name in names {
     if !productive.contains(name) {
-      raise ParseFailure(diagnostic(a.source, rules[name].offset(), "nonproductive-rule", "rule \{name} cannot derive a finite string"))
+      raise ParseFailure(
+        diagnostic(
+          a.source,
+          rules[name].offset(),
+          "nonproductive-rule",
+          "rule \{name} cannot derive a finite string",
+        ),
+      )
     }
   }
   let nullable = fixed_point(rules, true, a)
@@ -76,8 +121,20 @@ fn validate_recursion(rules : Map[String, Expr], a : Analysis) -> Unit raise Par
       i = i + 1
       for next in graph[node] {
         a.tick(rules[root].offset())
-        if next == root { raise ParseFailure(diagnostic(a.source, rules[root].offset(), "left-recursion", "nullable-prefix cycle from rule \{root}; rewrite the grammar")) }
-        if !seen.contains(next) { seen[next] = true; pending.push(next) }
+        if next == root {
+          raise ParseFailure(
+            diagnostic(
+              a.source,
+              rules[root].offset(),
+              "left-recursion",
+              "nullable-prefix cycle from rule \{root}; rewrite the grammar",
+            ),
+          )
+        }
+        if !seen.contains(next) {
+          seen[next] = true
+          pending.push(next)
+        }
       }
     }
   }

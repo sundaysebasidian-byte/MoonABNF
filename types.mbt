@@ -1,4 +1,5 @@
-///| Source positions are zero-based byte offsets; line/column are one-based.
+///|
+/// Source positions are zero-based byte offsets; line/column are one-based.
 pub(all) struct Diagnostic {
   code : String
   message : String
@@ -7,7 +8,8 @@ pub(all) struct Diagnostic {
   column : Int
 } derive(Eq, Debug)
 
-///| Public AST. Repeat maximum None means unbounded; positions refer to source.
+///|
+/// Public AST. Repeat maximum None means unbounded; positions refer to source.
 pub(all) enum Expr {
   Ref(String, Int)
   Literal(Bytes, Bool, Int)
@@ -31,7 +33,8 @@ pub(all) struct Grammar {
   rules : Array[Rule]
 } derive(Eq, Debug)
 
-///| Hard implementation ceilings prevent caller budgets from risking the stack.
+///|
+/// Hard implementation ceilings prevent caller budgets from risking the stack.
 pub(all) struct ParseLimits {
   max_bytes : Int
   max_rules : Int
@@ -41,38 +44,66 @@ pub(all) struct ParseLimits {
 
 ///|
 pub fn default_parse_limits() -> ParseLimits {
-  { max_bytes: 65536, max_rules: 256, max_nodes: 4096, max_depth: 64 }
+  { max_bytes: 65536, max_rules: 256, max_nodes: 4096, max_depth: 64, }
 }
 
 ///|
-fn diagnostic(source : Bytes, offset : Int, code : String, message : String) -> Diagnostic {
+fn diagnostic(
+  source : Bytes,
+  offset : Int,
+  code : String,
+  message : String,
+) -> Diagnostic {
   let mut line = 1
   let mut column = 1
   for i = 0; i < offset && i < source.length(); i = i + 1 {
-    if source[i] == b'\n' { line = line + 1; column = 1 } else { column = column + 1 }
+    if source[i] == b'\n' {
+      line = line + 1
+      column = 1
+    } else {
+      column = column + 1
+    }
   }
-  { code, message, offset, line, column }
+  { code, message, offset, line, column, }
 }
 
 ///|
 fn Expr::offset(self : Expr) -> Int {
   match self {
-    Ref(_, p) | Literal(_, _, p) | Range(_, _, p) | Sequence(_, p) |
-    Choice(_, p) | Repeat(_, _, _, p) | Prose(_, p) => p
+    Ref(_, p)
+    | Literal(_, _, p)
+    | Range(_, _, p)
+    | Sequence(_, p)
+    | Choice(_, p)
+    | Repeat(_, _, _, p)
+    | Prose(_, p) => p
   }
 }
 
 ///|
-fn ascii_lower(c : Int) -> Int { if c >= 65 && c <= 90 { c + 32 } else { c } }
+fn ascii_lower(c : Int) -> Int {
+  if c >= 65 && c <= 90 {
+    c + 32
+  } else {
+    c
+  }
+}
 
 ///|
-fn alpha(c : Int) -> Bool { let v = ascii_lower(c); v >= 97 && v <= 122 }
+fn alpha(c : Int) -> Bool {
+  let v = ascii_lower(c)
+  v >= 97 && v <= 122
+}
 
 ///|
-fn digit(c : Int) -> Bool { c >= 48 && c <= 57 }
+fn digit(c : Int) -> Bool {
+  c >= 48 && c <= 57
+}
 
 ///|
-fn lower_name(s : String) -> String { s.to_lower() }
+fn lower_name(s : String) -> String {
+  s.to_lower()
+}
 
 ///|
 pub extend Diagnostic with Eq::{equal, not_equal}
