@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
-SDK=${MOONABNF_SDK:-/Users/sebasidian/Documents/Codex/2026-09-10/ni-q/work/moonbit-sdk}
+SDK=${MOONABNF_SDK:-${MOON_HOME:-}}
+if [ -z "$SDK" ]; then
+  echo "Set MOONABNF_SDK to your existing MoonBit SDK; see TOOLCHAIN.lock" >&2
+  exit 2
+fi
 export RUST_LOG=error
 export MOON_HOME="$SDK"
 export PATH="$SDK/bin:$PATH"

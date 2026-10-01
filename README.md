@@ -3,7 +3,8 @@
 MoonBit 实现的通用 ABNF 文本解析、编译验证和有界字节识别库，依据
 [RFC 5234](https://www.rfc-editor.org/info/rfc5234/) 与
 [RFC 7405](https://www.rfc-editor.org/info/rfc7405/)。适合协议字段、配置输入和二进制 fixture 校验。
-当前为本地独立工程；尚未公开仓库、发布 Mooncakes 或提交赛事表单。
+项目使用 MIT，仓库地址为 https://github.com/sundaysebasidian-byte/MoonABNF 。
+正式模块名为 `sundaysebasidian-byte/moonabnf`，版本 `0.1.0`。发布与远端验证状态见中文验收矩阵；未提交赛事表单。
 
 ## 安装与复现
 
@@ -24,16 +25,16 @@ python3 scripts/downstream.py
 ```
 
 使用 Unix `unzip` 可保留脚本执行位；若解压工具移除了执行位，先运行 `chmod +x scripts/*.sh`。
-本机默认复用的 SDK 路径已记录在锁文件；其他机器请设置 `MOONABNF_SDK`。
-本地模块名暂为 `local/moonabnf`，发布前由用户确定正式命名空间。
-当前不能把 `moon add local/moonabnf` 当作已发布安装方式。
+脚本通过 `MOONABNF_SDK`（或 `MOON_HOME`）使用已有 SDK，不依赖作者本机绝对路径。
+在独立下游模块内，正式版本发布后可使用 `moon add sundaysebasidian-byte/moonabnf@0.1.0`。
+本地候选包消费和正式注册表消费分别保留证据，不把前者当成后者。
 
 ## 库 API
 
 包配置和可运行样例见 `examples/moon.pkg` 与 `examples/main.mbt`：
 
 ```moonbit
-import { "local/moonabnf" @abnf }
+import { "sundaysebasidian-byte/moonabnf" @abnf }
 ```
 
 ```moonbit
@@ -135,4 +136,5 @@ CI 配置覆盖同一流程，锁定编译器；尚未在远端执行，不把�
 原创实现与自制 fixtures 使用 MIT。标准库依赖许可及 NOTICE 在 `licenses/`。
 RFC 文本未作为 MIT 源码或 fixture 打包；规范依据与参考范围见 `SOURCES.md`。
 代码和事实资料均有 AI 辅助；最终申报书必须由用户本人撰写，身份材料与诚信承诺由本人处理。
-公开仓库、发布 Mooncakes、报名和奖励资格仍待用户批准及赛事审核。
+用户已条件批准公开 GitHub 和按现有 MIT 发布 Mooncakes；实际发布状态与证据另记。
+本人报名、人工最终申报书、身份材料、诚信承诺及奖励资格仍由本人和赛事审核处理。

@@ -7,12 +7,16 @@ Only the consumer template and the unzipped package's public API are used.
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import tempfile
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+manifest = (ROOT / 'moon.mod').read_text()
+MODULE = re.search(r'^name\s*=\s*"([^"]+)"', manifest, re.M).group(1)
+VERSION = re.search(r'^version\s*=\s*"([^"]+)"', manifest, re.M).group(1)
 parser = argparse.ArgumentParser()
 parser.add_argument('--output', type=Path, default=ROOT / 'evidence' / 'downstream-20261001')
 args = parser.parse_args()
@@ -35,7 +39,7 @@ def run(name, command, cwd):
     return r
 
 run('candidate-package', [moon, 'package', '--frozen'], ROOT)
-archive = ROOT / '_build' / 'publish' / 'local-moonabnf-0.1.0.zip'
+archive = ROOT / '_build' / 'publish' / (MODULE.replace('/', '-') + '-' + VERSION + '.zip')
 (out / archive.name).write_bytes(archive.read_bytes())
 with zipfile.ZipFile(archive) as z:
     candidate = {n: hashlib.sha256(z.read(n)).hexdigest() for n in sorted(z.namelist())}
@@ -53,11 +57,11 @@ with zipfile.ZipFile(archive) as z:
         consumer = work / 'consumer'
         consumer.mkdir()
         (work / 'moon.work').write_text('members = ["candidate", "consumer"]\n')
-        (consumer / 'moon.mod').write_text('name = "local/moonabnf-downstream"\nversion = "0.1.0"\npreferred_target = "wasm"\nimport { "local/moonabnf@0.1.0" }\n')
-        (consumer / 'moon.pkg').write_text('import { "local/moonabnf" @abnf }\noptions(is_main: true)\n')
+        (consumer / 'moon.mod').write_text('name = "local/moonabnf-downstream"\nversion = "0.1.0"\npreferred_target = "wasm"\nimport { "' + MODULE + '@' + VERSION + '" }\n')
+        (consumer / 'moon.pkg').write_text('import { "' + MODULE + '" @abnf }\noptions(is_main: true)\n')
         (consumer / 'main.mbt').write_bytes((ROOT / 'integration' / 'consumer' / 'main.mbt.in').read_bytes())
         tree = json.loads(run('consumer-tree', [moon, 'tree', '--json'], consumer).stdout)
-        module = next(m for m in tree['modules'] if m['name'] == 'local/moonabnf')
+        module = next(m for m in tree['modules'] if m['name'] == MODULE)
         assert Path(module['source']['path']).resolve() == library.resolve()
         assert module['source']['kind'] == 'local'
         run('consumer-format', [moon, 'fmt'], consumer)

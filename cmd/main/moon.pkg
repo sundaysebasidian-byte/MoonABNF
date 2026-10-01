@@ -1,5 +1,5 @@
 import {
-  "local/moonabnf" @abnf,
+  "sundaysebasidian-byte/moonabnf" @abnf,
   "moonbitlang/core/env",
   "moonbitlang/core/json",
 }

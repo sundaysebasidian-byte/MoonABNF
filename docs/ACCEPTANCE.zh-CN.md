@@ -8,7 +8,7 @@
 
 | 项目 | 实际材料与证据 | 状态 |
 |---|---|---|
-| 独立初始化和生态价值 | local/moonabnf，独立Git；通用ABNF→AST→诊断→有界识别；TECHNICAL_FACTS.md | 本地已完成；最终选题审核未做 |
+| 独立初始化和生态价值 | sundaysebasidian-byte/moonabnf，独立Git；通用ABNF→AST→诊断→有界识别；TECHNICAL_FACTS.md | 本地已完成；最终选题审核未做 |
 | 避免高度同类 | 9/30 Mooncakes有界站内abnf、bnf核查；只见URI字符表；SOURCES.md记录范围 | 未见高度同类；非全生态穷尽证明；报名时需复核 |
 | 至少3完整场景 | 协议字段、配置输入、二进制批量fixture；REUSE_REVIEW.zh-CN.md列完整输入/API/输出/断言；独立消费者四后端运行 | 本机可复现通过；不声称真实第三方采用 |
 | 开发与MVP历史（不推定十月提交数门槛） | 9/30已有11个阶段提交，10/1增加FIFO修复、文档整理与实质复用验证；完整历史随源码包交付 | 不自动把九月10提交要求套十月；未造空提交、未回填日期；赛期贡献认可待审核 |
@@ -20,13 +20,13 @@
 | # | 章程要求 | 本项目证据 | 状态/缺口 |
 |---|---|---|---|
 | 1 | MoonBit主要实现语言 | parser/types/core/compiler/analysis/recognizer、CLI参数处理与examples均MoonBit；JS仅文件/退出码适配，Python仅验收与oracle | 本地实现符合声明；不据此替代赛事审查 |
-| 2 | 公开可访问仓库，清晰提交历史 | 独立本地Git与完整bundle，连续实质阶段提交 | **公开仓库待用户批准**；无远端、未push |
+| 2 | 公开可访问仓库，清晰提交历史 | 独立本地Git与完整bundle，连续实质阶段提交 | 用户已条件批准；发布状态待实际结果更新 |
 | 3 | 结构清晰，实现声明核心功能 | AST、规则合并与诊断、明确拒绝左递归、全输入识别与预算、check/match/batch CLI | 声明范围内本地测试通过；未声称支持全部ABNF编码与所有文法 |
 | 4 | README目标、安装、用法、可复现例子 | README.md、TOOLCHAIN.lock、SDK路径覆盖、examples与自制fixtures、验收脚本 | 本机复现通过；包内本地模块名非已发布安装地址 |
 | 5 | CI覆盖check/build/test | .github/workflows/ci.yml固定编译器，调用同一低并发验收脚本并保留失败日志 | 配置完成；**远端CI未执行**，本地check/build/test通过 |
 | 6 | 至少一个可运行例子 | examples/main.mbt的协议/配置/二进制三个例子；CLI fixtures | 本机运行通过，原始输出已存 |
 | 7 | 完整测试覆盖核心路径 | 四后端各18测试组、20项CLI进程检查、5,440差分；正常/错误/字节边界/空匹配/重复/折行/预算/循环等 | 已列范围通过；有限测试不是“全部正确”或完整标准认证 |
-| 8 | 发布Mooncakes | 发布所需工程结构、license、metadata、API；真实moon package候选ZIP已被独立模块消费，四后端断言通过 | **正式发布待用户批准**；本地候选包消费通过，不等于Mooncakes安装；registry consumer未验证 |
+| 8 | 发布Mooncakes | 正式包名sundaysebasidian-byte/moonabnf@0.1.0；MIT、metadata、API；候选ZIP独立消费通过 | 用户已条件批准；本地候选包消费通过，正式发布与registry consumer状态待实际结果更新 |
 | 9 | OSI许可与参考依赖合规 | MIT；SOURCES.md；AI_USAGE.md；自制fixtures；licenses/保留core Apache-2.0与NOTICE；不打包RFC原文 | 已准备来源与许可清单；最终公开/二进制发行前仍需检查实际依赖与署名 |
 
 ## 本机实际结果

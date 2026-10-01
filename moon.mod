@@ -1,10 +1,10 @@
-name = "local/moonabnf"
+name = "sundaysebasidian-byte/moonabnf"
 
 version = "0.1.0"
 
 readme = "README.md"
 
-repository = ""
+repository = "https://github.com/sundaysebasidian-byte/MoonABNF"
 
 license = "MIT"
 
