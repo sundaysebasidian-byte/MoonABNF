@@ -11,9 +11,9 @@
 | 独立初始化和生态价值 | sundaysebasidian-byte/moonabnf，独立Git；通用ABNF→AST→诊断→有界识别；TECHNICAL_FACTS.md | 本地已完成；最终选题审核未做 |
 | 避免高度同类 | 9/30 Mooncakes有界站内abnf、bnf核查；只见URI字符表；SOURCES.md记录范围 | 未见高度同类；非全生态穷尽证明；报名时需复核 |
 | 至少3完整场景 | 协议字段、配置输入、二进制批量fixture；REUSE_REVIEW.zh-CN.md列完整输入/API/输出/断言；独立消费者四后端运行 | 本机可复现通过；不声称真实第三方采用 |
-| 开发与MVP历史（不推定十月提交数门槛） | 9/30已有11个阶段提交，10/1增加FIFO修复、文档整理与实质复用验证；完整历史随源码包交付 | 不自动把九月10提交要求套十月；未造空提交、未回填日期；赛期贡献认可待审核 |
+| 开发与MVP历史 | 公开基线18个非空非merge提交，按用户明确的北京时间口径均在10/1；完整真实历史随源码包交付 | 未造空提交、未回填日期；每次贡献有效性仍由主办认定 |
 | Proposal本人撰写 | 只交AI辅助技术事实、理解资料与来源 | 待用户本人撰写；不提供伪装人工的最终申报书 |
-| 赛期有效贡献 | 开发始于9/30，10/1续修；历史日期真实保留 | 十月资格及新增贡献认定待赛事确认 |
+| 赛期有效贡献 | 用户已明确采用北京时间；公开基线18个真实提交均落在10/1，不改写Git时间 | 时区不再作为待确认阻塞；赛期贡献有效性待赛事审核 |
 
 ## 终验九条
 
@@ -22,26 +22,27 @@
 | 1 | MoonBit主要实现语言 | parser/types/core/compiler/analysis/recognizer、CLI参数处理与examples均MoonBit；JS仅文件/退出码适配，Python仅验收与oracle | 本地实现符合声明；不据此替代赛事审查 |
 | 2 | 公开可访问仓库，清晰提交历史 | https://github.com/sundaysebasidian-byte/MoonABNF ，原历史正常推送；0.1.0源码SHA见PUBLICATION.md | 已公开；不等于赛事认可历史贡献 |
 | 3 | 结构清晰，实现声明核心功能 | AST、规则合并与诊断、明确拒绝左递归、全输入识别与预算、check/match/batch CLI | 声明范围内本地测试通过；未声称支持全部ABNF编码与所有文法 |
-| 4 | README目标、安装、用法、可复现例子 | README.md、TOOLCHAIN.lock、SDK路径覆盖、examples与自制fixtures、验收脚本 | 本机复现通过；包内本地模块名非已发布安装地址 |
+| 4 | README目标、安装、用法、可复现例子 | README.md、TOOLCHAIN.lock、SDK路径覆盖、examples与自制fixtures、验收脚本；正式namespace与registry安装已实测 | 已公开版本可复现；本轮边界说明已获用户核准纳入现有GitHub |
 | 5 | CI覆盖check/build/test | .github/workflows/ci.yml固定编译器；准确0.1.0源码提交2f32fdc的运行36832382024成功，原始summary同SHA、工作树干净 | Linux远端check/build/test及完整验收通过；准确链接见PUBLICATION.md |
 | 6 | 至少一个可运行例子 | examples/main.mbt的协议/配置/二进制三个例子；CLI fixtures | 本机运行通过，原始输出已存 |
-| 7 | 完整测试覆盖核心路径 | 四后端各18测试组、20项CLI进程检查、5,440差分；正常/错误/字节边界/空匹配/重复/折行/预算/循环等 | 已列范围通过；有限测试不是“全部正确”或完整标准认证 |
+| 7 | 完整测试覆盖核心路径 | 当前本地候选四后端各22组、24项CLI、5,440差分；公开0.1.0基线各18组/20项 | 本地候选范围通过，新增回归远端CI按准确收尾SHA另核；有限测试不是完整标准认证 |
 | 8 | 发布Mooncakes | https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.1.0/ ；publish200、view验证版本与MIT；独立正式消费者source.kind=registry | 0.1.0已正式发布；三个场景/API断言四后端通过；无本地workspace替代 |
 | 9 | OSI许可与参考依赖合规 | MIT；SOURCES.md；AI_USAGE.md；自制fixtures；licenses/保留core Apache-2.0与NOTICE；不打包RFC原文 | 已准备来源与许可清单；最终公开/二进制发行前仍需检查实际依赖与署名 |
 
 ## 本机实际结果
 
-最新串行命令见 `evidence/reuse-20261001/summary.json`，各命令stdout/stderr及SHA256独立存档。
-旧16组验证快照仍保留在 `evidence/acceptance/`，最新18组结果在 final-20261001。
+本轮收尾源码最终文档冻结后重新执行完整串行验收；命令、stdout/stderr及源码SHA256见审查 ZIP 的 `verification/summary.json`。
+公开0.1.0基线的18组/20项历史证据在 `evidence/final-20261001/` 与 `evidence/reuse-20261001/`，更早16组在 `evidence/acceptance/`。
+第一轮边界补充运行后曾修改文档，旧summary的BOUNDARIES哈希因此与随后文档不同；旧证据原样保留，本轮重跑生成新的最终快照，不将旧结果哈希改写成新文档。
 
 | 验证项 | 结果 | 边界 |
 |---|---|---|
 | 格式、Wasm/JS/native check与build | 本地与准确发布提交Linux CI全部退出0，编译警告作为错误 | macOS arm64与Linux x86_64实际运行通过；Windows未测 |
-| Wasm/Wasm GC/JS/native测试 | 每后端18组，18 passed，0 failed | 分组内含256字节多core断言，不把“18组”误写成18个输入 |
+| Wasm/Wasm GC/JS/native测试 | 当前本地候选每后端22组通过，0失败；公开0.1.0基线18组 | 组内含多项断言；不把测试组数误写成输入个数；新增回归远端结果随准确SHA发布后证据保存 |
 | 三场景可运行例子 | 预期匹配与拒绝均出现 | 格式校验，不验证真实协议业务/认证 |
 | 独立下游候选包复用 | 实际moon package ZIP、隔离解压、独立消费者模块、四后端全部断言与11行输出逐字核对通过；依赖树与包源码哈希一致 | 不读私有API、不引用主工程路径；该验证是本地候选路径，正式注册表消费另记；不证明真实第三方采用或完整业务集成 |
 | 正式版本独立注册表消费 | moon update后在独立模块build安装0.1.0；依赖树确认registry、非workspace；三场景及AST/诊断/预算独立性断言四后端通过 | 初次本地索引未更新的失败保留；不证明真实第三方采用、broker或办公软件互操作 |
-| CLI真实进程检查 | macOS20项通过 | 含缺失文件、目录、FIFO、空输入、NUL/FF、混合batch、超限与非法预算；Windows FIFO未测 |
+| CLI真实进程检查 | 当前候选macOS24项通过；公开0.1.0基线20项 | 含缺失文件、目录、FIFO、空输入、NUL/FF、混合batch、超限与非法预算；Windows FIFO未测 |
 | 独立实现差分 | 固定seed20260930；80随机文法，5,440比较，0差异 | Python标准库bytes正则全匹配；只正则子集；没有第三方完整ABNF parser差分 |
 | 解析与编译诊断 | 未定义、重复基定义、增量无基、prose、非生产/可空前缀左递归、数值/预算超限均有测试 | 只首个诊断，无恢复；全规则都验证，包括未选入口 |
 | 资源上限 | 超长输入、工作量、累积端点、调用深度、文法节点/字节/规则/嵌套/分析预算均测 | 操作预算不是墙钟超时；高复杂度有效文法可返回未判定 |

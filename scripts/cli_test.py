@@ -27,6 +27,7 @@ with tempfile.TemporaryDirectory(prefix='moonabnf-cli-') as directory:
     huge = d / 'huge.bin'; huge.write_bytes(b'a' * 65537)
     bad = d / 'bad.abnf'; bad.write_bytes(b'x = x / "a"\r\n')
     lf = d / 'lf.abnf'; lf.write_bytes(b'x = "a"\n')
+    huge_grammar = d / 'huge.abnf'; huge_grammar.write_bytes(b';' + b'a' * 65534 + b'\r\n')
     invoke(['check', g], 0, 'valid')
     invoke(['match', g, 's', yes], 0, 'matched')
     rows = invoke(['match', g, 's', no], 1, 'no-match'); assert rows[0]['offset'] == 2
@@ -38,8 +39,10 @@ with tempfile.TemporaryDirectory(prefix='moonabnf-cli-') as directory:
     invoke(['match', g, 'x', yes, 0], 2, 'invalid-work-budget')
     invoke(['match', g, 'x', yes, '10000001'], 2, 'invalid-work-budget')
     invoke(['match', g, 'x', yes, '-1'], 2, 'invalid-work-budget')
+    invoke(['match', g, 'x', yes, ''], 2, 'invalid-work-budget')
     invoke(['check', bad], 2, 'grammar-error')
     invoke(['check', lf], 2, 'grammar-error')
+    rows = invoke(['check', huge_grammar], 2, 'grammar-error'); assert rows[0]['code'] == 'parse-budget'
     invoke(['check', d / 'missing.abnf'], 2)
     invoke(['check', d], 2)
     if hasattr(os, 'mkfifo'):
@@ -47,6 +50,12 @@ with tempfile.TemporaryDirectory(prefix='moonabnf-cli-') as directory:
         invoke(['check', fifo], 2)
     rows = invoke(['batch', g, 's', yes, no], 1); assert len(rows) == 2
     rows = invoke(['batch', g, 'x', huge, yes], 3); assert len(rows) == 2
+    rows = invoke(['batch', g, 's', d / 'missing.bin', yes], 2)
+    assert len(rows) == 1 and rows[0]['status'] == 'matched' and rows[0]['file'] == str(yes)
+    assert 'I/O:' in checks[-1]['stderr']
+    rows = invoke(['batch', g, 'x', d / 'missing.bin', huge], 3)
+    assert len(rows) == 1 and rows[0]['status'] == 'budget-exceeded:input-bytes'
+    assert 'I/O:' in checks[-1]['stderr']
     invoke(['batch', g, 'x', *([yes] * 257)], 2, 'usage-error')
     invoke(['check', g, 'unexpected'], 2, 'usage-error')
 # Strip non-reproducible temporary directory identities, retaining inputs/results.

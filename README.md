@@ -75,6 +75,9 @@ match @abnf.compile(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n") {
 覆盖直接、间接和隐藏于可空重复/可选项前缀的循环。消耗字节的递归允许，
 受识别深度及工作量预算约束。`0rule` 不执行引用，但引用本身仍须存在。
 
+详细范围、预算计数范围、失败优先级、batch错误行与后端边界见
+[支持范围与失败契约](docs/BOUNDARIES.zh-CN.md)。该说明不把字节格式校验当作完整协议或配置业务校验。
+
 ## 预算与错误
 
 | 阶段/项 | 默认 | 可设置的硬上限 |
@@ -119,7 +122,8 @@ I/O 错误输出 stderr；其余状态带 JSON。CLI 使用默认 64 KiB 文法/
 ## 验证与证据
 
 `scripts/acceptance.py` 串行执行格式检查、check/build/test、例子、CLI 和差分，`-j 1`。
-最新四种后端（Wasm、Wasm GC、JS、native）的测试及 CLI/差分原始输出见 `evidence/final-20261001/`；旧快照保留在 `evidence/acceptance/`。
+本轮收尾源码在四种后端（Wasm、Wasm GC、JS、native）各22组测试、24项CLI检查通过；本轮最终文档冻结后重新执行串行验收，原始输出与源码哈希见审查 ZIP 的 `verification/summary.json`。
+公开0.1.0基线及其既有Linux CI为各18组/20项，历史输出保留在 `evidence/final-20261001/` 与 `evidence/reuse-20261001/`；更早快照在 `evidence/acceptance/`。本轮新增回归的远端CI须按准确提交查询，结果另随发布后核对证据保存。
 独立 oracle 使用 Python 字节正则全匹配：固定 seed，80 组随机正则子集文法，5,440 次比较。
 它验证识别语义及相应解析路径，不是完整 ABNF 解析器对全部规范的认证。
 递归场景由明确预期的本地测试覆盖；未做第三方完整 ABNF 解析器差分。
@@ -129,7 +133,9 @@ CI 覆盖同一流程，锁定编译器；发布提交在 Linux CI 已通过，�
 由 `local/moonabnf-downstream` 模块引用公开 API。三个场景有完整输入/输出/断言，
 四后端运行并核对解压源码哈希。另用 `scripts/registry_consumer.py --output /absolute/evidence/path`
 从 Mooncakes 安装正式 0.1.0，依赖树确认 registry 来源，三个场景/API断言四后端通过。
-证据与范围审查见 [复用价值审查](docs/REUSE_REVIEW.zh-CN.md)；最新完整验收在 `evidence/reuse-20261001/`。
+公开0.1.0基线的证据与范围审查见 [复用价值审查](docs/REUSE_REVIEW.zh-CN.md) 与 `evidence/reuse-20261001/`。
+本轮收尾源码的完整验收见审查 ZIP 的 `verification/`，统一核对说明见 [FINAL_GATE.zh-CN.md](docs/FINAL_GATE.zh-CN.md)。
+重新生成独立证据目录可运行 `python3 scripts/acceptance.py --output /absolute/evidence/path`；新运行记录自身源码哈希，不沿用旧快照哈希。
 
 [技术事实与三场景](docs/TECHNICAL_FACTS.md) · [理解说明](docs/UNDERSTANDING.md) ·
 [中文验收矩阵](docs/ACCEPTANCE.zh-CN.md) · [来源](SOURCES.md) · [AI 使用说明](AI_USAGE.md)
