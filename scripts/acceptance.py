@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import platform
+import os
 import subprocess
 import time
 from datetime import datetime, timezone
@@ -42,12 +43,17 @@ for name, command in commands:
     records.append(record)
     print(f'{name}: {record["status"]} ({record["elapsed_seconds"]}s)', flush=True)
     if r.returncode != 0: print(r.stdout + r.stderr, flush=True)
+source_hashes = {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
+    for p in sorted(ROOT.rglob('*')) if p.is_file() and '.git' not in p.parts and '_build' not in p.parts and 'evidence' not in p.parts}
 sha = subprocess.run(['git','rev-parse','HEAD'], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 dirty = subprocess.run(['git','status','--porcelain'], cwd=ROOT, capture_output=True, text=True).stdout
 summary = {'time_utc':datetime.now(timezone.utc).isoformat(), 'host':platform.platform(),
            'git_head_at_run':sha, 'working_tree_at_run':dirty,
            'status':'passed' if all(r['exit_code'] == 0 for r in records) else 'failed',
-           'commands':records, 'not_tested':['remote GitHub CI', 'registry installation', 'Linux/Windows execution', 'third-party complete ABNF parser differential']}
+           'source_sha256':source_hashes, 'commands':records,
+           'not_tested':['registry installation', 'Windows execution', 'third-party complete ABNF parser differential', 'Artemis interoperability', 'LibreOffice compatibility']
+             + ([] if platform.system() == 'Linux' else ['Linux execution'])
+             + ([] if os.getenv('GITHUB_ACTIONS') == 'true' else ['remote GitHub CI'])}
 (out / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
 manifest = {p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(out.iterdir()) if p.is_file() and p.name != 'SHA256.json'}
 (out / 'SHA256.json').write_text(json.dumps(manifest, indent=2))
