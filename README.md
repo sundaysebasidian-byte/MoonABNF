@@ -21,6 +21,7 @@ scripts/moon-local.sh run examples -j 1
 python3 scripts/acceptance.py
 ```
 
+使用 Unix `unzip` 可保留脚本执行位；若解压工具移除了执行位，先运行 `chmod +x scripts/*.sh`。
 本机默认复用的 SDK 路径已记录在锁文件；其他机器请设置 `MOONABNF_SDK`。
 本地模块名暂为 `local/moonabnf`，发布前由用户确定正式命名空间。
 当前不能把 `moon add local/moonabnf` 当作已发布安装方式。
