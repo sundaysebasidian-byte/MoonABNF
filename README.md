@@ -19,6 +19,8 @@ scripts/moon-local.sh build -j 1 -d
 scripts/moon-local.sh test -j 1 -d
 scripts/moon-local.sh run examples -j 1
 python3 scripts/acceptance.py
+# 只验证独立下游消费本地候选包；不执行正式发布
+python3 scripts/downstream.py
 ```
 
 使用 Unix `unzip` 可保留脚本执行位；若解压工具移除了执行位，先运行 `chmod +x scripts/*.sh`。
@@ -119,6 +121,11 @@ I/O 错误输出 stderr；其余状态带 JSON。CLI 使用默认 64 KiB 文法/
 它验证识别语义及相应解析路径，不是完整 ABNF 解析器对全部规范的认证。
 递归场景由明确预期的本地测试覆盖；未做第三方完整 ABNF 解析器差分。
 CI 配置覆盖同一流程，锁定编译器；尚未在远端执行，不把本地通过称为 CI 已通过。
+
+独立下游验证用 `moon package --frozen` 生成候选 ZIP，解压到隔离 workspace，
+由 `local/moonabnf-downstream` 模块引用公开 API。三个场景有完整输入/输出/断言，
+四后端运行并核对解压源码哈希。此路径是本地模块依赖，尚未验证 Mooncakes 注册表安装。
+证据与范围审查见 [复用价值审查](docs/REUSE_REVIEW.zh-CN.md)；最新完整验收在 `evidence/reuse-20261001/`。
 
 [技术事实与三场景](docs/TECHNICAL_FACTS.md) · [理解说明](docs/UNDERSTANDING.md) ·
 [中文验收矩阵](docs/ACCEPTANCE.zh-CN.md) · [来源](SOURCES.md) · [AI 使用说明](AI_USAGE.md)

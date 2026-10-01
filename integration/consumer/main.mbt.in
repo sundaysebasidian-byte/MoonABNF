@@ -1,0 +1,50 @@
+///|
+fn checked(grammar : Bytes) -> @abnf.Program {
+  match @abnf.compile(grammar) {
+    Ok(p) => p
+    Err(d) => abort("unexpected grammar error: \{d.code}")
+  }
+}
+
+///|
+fn expect(name : String, r : @abnf.MatchReport, matched : Bool, offset : Int) -> Unit raise {
+  assert_eq(r.status, if matched { @abnf.Matched } else { @abnf.NoMatch })
+  assert_eq(r.offset, offset)
+  assert_true(r.work > 0)
+  assert_true(r.states > 0)
+  println("\{name}: \{if matched { "matched" } else { "no-match" }} offset=\{r.offset}")
+}
+
+///|
+fn main raise {
+  // Protocol adapter: compile once before accepting fields for further processing.
+  let protocol = checked(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n")
+  expect("protocol/accept", protocol.recognize("field", b"TRACE: aF12\r\n"), true, 13)
+  expect("protocol/reject", protocol.recognize("field", b"Trace:aF12\r\n"), false, 6)
+  // Config editor: strict value case and actionable byte offset.
+  let config = checked(b"setting = key \"=\" value\r\nkey = ALPHA *7(ALPHA / DIGIT / \"-\")\r\nvalue = %s\"on\" / %s\"off\" / 1*3DIGIT\r\n")
+  expect("config/accept", config.recognize("setting", b"ttl=120"), true, 7)
+  expect("config/reject", config.recognize("setting", b"cache=ON"), false, 6)
+  // Fixture runner: preserve raw bytes and reuse one compiled program per batch.
+  let binary = checked(b"frame = %x00 1*4OCTET %xFF\r\n")
+  let samples = [b"\x00\x00\xFF", b"\x00\xFF\xFF", b"\x00ABCD\xFF"]
+  for i = 0; i < samples.length(); i = i + 1 {
+    let input = samples[i]
+    expect("fixture/accept-\{i}", binary.recognize("frame", input), true, input.length())
+  }
+  expect("fixture/reject", binary.recognize("frame", b"\x00ABCDE\xFF"), false, 5)
+  // A downstream caller can distinguish unresolved work from rejection.
+  let budget = protocol.recognize("field", b"TRACE: aF12\r\n", limits={ ..@abnf.default_match_limits(), max_work: 1 })
+  assert_true(budget.status is @abnf.BudgetExceeded(_))
+  assert_eq(protocol.recognize("missing", b"").status, @abnf.UnknownRule)
+  assert_eq(protocol.recognize("field", b"TRACE: aF12\r\n").status, @abnf.Matched)
+  println("api/budget-and-independent-reuse: passed")
+  match @abnf.compile(b"a = missing\r\n") {
+    Err(d) => { assert_eq(d.code, "undefined-rule"); println("api/undefined-rule: \{d.code}") }
+    Ok(_) => abort("undefined rule unexpectedly compiled")
+  }
+  match @abnf.parse(b"a = %s\"X\"\r\na =/ %x59\r\n") {
+    Ok(ast) => { assert_eq(ast.rules.length(), 2); assert_true(ast.rules[1].incremental); println("api/ast-incremental: passed") }
+    Err(_) => abort("AST unexpectedly rejected")
+  }
+}

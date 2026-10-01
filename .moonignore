@@ -1,0 +1,6 @@
+# Keep generated verification evidence in the source delivery, not the candidate package.
+_build/
+target/
+.mooncakes/
+.moonagent/
+evidence/

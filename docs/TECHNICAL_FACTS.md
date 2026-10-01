@@ -23,6 +23,11 @@ marianoguerra/uri@0.1.2 的 URI/IRI 字符编码表，bnf 无结果。
 可复现命令：`scripts/moon-local.sh run examples -j 1`；或 README 的 check/match/batch 命令。
 fixtures均为自制，二进制内容不是个人或业务数据。
 
+独立消费者实证：`python3 scripts/downstream.py` 消费 `moon package` 生成并隔离解压的本地候选 ZIP，
+三个场景通过同一个公共库 API、有明确状态/偏移断言，四后端输出逐字核对。
+完整输入/API/实际输出、拒绝原因及证据边界见 [REUSE_REVIEW.zh-CN.md](REUSE_REVIEW.zh-CN.md)。
+它证明本地包可被独立模块复用，不是 Mooncakes 安装、真实第三方采用或完整业务集成的证明。
+
 ## 交付范围与技术理解
 
 支持引用、增量替代、重复、分组/可选、数值序列/range、16 core规则、默认与%i/%s字符串、

@@ -1,0 +1,8 @@
+candidate-package: passed
+consumer-tree: passed
+consumer-format: passed
+consumer-wasm: passed
+consumer-wasm-gc: passed
+consumer-js: passed
+consumer-native: passed
+Unpublished candidate consumer: all assertions passed

@@ -1,0 +1,86 @@
+Warning: `moon.mod.json` at '/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer' is deprecated. Run `moon fmt` to migrate to `moon.mod`.
+Error: [0013] Error Warning (unresolved_type_variable): The type of this expression is Iter[(_/0, Bytes)], which contains unresolved type variables. The type variable is default to Unit.
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:11:3 ]
+    │
+ 11 │   assert_eq(r.status, if matched { @abnf.Matched } else { @abnf.NoMatch })
+    │   ────────────────────────────────────┬───────────────────────────────────  
+    │                                       ╰───────────────────────────────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:12:3 ]
+    │
+ 12 │   assert_eq(r.offset, offset)
+    │   ─────────────┬─────────────  
+    │                ╰─────────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:13:3 ]
+    │
+ 13 │   assert_true(r.work > 0)
+    │   ───────────┬───────────  
+    │              ╰───────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:14:3 ]
+    │
+ 14 │   assert_true(r.states > 0)
+    │   ────────────┬────────────  
+    │               ╰────────────── Function with error can only be used inside a function with error types in its signature. Please fix the return type of this function.
+────╯
+Error: [4015]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:30:80 ]
+    │
+ 30 │   for (i, input) in [b"\x00\x00\xFF", b"\x00\xFF\xFF", b"\x00ABCD\xFF"].iter().enumerate() {
+    │                                                                                ────┬────  
+    │                                                                                    ╰────── Type Iter[Bytes] has no method enumerate.
+────╯
+Error: [0013]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:31:30 ]
+    │
+ 31 │     expect("fixture/accept-\{i}", binary.recognize("frame", input), true, input.length())
+    │                              ┬  
+    │                              ╰── Error Warning (unresolved_type_variable): The type of this expression is _/0, which contains unresolved type variables. The type variable is default to Unit.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:36:3 ]
+    │
+ 36 │   assert_true(budget.status is @abnf.BudgetExceeded(_))
+    │   ──────────────────────────┬──────────────────────────  
+    │                             ╰──────────────────────────── Function with error is not allowed in `fn main`. You could use `fn main raise` to declare the main function with an error type.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:37:3 ]
+    │
+ 37 │   assert_eq(protocol.recognize("missing", b"").status, @abnf.UnknownRule)
+    │   ───────────────────────────────────┬───────────────────────────────────  
+    │                                      ╰───────────────────────────────────── Function with error is not allowed in `fn main`. You could use `fn main raise` to declare the main function with an error type.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:38:3 ]
+    │
+ 38 │   assert_eq(protocol.recognize("field", b"TRACE: aF12\r\n").status, @abnf.Matched)
+    │   ────────────────────────────────────────┬───────────────────────────────────────  
+    │                                           ╰───────────────────────────────────────── Function with error is not allowed in `fn main`. You could use `fn main raise` to declare the main function with an error type.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:41:17 ]
+    │
+ 41 │     Err(d) => { assert_eq(d.code, "undefined-rule"); println("api/undefined-rule: \{d.code}") }
+    │                 ─────────────────┬─────────────────  
+    │                                  ╰─────────────────── Function with error is not allowed in `fn main`. You could use `fn main raise` to declare the main function with an error type.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:45:18 ]
+    │
+ 45 │     Ok(ast) => { assert_eq(ast.rules.length(), 2); assert_true(ast.rules[1].incremental); println("api/ast-incremental: passed") }
+    │                  ────────────────┬───────────────  
+    │                                  ╰───────────────── Function with error is not allowed in `fn main`. You could use `fn main raise` to declare the main function with an error type.
+────╯
+Error: [4122]
+    ╭─[ /Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-1meykffm/consumer/main.mbt:45:52 ]
+    │
+ 45 │     Ok(ast) => { assert_eq(ast.rules.length(), 2); assert_true(ast.rules[1].incremental); println("api/ast-incremental: passed") }
+    │                                                    ──────────────────┬──────────────────  
+    │                                                                      ╰──────────────────── Function with error is not allowed in `fn main`. You could use `fn main raise` to declare the main function with an error type.
+────╯

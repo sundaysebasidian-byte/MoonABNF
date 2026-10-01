@@ -30,6 +30,7 @@ commands = [
  ('examples', ['scripts/moon-local.sh', 'run', 'examples', '-j', '1']),
  ('cli', ['python3', 'scripts/cli_test.py']),
  ('differential', ['python3', 'scripts/differential.py']),
+ ('downstream', ['python3', 'scripts/downstream.py', '--output', str(out / 'downstream')]),
 ]
 records = []
 for name, command in commands:

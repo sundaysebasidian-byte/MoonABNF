@@ -1,5 +1,5 @@
 ///|
-/// Compile once, use the same program across protocol/config/fixture checks.
+/// Compile each grammar once; reuse its program across the samples.
 fn demo(
   name : String,
   grammar : Bytes,

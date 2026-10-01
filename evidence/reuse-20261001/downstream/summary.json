@@ -1,0 +1,104 @@
+{
+  "status": "passed",
+  "delivery": "unpublished moon package ZIP",
+  "archive_sha256": "ebe029feab29c046688fe3010f6d3001f95873582f23e1c58bc534593aa5d1ac",
+  "manifest": "candidate-manifest.json",
+  "commands": [
+    {
+      "name": "candidate-package",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "package",
+        "--frozen"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "name": "consumer-tree",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "tree",
+        "--json"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "name": "consumer-format",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "fmt"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "name": "consumer-wasm",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "run",
+        ".",
+        "--target",
+        "wasm",
+        "--frozen",
+        "-j",
+        "1",
+        "-d"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "name": "consumer-wasm-gc",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "run",
+        ".",
+        "--target",
+        "wasm-gc",
+        "--frozen",
+        "-j",
+        "1",
+        "-d"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "name": "consumer-js",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "run",
+        ".",
+        "--target",
+        "js",
+        "--frozen",
+        "-j",
+        "1",
+        "-d"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    },
+    {
+      "name": "consumer-native",
+      "command": [
+        "/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/scripts/moon-local.sh",
+        "run",
+        ".",
+        "--target",
+        "native",
+        "--frozen",
+        "-j",
+        "1",
+        "-d"
+      ],
+      "exit_code": 0,
+      "status": "passed"
+    }
+  ],
+  "resolution": "isolated workspace module dependency, consumer imports only public API",
+  "registry_consumption": "not tested; no registry calls or publication",
+  "consumer_template_sha256": "6376ccb88b8e01a9fffac290138206441358c9c3023fcd5c91a4184b9ce045f7"
+}

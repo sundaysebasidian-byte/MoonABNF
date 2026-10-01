@@ -1,0 +1,1 @@
+Warning: `moon.mod.json` at '/Users/sebasidian/Documents/Codex/2026-09-30/task-17/moonabnf/_build/downstream-lgrqko5e/consumer' is deprecated. Run `moon fmt` to migrate to `moon.mod`.

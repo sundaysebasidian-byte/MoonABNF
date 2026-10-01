@@ -1,0 +1,5 @@
+error: unexpected argument '--frozen' found
+
+Usage: moon tree [OPTIONS]
+
+For more information, try '--help'.
