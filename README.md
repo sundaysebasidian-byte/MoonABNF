@@ -113,7 +113,7 @@ I/O 错误输出 stderr；其余状态带 JSON。CLI 使用默认 64 KiB 文法/
 ## 验证与证据
 
 `scripts/acceptance.py` 串行执行格式检查、check/build/test、例子、CLI 和差分，`-j 1`。
-四种后端（Wasm、Wasm GC、JS、native）的测试及 CLI/差分原始输出见 `evidence/acceptance/`。
+最新四种后端（Wasm、Wasm GC、JS、native）的测试及 CLI/差分原始输出见 `evidence/final-20261001/`；旧快照保留在 `evidence/acceptance/`。
 独立 oracle 使用 Python 字节正则全匹配：固定 seed，80 组随机正则子集文法，5,440 次比较。
 它验证识别语义及相应解析路径，不是完整 ABNF 解析器对全部规范的认证。
 递归场景由明确预期的本地测试覆盖；未做第三方完整 ABNF 解析器差分。
