@@ -42,7 +42,8 @@ with tempfile.TemporaryDirectory(prefix='registry-consumer-', dir=ROOT / '_build
     (consumer / 'moon.pkg').write_text('import { "' + MODULE + '" @abnf }\noptions(is_main: true)\n')
     template = ROOT / 'integration/consumer/main.mbt.in'
     (consumer / 'main.mbt').write_bytes(template.read_bytes())
-    run('registry-install', [moon, 'install'], consumer)
+    run('registry-update', [moon, 'update'], consumer)
+    run('registry-build-install', [moon, 'build', '--target', 'wasm', '-j', '1', '-d'], consumer)
     tree = json.loads(run('registry-tree', [moon, 'tree', '--json'], consumer).stdout)
     module = next(m for m in tree['modules'] if m['name'] == MODULE)
     assert module['version'] == VERSION, module

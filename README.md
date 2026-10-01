@@ -4,7 +4,9 @@ MoonBit 实现的通用 ABNF 文本解析、编译验证和有界字节识别库
 [RFC 5234](https://www.rfc-editor.org/info/rfc5234/) 与
 [RFC 7405](https://www.rfc-editor.org/info/rfc7405/)。适合协议字段、配置输入和二进制 fixture 校验。
 项目使用 MIT，仓库地址为 https://github.com/sundaysebasidian-byte/MoonABNF 。
-正式模块名为 `sundaysebasidian-byte/moonabnf`，版本 `0.1.0`。发布与远端验证状态见中文验收矩阵；未提交赛事表单。
+正式模块名为 `sundaysebasidian-byte/moonabnf`，已发布版本 `0.1.0`。
+[Mooncakes 文档](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.1.0/) ·
+[发布证据](docs/PUBLICATION.md)。未提交赛事表单。
 
 ## 安装与复现
 
@@ -26,7 +28,7 @@ python3 scripts/downstream.py
 
 使用 Unix `unzip` 可保留脚本执行位；若解压工具移除了执行位，先运行 `chmod +x scripts/*.sh`。
 脚本通过 `MOONABNF_SDK`（或 `MOON_HOME`）使用已有 SDK，不依赖作者本机绝对路径。
-在独立下游模块内，正式版本发布后可使用 `moon add sundaysebasidian-byte/moonabnf@0.1.0`。
+在独立下游模块内使用 `moon add sundaysebasidian-byte/moonabnf@0.1.0`。
 本地候选包消费和正式注册表消费分别保留证据，不把前者当成后者。
 
 ## 库 API
@@ -121,11 +123,12 @@ I/O 错误输出 stderr；其余状态带 JSON。CLI 使用默认 64 KiB 文法/
 独立 oracle 使用 Python 字节正则全匹配：固定 seed，80 组随机正则子集文法，5,440 次比较。
 它验证识别语义及相应解析路径，不是完整 ABNF 解析器对全部规范的认证。
 递归场景由明确预期的本地测试覆盖；未做第三方完整 ABNF 解析器差分。
-CI 配置覆盖同一流程，锁定编译器；尚未在远端执行，不把本地通过称为 CI 已通过。
+CI 覆盖同一流程，锁定编译器；发布提交在 Linux CI 已通过，准确提交与运行链接见发布事实记录。
 
 独立下游验证用 `moon package --frozen` 生成候选 ZIP，解压到隔离 workspace，
 由 `local/moonabnf-downstream` 模块引用公开 API。三个场景有完整输入/输出/断言，
-四后端运行并核对解压源码哈希。此路径是本地模块依赖，尚未验证 Mooncakes 注册表安装。
+四后端运行并核对解压源码哈希。另用 `scripts/registry_consumer.py --output /absolute/evidence/path`
+从 Mooncakes 安装正式 0.1.0，依赖树确认 registry 来源，三个场景/API断言四后端通过。
 证据与范围审查见 [复用价值审查](docs/REUSE_REVIEW.zh-CN.md)；最新完整验收在 `evidence/reuse-20261001/`。
 
 [技术事实与三场景](docs/TECHNICAL_FACTS.md) · [理解说明](docs/UNDERSTANDING.md) ·
@@ -136,5 +139,5 @@ CI 配置覆盖同一流程，锁定编译器；尚未在远端执行，不把�
 原创实现与自制 fixtures 使用 MIT。标准库依赖许可及 NOTICE 在 `licenses/`。
 RFC 文本未作为 MIT 源码或 fixture 打包；规范依据与参考范围见 `SOURCES.md`。
 代码和事实资料均有 AI 辅助；最终申报书必须由用户本人撰写，身份材料与诚信承诺由本人处理。
-用户已条件批准公开 GitHub 和按现有 MIT 发布 Mooncakes；实际发布状态与证据另记。
+用户已条件批准公开 GitHub 和按现有 MIT 发布 Mooncakes，两项已完成；准确提交、CI与正式版本消费证据另记。
 本人报名、人工最终申报书、身份材料、诚信承诺及奖励资格仍由本人和赛事审核处理。

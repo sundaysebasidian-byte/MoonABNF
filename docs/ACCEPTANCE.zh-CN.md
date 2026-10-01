@@ -20,13 +20,13 @@
 | # | 章程要求 | 本项目证据 | 状态/缺口 |
 |---|---|---|---|
 | 1 | MoonBit主要实现语言 | parser/types/core/compiler/analysis/recognizer、CLI参数处理与examples均MoonBit；JS仅文件/退出码适配，Python仅验收与oracle | 本地实现符合声明；不据此替代赛事审查 |
-| 2 | 公开可访问仓库，清晰提交历史 | 独立本地Git与完整bundle，连续实质阶段提交 | 用户已条件批准；发布状态待实际结果更新 |
+| 2 | 公开可访问仓库，清晰提交历史 | https://github.com/sundaysebasidian-byte/MoonABNF ，原历史正常推送；0.1.0源码SHA见PUBLICATION.md | 已公开；不等于赛事认可历史贡献 |
 | 3 | 结构清晰，实现声明核心功能 | AST、规则合并与诊断、明确拒绝左递归、全输入识别与预算、check/match/batch CLI | 声明范围内本地测试通过；未声称支持全部ABNF编码与所有文法 |
 | 4 | README目标、安装、用法、可复现例子 | README.md、TOOLCHAIN.lock、SDK路径覆盖、examples与自制fixtures、验收脚本 | 本机复现通过；包内本地模块名非已发布安装地址 |
-| 5 | CI覆盖check/build/test | .github/workflows/ci.yml固定编译器，调用同一低并发验收脚本并保留失败日志 | 配置完成；**远端CI未执行**，本地check/build/test通过 |
+| 5 | CI覆盖check/build/test | .github/workflows/ci.yml固定编译器；准确0.1.0源码提交2f32fdc的运行36832382024成功，原始summary同SHA、工作树干净 | Linux远端check/build/test及完整验收通过；准确链接见PUBLICATION.md |
 | 6 | 至少一个可运行例子 | examples/main.mbt的协议/配置/二进制三个例子；CLI fixtures | 本机运行通过，原始输出已存 |
 | 7 | 完整测试覆盖核心路径 | 四后端各18测试组、20项CLI进程检查、5,440差分；正常/错误/字节边界/空匹配/重复/折行/预算/循环等 | 已列范围通过；有限测试不是“全部正确”或完整标准认证 |
-| 8 | 发布Mooncakes | 正式包名sundaysebasidian-byte/moonabnf@0.1.0；MIT、metadata、API；候选ZIP独立消费通过 | 用户已条件批准；本地候选包消费通过，正式发布与registry consumer状态待实际结果更新 |
+| 8 | 发布Mooncakes | https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.1.0/ ；publish200、view验证版本与MIT；独立正式消费者source.kind=registry | 0.1.0已正式发布；三个场景/API断言四后端通过；无本地workspace替代 |
 | 9 | OSI许可与参考依赖合规 | MIT；SOURCES.md；AI_USAGE.md；自制fixtures；licenses/保留core Apache-2.0与NOTICE；不打包RFC原文 | 已准备来源与许可清单；最终公开/二进制发行前仍需检查实际依赖与署名 |
 
 ## 本机实际结果
@@ -36,10 +36,11 @@
 
 | 验证项 | 结果 | 边界 |
 |---|---|---|
-| 格式、Wasm/JS/native check与build | 全部退出0，编译警告作为错误 | macOS arm64；没有Linux/Windows实机验证 |
+| 格式、Wasm/JS/native check与build | 本地与准确发布提交Linux CI全部退出0，编译警告作为错误 | macOS arm64与Linux x86_64实际运行通过；Windows未测 |
 | Wasm/Wasm GC/JS/native测试 | 每后端18组，18 passed，0 failed | 分组内含256字节多core断言，不把“18组”误写成18个输入 |
 | 三场景可运行例子 | 预期匹配与拒绝均出现 | 格式校验，不验证真实协议业务/认证 |
-| 独立下游候选包复用 | 实际moon package ZIP、隔离解压、独立消费者模块、四后端全部断言与11行输出逐字核对通过；依赖树与包源码哈希一致 | 不读私有API、不引用主工程路径；未发布、未消费Mooncakes；不证明真实第三方采用或完整业务集成 |
+| 独立下游候选包复用 | 实际moon package ZIP、隔离解压、独立消费者模块、四后端全部断言与11行输出逐字核对通过；依赖树与包源码哈希一致 | 不读私有API、不引用主工程路径；该验证是本地候选路径，正式注册表消费另记；不证明真实第三方采用或完整业务集成 |
+| 正式版本独立注册表消费 | moon update后在独立模块build安装0.1.0；依赖树确认registry、非workspace；三场景及AST/诊断/预算独立性断言四后端通过 | 初次本地索引未更新的失败保留；不证明真实第三方采用、broker或办公软件互操作 |
 | CLI真实进程检查 | macOS20项通过 | 含缺失文件、目录、FIFO、空输入、NUL/FF、混合batch、超限与非法预算；Windows FIFO未测 |
 | 独立实现差分 | 固定seed20260930；80随机文法，5,440比较，0差异 | Python标准库bytes正则全匹配；只正则子集；没有第三方完整ABNF parser差分 |
 | 解析与编译诊断 | 未定义、重复基定义、增量无基、prose、非生产/可空前缀左递归、数值/预算超限均有测试 | 只首个诊断，无恢复；全规则都验证，包括未选入口 |
@@ -48,7 +49,8 @@
 
 ## 尚未完成与需要本人处理
 
-公开仓库/远端CI、Mooncakes发布与发布后consumer检查、本人申报、身份与诚信材料未完成。
+公开仓库、准确发布提交远端CI、Mooncakes 0.1.0发布与正式版本独立consumer检查已完成。
+本人申报、身份与诚信材料未完成；发布不等于初审/终验通过或获奖。
 正式提交前，用户须本人撰写一页申报，确认最终命名空间/署名及赛期资格，亲自处理
 电话、身份证、银行卡/分行、学籍/学历资料和诚信承诺。10/31官网与10/24旧章程冲突
 仍在记录中；内部按10/24前准备，不把最终时刻说成已确认。150+350元支持均有审核条件。
