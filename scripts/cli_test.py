@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Real CLI integration: exit codes, byte-preserving files, batch and budgets."""
 import json
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -41,6 +42,9 @@ with tempfile.TemporaryDirectory(prefix='moonabnf-cli-') as directory:
     invoke(['check', lf], 2, 'grammar-error')
     invoke(['check', d / 'missing.abnf'], 2)
     invoke(['check', d], 2)
+    if hasattr(os, 'mkfifo'):
+        fifo = d / 'pipe'; os.mkfifo(fifo)
+        invoke(['check', fifo], 2)
     rows = invoke(['batch', g, 's', yes, no], 1); assert len(rows) == 2
     rows = invoke(['batch', g, 'x', huge, yes], 3); assert len(rows) == 2
     invoke(['batch', g, 'x', *([yes] * 257)], 2, 'usage-error')

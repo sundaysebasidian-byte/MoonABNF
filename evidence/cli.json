@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checks": 19,
+  "checks": 20,
   "results": [
     {
       "command": [
@@ -160,6 +160,15 @@
       "exit_code": 2,
       "stdout": "",
       "stderr": "I/O: <temp>: not a regular file\n"
+    },
+    {
+      "command": [
+        "check",
+        "<temp>/pipe"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "I/O: <temp>/pipe: not a regular file\n"
     },
     {
       "command": [

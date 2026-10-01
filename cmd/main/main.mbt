@@ -5,7 +5,7 @@ extern "js" fn read_file(path : String, max : Int) -> Bytes? =
   #|   const fs = require('node:fs');
   #|   let fd;
   #|   try {
-  #|     fd = fs.openSync(path, 'r');
+  #|     fd = fs.openSync(path, fs.constants.O_RDONLY | fs.constants.O_NONBLOCK);
   #|     const stat = fs.fstatSync(fd);
   #|     if (!stat.isFile()) throw new Error('not a regular file');
   #|     const buffer = Buffer.alloc(max + 1);
