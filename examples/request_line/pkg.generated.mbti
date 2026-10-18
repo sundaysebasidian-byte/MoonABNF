@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "sundaysebasidian-byte/moonabnf/examples/request_line"
+
+import {
+  "sundaysebasidian-byte/moonabnf",
+}
+
+// Values
+pub fn dump(@moonabnf.InputTree, Bytes) -> String
+
+pub fn extract(@moonabnf.InputTree, Bytes) -> RequestLine
+
+pub fn grammar() -> Bytes
+
+pub fn parse(@moonabnf.Program, Bytes) -> Result[RequestLine, String]
+
+// Errors
+
+// Types and methods
+pub(all) struct RequestLine {
+  verb : (Int, Int)
+  path : (Int, Int)
+  query : (Int, Int)?
+  major : Int
+  minor : Int
+} derive(Eq)
+pub fn RequestLine::equal(Self, Self) -> Bool
+pub fn RequestLine::not_equal(Self, Self) -> Bool
+
+// Type aliases
+
+// Traits

@@ -6,8 +6,58 @@ MoonBit 实现的 ABNF 文法解析、编译验证、有界字节识别和输入
 项目使用 MIT，仓库地址为 https://github.com/sundaysebasidian-byte/MoonABNF 。
 正式模块名为 `sundaysebasidian-byte/moonabnf`，已发布版本 `0.1.0`。
 [Mooncakes 文档](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.1.0/) ·
-[发布证据](docs/PUBLICATION.md)。用户反馈已初审未过；本轮未修改或提交表单。
-**当前本地分支新增的输入树API尚未发布，0.1.0不包含它。**
+[发布证据](docs/PUBLICATION.md)。
+
+## 状态一览（2026-10-18 整改后；先读这里）
+
+本仓库同时含有**已发布的 0.1.0**和**尚未发布的候选**（输入解析树等）。`moon.mod` 未改版本号，候选没有新版本。二者不要混读。
+
+| 能力 | 0.1.0 正式包 | 本分支候选（未发布） |
+|---|---|---|
+| `parse` 文法 AST、`compile` 校验、`Program::recognize` 有界字节识别 | 已实现并发布 | 保留 |
+| 输入解析树 `Program::parse_input` → `InputTreeReport`/`InputTree`/`InputNode`（规则/字面量/区间/序列/分支/重复节点，字节跨度） | **没有**（安装 0.1.0 后查看，无 `parse_input`） | 已实现 |
+| 真实协议：RFC 9110 ETag 字段值 | 无 | `examples/http_etag`（已有） |
+| 真实协议：RFC 9112 HTTP 请求行（origin-form）解析树 + 字段提取 | 无 | `examples/request_line`（本轮新增） |
+| CLI（check / match / batch） | 有（只做识别，不出树） | 同，不出树 |
+| 全部歧义枚举（解析森林）、代码生成、错误恢复、Unicode 数值终端、流式识别、左递归 | 不支持 | 不支持（左递归在编译期拒绝） |
+
+**关于“通用 ABNF 解析器”（初审意见）**：候选可以编译任何符合 RFC 5234/7405 的文法（有预算与左递归限制），并对任意输入给出一棵派生树，歧义时保留首次遇到的路径，不是 PEG，也不枚举全部解析。它是字节级的；协议语义（例如 HTTP 方法是否被允许、URI 是否可解析）不在范围内。
+
+### 验证结果分开列（候选）
+
+| 层面 | 结果 |
+|---|---|
+| 本地，锁定工具链（`moon 0.1.20260920 (914d7da)`、`moonc v0.10.14+7d59c7ec9`、Node v24.18.0，macOS arm64） | `moon test` 在 js / wasm-gc / native / wasm 各 **41/41**（其中 5 项为本轮新增的请求行用例；起点基线为 36/36）。`python3 scripts/acceptance.py` 全部 16 个阶段通过（格式、四后端 check/build/test、examples、cli、differential、downstream） |
+| 远端 CI | 候选**未运行**（未推送）。0.1.0 的旧 Linux CI 记录见 `docs/PUBLICATION.md` |
+| 注册表 | 候选未发布，不适用。0.1.0 已用 `moon add …@0.1.0` 安装查看，确认不含输入树 API |
+
+本轮日志：`evidence/review-20261018/`。
+
+### 请求行示例（真实协议、解析树、字段提取，本轮实跑）
+
+```sh
+moon run examples/request_line/cmd --target js
+```
+
+输入 `GET /search/a%20b?q=moon&n=2 HTTP/1.1\r\n`（文法取自 RFC 9112 §3 的 request-line，路径/查询取自 RFC 3986 的 pchar 等规则，**只覆盖 origin-form 目标**），输出的解析树（隐藏 `tchar`/`pchar`）与提取：
+
+```text
+request-line [0,39) "GET /search/a%20b?q=moon&n=2 HTTP/1.1\r\n"
+  method [0,3) "GET"
+  sp [3,4) " "
+  request-target [4,28) "/search/a%20b?q=moon&n=2"
+    absolute-path [4,17) "/search/a%20b"
+    query [18,28) "q=moon&n=2"
+  sp [28,29) " "
+  http-version [29,37) "HTTP/1.1"
+    digit [34,35) "1"
+    digit [36,37) "1"
+  crlf [37,39) "\r\n"
+fields: method=b"GET" path=[4,17) HTTP/1.1
+        query=[18,28)
+```
+
+负例同样实跑：`GET index.html HTTP/1.1\r\n`（目标不是 `/` 开头，byte 4 不匹配）、缺 CRLF、路径含空格、小写 `http/1.1`（`%s` 区分大小写）均无树，并报告最远字节位置；预算过紧时返回“未判定”而不是“不匹配”（单测覆盖，示例输出未展示）。js / wasm-gc / native 三个后端输出完全相同（本轮实跑）。限制：只做语法与字节跨度提取，不含 absolute-form/authority-form/`*` 目标、整条 HTTP 报文、头字段、方法白名单或 URI 规范化。
 
 ## 安装与复现
 
@@ -162,7 +212,7 @@ I/O 错误输出 stderr；其余状态带 JSON。CLI 使用默认 64 KiB 文法/
 随后在Mac已有完整锁定SDK上，原始d0982d80候选的71项源码哈希一致，四后端30组、CLI24项、5,440次差分、标准候选包及隔离消费者全部通过。
 树测试另有1,820个穷举输入与独立AST见证重放。Mac另补预算逐阈值、后续分支失败与长递归/输入长度契约回归；
 最终源码快照的完整验收与协议命令日志随审查包保存，详见 [Mac补审记录](docs/MAC_REVIEW.zh-CN.md)。
-新增树API的远端CI、注册表新版本消费仍未验证；公开0.1.0不含它。
+新增树API的远端CI、注册表新版本消费仍未验证；公开0.1.0不含它。本轮（2026-10-18）的本地结果见顶部状态表。
 独立 oracle 使用 Python 字节正则全匹配：固定 seed，80 组随机正则子集文法，5,440 次比较。
 它验证识别语义及相应解析路径，不是完整 ABNF 解析器对全部规范的认证。
 递归场景由明确预期的本地测试覆盖；未做第三方完整 ABNF 解析器差分。

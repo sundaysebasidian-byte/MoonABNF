@@ -13,6 +13,7 @@
 | 用户先前 LogLens CI | 本机只读既有配置 | 核实已经使用的官方固定版安装参数与 SDK 来源 | 未修改 LogLens，未复制其功能或 fixtures |
 | 本项目 fixtures 与例子 | fixtures/、examples/、scripts/differential.py | AI辅助自制输入，无真实业务或个人数据，ETag文法例外见下行 | 自制部分MIT，未抽取第三方测试集 |
 | RFC9110, Fielding / Nottingham / Reschke, June 2022 | https://www.rfc-editor.org/rfc/rfc9110.html#section-8.8.3 与 §5.5 | examples/http_etag/main.mbt 字段值文法Code Component，不是完整HTTP实现，输入自制 | Copyright 2022 IETF Trust，文法见licenses/rfc9110-BSD，不称MIT原创 |
+| RFC9112, Fielding / Nottingham / Reschke, June 2022；RFC3986 pchar/unreserved/pct-encoded/sub-delims | https://www.rfc-editor.org/rfc/rfc9112.html#section-3 、https://www.rfc-editor.org/rfc/rfc3986.html | examples/request_line 的 request-line、method/tchar、http-version 与路径/查询规则（origin-form 简化），输入自制 | Copyright IETF Trust，Code Component 适用 IETF BSD（同 licenses/rfc9110-BSD 文本），不称 MIT 原创；周边示例实现为 MIT |
 | Official compiler release | https://github.com/moonbitlang/moonbit-compiler/releases/tag/v0.10.14%2B7d59c7ec9 | 原生SDK下载403后的同版本Wasm编译器/formatter和捆绑core，官方源码工具构建路径 | 隔离工具链、不打包进项目；发布SHA256核对见本轮记录 |
 | Official MoonBit skills | https://github.com/moonbitlang/skills | moonbit-agent-guide 工程指导 | 只参考规范，不复制实现 |
 
