@@ -69,10 +69,7 @@ fn main {
     Ok(p) => p
   }
   if mode == "check" {
-    output([
-      ("status", Json("valid")),
-      ("rules", Json(program.rule_names())),
-    ])
+    output([("status", Json("valid")), ("rules", Json(program.rule_names()))])
     return
   }
   let mut limits = @abnf.default_match_limits()
