@@ -27,7 +27,7 @@ MoonBit 实现的 ABNF 文法解析、编译验证、有界字节识别和输入
 
 | 层面 | 结果 |
 |---|---|
-| 本地，锁定工具链（`moon 0.1.20260920 (914d7da)`、`moonc v0.10.14+7d59c7ec9`、Node v24.18.0，macOS arm64） | `moon test` 在 js / wasm-gc / native / wasm 各 **41/41**（其中 5 项为本轮新增的请求行用例；起点基线为 36/36）。`python3 scripts/acceptance.py` 全部 16 个阶段通过（格式、四后端 check/build/test、examples、cli、differential、downstream） |
+| 本地，锁定工具链（`moon 0.1.20260920 (914d7da)`、`moonc v0.10.14+7d59c7ec9`、Node v24.18.0，macOS arm64） | `moon test` 在 js / wasm-gc / native / wasm 各 **41/41**（其中 5 项为本轮新增的请求行用例；起点基线为 36/36）。`python3 scripts/acceptance.py` 全部 18 个阶段通过（格式、消费者证据防伪测试 `consumer-guards`、四后端 check/build/test、`examples`、`example-request-line`、cli、differential、downstream）；CI 同样执行这 18 个阶段 |
 | 远端 CI | 候选**未运行**（未推送）。0.1.0 的旧 Linux CI 记录见 `docs/PUBLICATION.md` |
 | 注册表 | 候选未发布，不适用。0.1.0 已用 `moon add …@0.1.0` 安装查看，确认不含输入树 API |
 
@@ -57,6 +57,8 @@ fields: method=b"GET" path=[4,17) HTTP/1.1
         query=[18,28)
 ```
 
+`python3 scripts/example_request_line.py`（已并入 `scripts/acceptance.py` 和 CI）在 js / wasm-gc / native 上运行该示例，输出必须与 `examples/request_line/cmd/expected_output.txt` 逐字节一致，其中含 1 个合法请求行（树与字段提取）和 4 个非法输入的拒绝偏移；脚本带自检，输出被改动（含偏移改动、截断、多余字节）时判失败。
+
 负例同样实跑：`GET index.html HTTP/1.1\r\n`（目标不是 `/` 开头，byte 4 不匹配）、缺 CRLF、路径含空格、小写 `http/1.1`（`%s` 区分大小写）均无树，并报告最远字节位置；预算过紧时返回“未判定”而不是“不匹配”（单测覆盖，示例输出未展示）。js / wasm-gc / native 三个后端输出完全相同（本轮实跑）。限制：只做语法与字节跨度提取，不含 absolute-form/authority-form/`*` 目标、整条 HTTP 报文、头字段、方法白名单或 URI 规范化。
 
 ## 安装与复现
@@ -73,6 +75,8 @@ scripts/moon-local.sh build -j 1 -d
 scripts/moon-local.sh test -j 1 -d
 scripts/moon-local.sh run examples -j 1
 python3 scripts/acceptance.py
+# 只跑请求行示例的跨后端黄金输出对比（已含在 acceptance 中）
+python3 scripts/example_request_line.py
 # 只验证独立下游消费本地候选包；不执行正式发布
 python3 scripts/downstream.py
 ```
