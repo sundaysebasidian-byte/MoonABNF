@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "sundaysebasidian-byte/moonabnf/examples/http_etag"
+
+import {
+  "sundaysebasidian-byte/moonabnf",
+}
+
+// Values
+pub fn extract(@moonabnf.InputTree) -> TagSpan
+
+pub fn grammar() -> Bytes
+
+// Errors
+
+// Types and methods
+pub(all) struct TagSpan {
+  weak : Bool
+  value_start : Int
+  value_end : Int
+} derive(Eq)
+pub fn TagSpan::equal(Self, Self) -> Bool
+pub fn TagSpan::not_equal(Self, Self) -> Bool
+
+// Type aliases
+
+// Traits

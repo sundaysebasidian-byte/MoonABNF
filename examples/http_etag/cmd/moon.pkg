@@ -1,0 +1,6 @@
+import {
+  "sundaysebasidian-byte/moonabnf" @abnf,
+  "sundaysebasidian-byte/moonabnf/examples/http_etag" @etag,
+}
+
+pkgtype(kind: "executable")

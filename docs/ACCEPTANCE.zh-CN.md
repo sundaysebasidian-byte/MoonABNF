@@ -1,5 +1,8 @@
 # MoonABNF 中文验收矩阵
 
+> 2026-10-12完整SDK复验及当前候选范围见 [Mac补审记录](MAC_REVIEW.zh-CN.md)，本文其余部分保留历史事实。
+> 本页为历史核对；不覆盖2026-10-12新增输入树API。新事实与未完成检查见 [本轮记录](INPUT_TREE_REVIEW.zh-CN.md)。
+
 记录日期：2026-10-01。这是 AI 辅助工程核对材料，不是赛事组验收结论、人工最终申报书或奖励保证。
 赛事要求依据完整阅读的 [官网](https://moonbitlang.github.io/Hackathon2026/) 与
 [章程](https://bxup9uklfcb.feishu.cn/wiki/Dx4Bwd6D1i3GfHkajQCcF7SznEd)。核查快照日期9/30；冲突及报名门禁见 RULES.md。

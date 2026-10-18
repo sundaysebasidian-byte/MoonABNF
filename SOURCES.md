@@ -11,8 +11,11 @@
 | Mooncakes module search | https://mooncakes.io/ | 2026-09-30 abnf、bnf 两次有界站内核查 | abnf 仅返回 marianoguerra/uri@0.1.2 字符编码表；bnf 无结果；不是全生态穷尽证明 |
 | marianoguerra/uri | https://mooncakes.io/docs/marianoguerra/uri@0.1.2/enc | 只读摘要对比范围 | 未复制代码，未作为依赖或 fixture 来源 |
 | 用户先前 LogLens CI | 本机只读既有配置 | 核实已经使用的官方固定版安装参数与 SDK 来源 | 未修改 LogLens，未复制其功能或 fixtures |
-| 本项目 fixtures 与例子 | fixtures/、examples/、scripts/differential.py | AI 辅助自制协议/配置/二进制例子，无真实业务或个人数据 | 本项目 MIT，未抽取第三方测试集 |
+| 本项目 fixtures 与例子 | fixtures/、examples/、scripts/differential.py | AI辅助自制输入，无真实业务或个人数据，ETag文法例外见下行 | 自制部分MIT，未抽取第三方测试集 |
+| RFC9110, Fielding / Nottingham / Reschke, June 2022 | https://www.rfc-editor.org/rfc/rfc9110.html#section-8.8.3 与 §5.5 | examples/http_etag/main.mbt 字段值文法Code Component，不是完整HTTP实现，输入自制 | Copyright 2022 IETF Trust，文法见licenses/rfc9110-BSD，不称MIT原创 |
+| Official compiler release | https://github.com/moonbitlang/moonbit-compiler/releases/tag/v0.10.14%2B7d59c7ec9 | 原生SDK下载403后的同版本Wasm编译器/formatter和捆绑core，官方源码工具构建路径 | 隔离工具链、不打包进项目；发布SHA256核对见本轮记录 |
+| Official MoonBit skills | https://github.com/moonbitlang/skills | moonbit-agent-guide 工程指导 | 只参考规范，不复制实现 |
 
 标准语义的功能重实现与第三方原文抽取有区别。这里不附 RFC 原文、标准示例长段落或
-第三方 ABNF fixtures；不是其他 ABNF 库的源码移植。发布二进制时继续携带标准库及依赖
+第三方测试集；新增RFC9110文法Code Component按上表单独归属。不是其他ABNF库源码移植。发布二进制时继续携带标准库及依赖
 许可证/NOTICE，并核对最终构建组件；当前交付为源码及自制材料。

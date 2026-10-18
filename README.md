@@ -1,12 +1,13 @@
 # MoonABNF
 
-MoonBit 实现的通用 ABNF 文本解析、编译验证和有界字节识别库，依据
+MoonBit 实现的 ABNF 文法解析、编译验证、有界字节识别和输入派生树库，依据
 [RFC 5234](https://www.rfc-editor.org/info/rfc5234/) 与
 [RFC 7405](https://www.rfc-editor.org/info/rfc7405/)。适合协议字段、配置输入和二进制 fixture 校验。
 项目使用 MIT，仓库地址为 https://github.com/sundaysebasidian-byte/MoonABNF 。
 正式模块名为 `sundaysebasidian-byte/moonabnf`，已发布版本 `0.1.0`。
 [Mooncakes 文档](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.1.0/) ·
-[发布证据](docs/PUBLICATION.md)。未提交赛事表单。
+[发布证据](docs/PUBLICATION.md)。用户反馈已初审未过；本轮未修改或提交表单。
+**当前本地分支新增的输入树API尚未发布，0.1.0不包含它。**
 
 ## 安装与复现
 
@@ -52,7 +53,35 @@ match @abnf.compile(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n") {
 `parse(Bytes)` 返回公开 AST，保留规则顺序、增量标志和源字节位置。
 `compile(Bytes)` 独立解析并拥有内部 AST，合并规则、解析 core 默认值并校验。
 `Program::recognize(rule, Bytes)` 要求输入全部匹配，返回状态、偏移、工作量及累积端点存储数。
+`Program::parse_input(rule, Bytes)` 要求输入全部匹配，返回 `InputTreeReport`；
+仅 `Matched` 带 `Some(InputTree)`，失败或预算耗尽均无部分树。
+`InputTree.nodes` 为只含选定派生的平坦节点数组，`root=0`；节点包含规则名/终端/序列/
+分支索引/实际重复次数、`[start,end)` 输入字节跨度及孩子ID。
+使用 `input[node.start:node.end]` 提取原始字节；`source_offset` 指文法表达式，隐式core为合成位置0。
+文法 `Expr` AST 描述规则；输入树描述某次输入的派生，二者不可混称。
 程序可复用，每次识别有独立预算；没有隐藏全局缓存。完整接口见 `pkg.generated.mbti`。
+
+```moonbit
+let p = @abnf.compile(b"record = key \":\" 1*DIGIT\r\nkey = 1*ALPHA\r\n").unwrap()
+let r = p.parse_input("record", b"Age:42")
+assert_true(r.status is @abnf.Matched)
+assert_eq(r.tree.unwrap().nodes[0].end, 6)
+```
+
+歧义策略：遍历所有替代、保留所有不同结束偏移；同一端点保留首次遇到的派生路径，
+重复次数按升序探索。这不是PEG优先匹配，不枚举全部歧义，也不认证唯一解析。
+可空重复在树中实际生成最小次数；百万次空重复可被recognize快速识别，parse_input则可能耗尽树预算。
+设计、预算及新验证见 [本轮补强记录](docs/INPUT_TREE_REVIEW.zh-CN.md)。
+
+## 规范协议示例
+
+`examples/http_etag` 使用 [RFC9110 §8.8.3](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.8.3)
+及 [§5.5](https://www.rfc-editor.org/rfc/rfc9110.html#section-5.5) 的 ETag 字段值文法。
+`scripts/moon-local.sh run examples/http_etag/cmd -j 1` 解析 `W/"revision-7"`，
+提取弱标签标志与 `[3,13)` 原始内容字节，拒绝错误的小写前缀。
+测试覆盖全部256种内部字节、空值、反斜杠、高位字节及非法值。
+范围仅为字段值语法与提取；不含 `ETag:` 行包装、外部空白、HTTP整报文、
+验证器生成/比较或条件请求语义。规范文法另有 [IETF BSD许可](licenses/rfc9110-BSD)。
 
 ## 支持与限制
 
@@ -64,7 +93,7 @@ match @abnf.compile(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n") {
 文法文本严格遵守 CRLF（包括最后一行）；折行须以 SP/HTAB 开始，支持注释。
 文法里的空白不隐式插入到被识别输入。可空字符串和可空重复有明确语义。
 解析可接受 prose-val AST，但编译拒绝自然语言终端。数值终端限制为 0..255；
-重复次数单个整数限制为 1,000,000，超限报错。未实现 Unicode 数值终端、解析树生成、
+重复次数单个整数限制为 1,000,000，超限报错。未实现 Unicode 数值终端、全部歧义树枚举、
 代码生成、错误恢复、自动左递归改写、完整协议语义检查和流式识别。
 
 显式 `=` 可覆盖 core 默认规则；`=/` 可扩展已存在的用户规则或 core 默认规则。
@@ -91,10 +120,15 @@ match @abnf.compile(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n") {
 | 识别工作量 | 500,000 | 10,000,000 |
 | 累积端点存储次数 | 100,000 | 1,000,000 |
 | 识别递归调用深度 | 128 | 128 |
+| 输入树累计节点分配 | 20,000 | 100,000 |
+| 输入树累计子边/路径分配 | 40,000 | 200,000 |
 
 用 `limits={ ..@abnf.default_match_limits(), max_work: 1000 }` 设置识别预算。
 工作量计表达式分派、字节比较、端点插入及去重比较；端点存储是累积次数，非峰值内存字节。
 这是确定性的操作预算，不是墙钟超时，不承诺任意文法在默认预算下结束识别。
+输入树由 `InputTreeLimits.matching` 设置匹配预算，另有 `max_nodes/max_edges`。
+计数涵盖丢弃分支、路径列表、孩子数组和最终压缩；不是输出节点数或内存字节数。
+树工作量额外计分配与路径反转，其计数和预算通过与否不必与recognize相同。
 不使用贪心或 PEG 优先选择：保留全部可达结束偏移。重复可达集合稳定后停止，允许空元素补足最小次数。
 
 语法/编译错误给零起始字节偏移和一起始行、列；只返回首个诊断。
@@ -122,19 +156,29 @@ I/O 错误输出 stderr；其余状态带 JSON。CLI 使用默认 64 KiB 文法/
 ## 验证与证据
 
 `scripts/acceptance.py` 串行执行格式检查、check/build/test、例子、CLI 和差分，`-j 1`。
-本轮收尾源码在四种后端（Wasm、Wasm GC、JS、native）各22组测试、24项CLI检查通过；本轮最终文档冻结后重新执行串行验收，原始输出与源码哈希见审查 ZIP 的 `verification/summary.json`。
-公开0.1.0基线及其既有Linux CI为各18组/20项，历史输出保留在 `evidence/final-20261001/` 与 `evidence/reuse-20261001/`；更早快照在 `evidence/acceptance/`。本轮新增回归的远端CI须按准确提交查询，结果另随发布后核对证据保存。
+历史323a3728…记录为四后端各22组、CLI24项及5,440正则子集差分通过，不能作为新树实现的验证。
+云端运行与工具链替代路径见 [原始补强记录](docs/INPUT_TREE_REVIEW.zh-CN.md)；当前完整SDK复验见 [Mac补审记录](docs/MAC_REVIEW.zh-CN.md)。
+云端旧记录为JS30组、CLI24项、5,440次差分通过，其替代工具链完整验收失败，原始日志保留。
+随后在Mac已有完整锁定SDK上，原始d0982d80候选的71项源码哈希一致，四后端30组、CLI24项、5,440次差分、标准候选包及隔离消费者全部通过。
+树测试另有1,820个穷举输入与独立AST见证重放。Mac另补预算逐阈值、后续分支失败与长递归/输入长度契约回归；
+最终源码快照的完整验收与协议命令日志随审查包保存，详见 [Mac补审记录](docs/MAC_REVIEW.zh-CN.md)。
+新增树API的远端CI、注册表新版本消费仍未验证；公开0.1.0不含它。
 独立 oracle 使用 Python 字节正则全匹配：固定 seed，80 组随机正则子集文法，5,440 次比较。
 它验证识别语义及相应解析路径，不是完整 ABNF 解析器对全部规范的认证。
 递归场景由明确预期的本地测试覆盖；未做第三方完整 ABNF 解析器差分。
-CI 覆盖同一流程，锁定编译器；发布提交在 Linux CI 已通过，准确提交与运行链接见发布事实记录。
+历史0.1.0发布提交有Linux CI记录，见发布事实；本轮未push或触发远端CI。
 
-独立下游验证用 `moon package --frozen` 生成候选 ZIP，解压到隔离 workspace，
+历史独立下游验证用 `moon package --frozen` 生成候选 ZIP，解压到隔离 workspace，
 由 `local/moonabnf-downstream` 模块引用公开 API。三个场景有完整输入/输出/断言，
-四后端运行并核对解压源码哈希。另用 `scripts/registry_consumer.py --output /absolute/evidence/path`
-从 Mooncakes 安装正式 0.1.0，依赖树确认 registry 来源，三个场景/API断言四后端通过。
+四后端运行并核对解压源码哈希。历史注册表证据使用当时的0.1.0消费者模板，从 Mooncakes 安装正式0.1.0，
+依赖树确认registry来源，三个场景/API断言四后端通过。当前消费者模板包含新增输入树API，
+不可再用它验证0.1.0。验证经批准且实际发布的新版本时，必须显式提供
+`python3 scripts/registry_consumer.py --release-version "$APPROVED_RELEASE_VERSION" --output /absolute/evidence/path`；
+脚本不会从本地moon.mod推断发布版本，也不会发布任何版本。未发布候选继续使用
+`scripts/downstream.py`，其打包源码逐文件SHA-256须与当前源码一致，并确认本地解析路径。
+离线验证这些门禁可运行 `python3 scripts/test_consumer_contract.py`，无需SDK或注册表访问。
 公开0.1.0基线的证据与范围审查见 [复用价值审查](docs/REUSE_REVIEW.zh-CN.md) 与 `evidence/reuse-20261001/`。
-本轮收尾源码的完整验收见审查 ZIP 的 `verification/`，统一核对说明见 [FINAL_GATE.zh-CN.md](docs/FINAL_GATE.zh-CN.md)。
+历史收尾核对见 [FINAL_GATE.zh-CN.md](docs/FINAL_GATE.zh-CN.md)，不覆盖新增输入树API。
 重新生成独立证据目录可运行 `python3 scripts/acceptance.py --output /absolute/evidence/path`；新运行记录自身源码哈希，不沿用旧快照哈希。
 
 [技术事实与三场景](docs/TECHNICAL_FACTS.md) · [理解说明](docs/UNDERSTANDING.md) ·
@@ -143,7 +187,25 @@ CI 覆盖同一流程，锁定编译器；发布提交在 Linux CI 已通过，�
 ## 许可与赛事边界
 
 原创实现与自制 fixtures 使用 MIT。标准库依赖许可及 NOTICE 在 `licenses/`。
-RFC 文本未作为 MIT 源码或 fixture 打包；规范依据与参考范围见 `SOURCES.md`。
+RFC9110示例文法Code Component单独使用IETF BSD许可；未将RFC全文打包或把规范文法当作MIT原创，见 `SOURCES.md`。
 代码和事实资料均有 AI 辅助；最终申报书必须由用户本人撰写，身份材料与诚信承诺由本人处理。
-用户已条件批准公开 GitHub 和按现有 MIT 发布 Mooncakes，两项已完成；准确提交、CI与正式版本消费证据另记。
-本人报名、人工最终申报书、身份材料、诚信承诺及奖励资格仍由本人和赛事审核处理。
+此前0.1.0公开GitHub和Mooncakes的发布证据另记；本轮只交本地分支/补丁，不push、不发布、不操作表单或发邮件。
+用户反馈已初审未过，申报修改、身份材料、诚信承诺与奖励资格仍由本人和赛事审核处理。
+
+### 审查补丁的兼容性复验
+
+新增消费者门禁使用显式异常，Python `-O` / `PYTHONOPTIMIZE` 不会移除版本、来源、
+工作区、输出或包内容校验；证据目录必须为空，避免沿用旧的成功摘要。
+运行 `python3 scripts/test_consumer_optimized.py` 可做离线假SDK防误报回归。
+消费者脚本默认保留锁定SDK入口；兼容性复验可显式传入 `--moon /trusted/sdk/bin/moon`，
+并设置该SDK的 `MOON_HOME` 和PATH。新SDK结果必须单独标注版本，不能冒充锁定SDK复验。
+
+## 输入树上手与评审核对
+
+[输入树最短可复现路径](docs/INPUT_TREE_QUICKSTART.zh-CN.md) 提供完整成功、拒绝和预算未判定的公共API示例。
+`moon run examples/input_tree --target js -j 1 -d` 可直接运行，按命名规则提取 `Age:42` 的值字节。
+[评审补充说明草稿](docs/REVIEWER_RESPONSE_DRAFT.zh-CN.md) 将原始反馈逐项对应到实现与证据，供作者核对改写，尚未提交。
+
+
+本轮边界回归进一步覆盖UTF-8外观字节中的失败位置、尾随NUL、歧义空输入，以及空派生预算失败后的复用。
+源码归档的解压层级与SDK选择见[从交付归档开始](docs/INPUT_TREE_QUICKSTART.zh-CN.md#从交付归档开始)。

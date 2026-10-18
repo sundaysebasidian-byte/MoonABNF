@@ -236,20 +236,26 @@ fn Runner::repeat(
 
 ///|
 /// Recognize the entire byte sequence, not just a prefix.
+fn valid_match_limits(limits : MatchLimits) -> Bool {
+  limits.max_input_bytes >= 0 &&
+  limits.max_input_bytes <= 1048576 &&
+  limits.max_work >= 1 &&
+  limits.max_work <= 10000000 &&
+  limits.max_states >= 1 &&
+  limits.max_states <= 1000000 &&
+  limits.max_depth >= 1 &&
+  limits.max_depth <= 128
+}
+
+///|
+/// Recognize the entire byte sequence, not just a prefix.
 pub fn Program::recognize(
   self : Program,
   start : String,
   input : Bytes,
   limits? : MatchLimits = default_match_limits(),
 ) -> MatchReport {
-  if limits.max_input_bytes < 0 ||
-    limits.max_input_bytes > 1048576 ||
-    limits.max_work < 1 ||
-    limits.max_work > 10000000 ||
-    limits.max_states < 1 ||
-    limits.max_states > 1000000 ||
-    limits.max_depth < 1 ||
-    limits.max_depth > 128 {
+  if !valid_match_limits(limits) {
     return { status: InvalidLimits, offset: 0, work: 0, states: 0, }
   }
   if input.length() > limits.max_input_bytes {

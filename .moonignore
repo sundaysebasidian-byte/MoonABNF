@@ -4,3 +4,7 @@ target/
 .mooncakes/
 .moonagent/
 evidence/
+
+# Python verification helpers must not ship interpreter caches.
+__pycache__/
+*.pyc

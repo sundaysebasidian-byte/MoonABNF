@@ -1,8 +1,10 @@
 # 技术事实清单（AI 辅助参考，非最终申报书）
 
-独立项目 MoonABNF：ABNF 文本 → AST → 编译验证 → 有界字节识别。
+独立项目 MoonABNF：ABNF 文本 → 文法AST → 编译验证 → 有界字节识别/输入派生树。
 规范为 RFC 5234 / RFC 7405，原创 MoonBit 实现，不移植其他 ABNF 库源码。
 最终申报书须用户本人理解后写；本资料不冒充人工 Proposal。
+本轮未发布分支为回应初审意见；新增树API、规范ETag场景、实际验证及限制见
+[INPUT_TREE_REVIEW.zh-CN.md](INPUT_TREE_REVIEW.zh-CN.md)。
 
 ## 生态价值与有界核查
 
@@ -22,8 +24,11 @@ marianoguerra/uri@0.1.2 的 URI/IRI 字符编码表，bnf 无结果。
 
 可复现命令：`scripts/moon-local.sh run examples -j 1`；或 README 的 check/match/batch 命令。
 fixtures均为自制，二进制内容不是个人或业务数据。
+原protocol是自造字段，不能算真实规范验证。新增examples/http_etag依据RFC9110
+§§8.8.3/5.5，校验ETag字段值并通过规则树提取弱标志与原始内容字节。
+规范文法BSD许可独立保留；不覆盖HTTP整报文或缓存/条件请求语义。
 
-独立消费者实证：`python3 scripts/downstream.py` 消费 `moon package` 生成并隔离解压的本地候选 ZIP，
+历史独立消费者实证（0.1.0识别API，不覆盖本轮新树API）：`python3 scripts/downstream.py` 消费 `moon package` 生成并隔离解压的本地候选 ZIP，
 三个场景通过同一个公共库 API、有明确状态/偏移断言，四后端输出逐字核对。
 完整输入/API/实际输出、拒绝原因及证据边界见 [REUSE_REVIEW.zh-CN.md](REUSE_REVIEW.zh-CN.md)。
 它证明本地包可被独立模块复用，不是 Mooncakes 安装、真实第三方采用或完整业务集成的证明。
@@ -37,8 +42,11 @@ prose-val能进入AST，但不把自然语言静默解释成识别器。数值�
 递归下降解析；生产性与可空性不动点；可空前缀引用图检查左递归。
 识别传播所有结束偏移，避免ABNF替代误当PEG优先选择；可空重复达到固定集合后停止。
 输入长度、工作量、累积端点、递归深度均有预算；耗尽是未判定，不是不匹配。
+parse_input保留每端点一棵见证，输出全输入派生。树/路径分配亦受预算，
+可空重复实际生成最小次数的子树，不凭固定点虚构节点。
 内部编译AST不可被外部可变AST破坏，程序可复用而每次识别资源账本独立。
 
 不生成编译器代码，不覆盖Unicode数值终端，不自动重写左递归，不承诺任意文法都在默认预算内成功。
 正式命名空间已核为 sundaysebasidian-byte/moonabnf@0.1.0；用户已条件批准公开仓库与Mooncakes发布。
-准确发布、远端CI及注册表消费结果另据真实操作更新；本人报名未执行，资格/奖励仍由赛事审核。
+0.1.0不含新树API。本轮禁止push/新发包/修改表单或发邮件，用户反馈已初审未过。
+剩余提交次数与本人材料由用户核对，资格/奖励由赛事审核。
