@@ -1,21 +1,22 @@
 # 输入树 API：最短可复现路径
 
 这是未发布候选的用法。公开0.1.0不含该API；不要用旧版本安装结果验证以下功能。
+本轮捕获/URI/Cookie 示例、准确输入约束和演示见 [捕获契约与复用](QUALITY_20261020.zh-CN.md)。
 
 ## 从交付归档开始
 
-先解压最外层交付包，再解压其中的 `source-ready-v4.zip` 到一个新目录，进入该目录。不要直接在只含补丁和日志的外层目录执行 `moon`。
+先解压最外层交付包，再解压其中的 `source.zip` 到一个新目录，进入包含 `moon.mod` 的源码根目录。核对交付清单中的源码SHA；不要直接在只含补丁和日志的外层目录执行 `moon`。历史交付的源码归档可能有不同文件名，以该交付清单为准。
 
 ```sh
-unzip source-ready-v4.zip -d moonabnf-v4
-cd moonabnf-v4
+unzip source.zip -d moonabnf-candidate
+cd moonabnf-candidate
 export MOON_HOME=/absolute/path/to/trusted-sdk
 export PATH="$MOON_HOME/bin:$PATH"
 moon version --all
 moon run examples/input_tree --target js -j 1 -d
 ```
 
-本包的新验证使用 moonc v0.10.15、moon 0.1.20261012；这些命令明确选择自己的可信SDK。若要重现历史锁定SDK记录，另按 `TOOLCHAIN.lock` 配置，不要混用证据。源码包保留原有脚本执行位；部分解压工具会移除执行位，必要时运行 `chmod +x scripts/*.sh`。
+这些命令明确选择已有可信SDK。锁定版本见 `TOOLCHAIN.lock`；本轮实际环境及限制见捕获契约文档和交付日志，不要把历史不同SDK的证据混入本轮。源码包保留原有脚本执行位；部分解压工具会移除执行位，必要时运行 `chmod +x scripts/*.sh`。
 
 ## 运行公共接口示例
 

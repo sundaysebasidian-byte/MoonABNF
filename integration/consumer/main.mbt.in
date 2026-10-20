@@ -25,6 +25,10 @@ fn main raise {
   let tree = parsed.tree.unwrap()
   assert_true(tree.nodes[tree.root].kind is @abnf.RuleNode("field"))
   assert_eq(tree.nodes[tree.root].end, 13)
+  let captures = tree.rule_nodes_in("HEXDIG", tree.root).unwrap()
+  assert_eq(captures.map(id => tree.extract(b"TRACE: aF12\r\n", id)),
+    [Some(b"a"), Some(b"F"), Some(b"1"), Some(b"2")])
+  assert_eq(tree.rule_nodes_in("HEXDIG", -1), None)
   let limited = protocol.parse_input("field", b"TRACE: aF12\r\n", limits={ ..@abnf.default_input_tree_limits(), max_nodes: 1 })
   assert_true(limited.status is @abnf.BudgetExceeded("tree-nodes"))
   assert_true(limited.tree is None)

@@ -48,6 +48,9 @@ fn tree_of(
   for i = 1; i < parents.length(); i = i + 1 {
     assert_eq(parents[i], 1)
   }
+  // The independent topology checks above also cross-check that the public
+  // structural query accepts every successful witness in the exhaustive set.
+  assert_true(tree.rule_nodes_in(rule, tree.root) is Some(ids) && ids[0] == 0)
   tree
 }
 
