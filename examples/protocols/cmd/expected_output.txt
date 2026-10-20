@@ -1,0 +1,35 @@
+Grammar AST: 36 rules; first source rule:
+  URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+Input derivation tree (first 3 levels):
+  Rule(uri) [0,40)
+    Sequence [0,40)
+      Rule(scheme) [0,5)
+      Literal [5,6)
+      Rule(hier-part) [6,32)
+      Repeat(1) [32,36)
+      Repeat(1) [36,40)
+URI components (syntax only, no percent decoding):
+  scheme=[0,5) raw=b"https"
+  host=[8,21) raw=b"[2001:db8::1]"
+  port=[22,26) raw=b"8443"
+  path-abempty=[26,32) raw=b"/a%20b"
+  query=[33,36) raw=b"q=1"
+  fragment=[37,40) raw=b"top"
+Grammar AST: 7 rules; first source rule:
+  cookie-string = cookie-pair *( ";" SP cookie-pair )
+Input derivation tree (first 3 levels):
+  Rule(cookie-string) [0,49)
+    Sequence [0,49)
+      Rule(cookie-pair) [0,11)
+      Repeat(3) [11,49)
+Cookie pairs (duplicates and quotes preserved):
+  cookie-name=[0,7) raw=b"session"
+  cookie-value=[8,11) raw=b"abc"
+  cookie-name=[13,18) raw=b"theme"
+  cookie-value=[19,25) raw=b"\x22dark\x22"
+  cookie-name=[27,32) raw=b"empty"
+  cookie-value=[33,33) raw=b""
+  cookie-name=[35,42) raw=b"session"
+  cookie-value=[43,49) raw=b"second"
+Invalid Cookie: no-match at byte 11
+Limited Cookie: indeterminate (tree-nodes), tree absent=true
