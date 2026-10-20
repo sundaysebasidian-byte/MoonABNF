@@ -18,6 +18,7 @@ commands = [
  ('toolchain', ['scripts/moon-local.sh', 'version', '--all']),
  ('format', ['scripts/moon-local.sh', 'fmt', '--check']),
  ('consumer-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_consumer*.py']),
+ ('protocol-fixtures', ['python3', 'scripts/verify_protocol_fixtures.py']),
  ('check-wasm', ['scripts/moon-local.sh', 'check', '--target', 'wasm', '-j', '1', '-d']),
  ('build-wasm', ['scripts/moon-local.sh', 'build', '--target', 'wasm', '-j', '1', '-d']),
  ('test-wasm', ['scripts/moon-local.sh', 'test', '--target', 'wasm', '-j', '1', '-d']),

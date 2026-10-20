@@ -1,0 +1,12 @@
+{
+  "uri": {
+    "grammar_sha256": "f8f731a5b16b6320566d59f798672ffcc42a6ed839de33b5e8656b06e95fa762",
+    "source": "https://www.rfc-editor.org/rfc/rfc3986.html#appendix-A",
+    "scope": "URI-reference syntactic grammar; path-empty 0<pchar> replaced by equivalent empty literal; RFC first-match host disambiguation and scheme semantics not implemented"
+  },
+  "cookie": {
+    "grammar_sha256": "43749426f94978a0c014d8d53e13842f391196f7fa70767cad09b65c96a415b4",
+    "source": "https://www.rfc-editor.org/rfc/rfc6265.html#section-4.2.1",
+    "scope": "Cookie header value; token/tchar from RFC9110. Cookie state/domain/security/percent-decoding not implemented"
+  }
+}

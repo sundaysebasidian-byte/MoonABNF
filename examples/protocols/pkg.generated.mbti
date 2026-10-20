@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "sundaysebasidian-byte/moonabnf/examples/protocols"
+
+// Values
+pub fn cookie_grammar() -> Bytes
+
+pub fn uri_grammar() -> Bytes
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

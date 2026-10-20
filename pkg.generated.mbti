@@ -78,7 +78,10 @@ pub(all) struct InputTree {
   root : Int
 } derive(Eq, @debug.Debug)
 pub fn InputTree::equal(Self, Self) -> Bool
+pub fn InputTree::extract(Self, Bytes, Int) -> Bytes?
 pub fn InputTree::not_equal(Self, Self) -> Bool
+pub fn InputTree::rule_nodes(Self, String) -> Array[Int]
+pub fn InputTree::span(Self, Int) -> (Int, Int)?
 pub fn InputTree::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputTreeLimits {

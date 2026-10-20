@@ -263,3 +263,11 @@ RFC9110示例文法Code Component单独使用IETF BSD许可；未将RFC全文打
 
 本轮边界回归进一步覆盖UTF-8外观字节中的失败位置、尾随NUL、歧义空输入，以及空派生预算失败后的复用。
 源码归档的解压层级与SDK选择见[从交付归档开始](docs/INPUT_TREE_QUICKSTART.zh-CN.md#从交付归档开始)。
+
+## Named captures and protocol corpora (local candidate)
+
+`InputTree::rule_nodes(name)` finds named-rule node IDs case-insensitively in stable tree storage order. `span(id)` returns a checked half-open byte span; `extract(original_input, id)` copies the original bytes or returns `None` for invalid IDs/spans. Supply the exact input used to parse; the tree does not store or authenticate it. No UTF-8, URI escape or quoted-string decoding is implicit.
+
+`examples/protocols` supplies RFC3986 URI-reference grammar (including IPv6 and relative references) and RFC6265 Cookie-value grammar. Tests use the generic `Program::parse_input` and the public query API to extract URI components and repeated cookie pairs. These are syntactic examples: no scheme-specific URI validation, host disambiguation policy, network access, cookie state/security policy or full HTTP parser. Source fixtures, the equivalent URI `path-empty` adaptation, and third-party license notices are in `fixtures/protocols/SOURCES.md` and `licenses/`.
+
+Run the complete acceptance with a new evidence directory; it includes the corpus-byte binding check and protocol tests on the existing supported targets.

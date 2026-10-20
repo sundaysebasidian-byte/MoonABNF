@@ -20,3 +20,8 @@
 标准语义的功能重实现与第三方原文抽取有区别。这里不附 RFC 原文、标准示例长段落或
 第三方测试集；新增RFC9110文法Code Component按上表单独归属。不是其他ABNF库源码移植。发布二进制时继续携带标准库及依赖
 许可证/NOTICE，并核对最终构建组件；当前交付为源码及自制材料。
+
+| RFC3986, Berners-Lee / Fielding / Masinter, January 2005 | https://www.rfc-editor.org/rfc/rfc3986.html#appendix-A | Collected URI grammar in fixtures/protocols and examples/protocols; path-empty zero-count prose replaced by empty literal | Original copyright/BCP78 notice retained in licenses/rfc3986-notice; grammar not relicensed as MIT |
+| RFC6265, A. Barth, April 2011 | https://www.rfc-editor.org/rfc/rfc6265.html#section-4.2.1 | Cookie grammar with explicit RFC9110 token/tchar | licenses/rfc6265-BSD and licenses/rfc9110-BSD; inputs and adapter/tests self-authored |
+
+Protocol corpus exception: fixtures/protocols/*.abnf and the corresponding embedded grammar are third-party grammar Code Components with the notices above; surrounding code and generated test inputs are MIT.
