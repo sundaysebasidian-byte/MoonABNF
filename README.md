@@ -27,8 +27,8 @@ diff -u examples/protocols/cmd/expected_output.txt /tmp/moonabnf-demo.txt
 紧节点预算的`indeterminate`，两者均不返回部分树。建议三分钟讲解节奏见
 [现有讲解与取舍](docs/QUALITY_20261020.zh-CN.md#三分钟演示)。
 
-当前Linux已复验的运行路径是 **JS**。SDK/官方包安装仍存在阻塞，见下表；不要省略`--target js`
-后把默认Wasm失败误当成源码安装成功。本轮未升级或覆盖已有SDK。
+本云环境已复验的运行路径是 **JS**；GitHub Linux runner 的官方完整SDK已通过四后端验收，见下表。
+本地SDK缺件和默认Wasm初始化失败的原回执仍保留；本轮未升级或覆盖已有SDK。
 
 ## 一个可用场景：离线协议字段诊断器
 
@@ -63,7 +63,7 @@ cd consumer
 
 ## 当前支持与证据矩阵（2026-10-22）
 
-| 范围 | 当前Linux证据 | 边界 |
+| 范围 | 当前云环境证据 | 边界 |
 | --- | --- | --- |
 | JS库运行 | 4306ca1：debug/release各58/58 | 包含确定种子鲁棒性；不是无bug证明 |
 | JS CLI与差分 | 7826b166：CLI24；seed20260930、80文法/5440比较零差异 | 正则子集oracle，不覆盖全部递归文法 |
@@ -73,10 +73,19 @@ cd consumer
 | 官方候选包消费 | SDK与PATH均缺mooncake | 未得到本轮打包/注册表消费回执 |
 | 开发分支/远端CI | 已获准公开开发分支；实际SHA/CI见当前提交回执与[Actions](https://github.com/sundaysebasidian-byte/MoonABNF/actions) | 分支公开不等于新包发布；历史0.1.0证据不替代候选 |
 
-本环境：Linux x86_64、Node v24.19.0、官方Wasm版moonc v0.10.14+7d59c7ec9；
+另有独立 **GitHub Linux CI**：提交`3e0333a52e058b9213b84028c2aae2e1be35e966`的
+[run 39827943551](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/39827943551)
+已于2026-10-22 UTC终态成功。Ubuntu 26.04.1 runner从官方来源安装完整锁定SDK：
+moonc v0.10.14+7d59c7ec9，moon/moonrun 0.1.20260920（914d7da）。
+`scripts/acceptance.py`的19个阶段均通过，包括JS/Wasm/native的check、build、test，
+Wasm GC test、示例、请求行、CLI、差分、消费者保护，以及`moon package --frozen`归档的四后端独立消费者。
+[原始验收附件](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/39827943551/artifacts/12446339942)
+绑定该SHA；这不是注册表安装、跨平台认证或绝对无bug证明。新字段诊断消费者另在本云环境按上述命令验证。
+
+本云环境：Linux x86_64、Node v24.19.0、官方Wasm版moonc v0.10.14+7d59c7ec9；
 moon/moonrun从锁定914d7da0源码本地构建，显示日期20261012，不能冒充锁文件中的官方完整发行二进制。
 本轮从官方文档列出的安装来源只读获取发行路径时收到HTTP403，未执行安装脚本、重试或绕过。
-完整可信SDK补齐仍是阻塞，不把局部工具链或源码ZIP称为完成正式包安装。
+本云环境完整SDK补齐仍受阻；远端CI的成功不覆盖这些历史失败，也不把源码ZIP称为注册表安装。
 
 外层交付 `manifest.json` 为结果入口，`evidence/`逐项绑定命令、UTC、退出码、输入、种子、源码SHA和失败记录。
 58组与5440比较的历史提交身份分别保留；本轮只复验文档/消费者变化，不重复计作新用例数量。
