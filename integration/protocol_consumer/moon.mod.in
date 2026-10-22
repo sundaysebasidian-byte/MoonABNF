@@ -1,0 +1,9 @@
+name = "local/protocol-field-diagnostic"
+
+version = "0.1.0"
+
+preferred_target = "js"
+
+import {
+  "sundaysebasidian-byte/moonabnf@0.1.0",
+}

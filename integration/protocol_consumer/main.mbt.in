@@ -1,0 +1,67 @@
+///|
+fn fields(
+  tree : @abnf.InputTree,
+  input : Bytes,
+  root : Int,
+  name : String,
+) -> Unit {
+  for id in tree.rule_nodes_in(name, root).unwrap() {
+    let (start, end) = tree.span(id).unwrap()
+    println(
+      "  \{name}=[\{start},\{end}) raw=\{tree.extract(input, id).unwrap()}",
+    )
+  }
+}
+
+///|
+fn diagnose(program : @abnf.Program, rule : String, input : Bytes) -> Unit {
+  let report = program.parse_input(rule, input)
+  match report.status {
+    @abnf.Matched => {
+      let tree = report.tree.unwrap()
+      println("\{rule}: matched bytes=\{input.length()}")
+      if rule == "URI-reference" {
+        for
+          name in [
+            "scheme", "host", "port", "path-abempty", "path-absolute", "path-noscheme",
+            "path-rootless", "path-empty", "query", "fragment",
+          ] {
+          fields(tree, input, tree.root, name)
+        }
+      } else {
+        for pair in tree.rule_nodes_in("cookie-pair", tree.root).unwrap() {
+          println(" pair:")
+          fields(tree, input, pair, "cookie-name")
+          fields(tree, input, pair, "cookie-value")
+        }
+      }
+    }
+    @abnf.NoMatch =>
+      println(
+        "\{rule}: no-match byte=\{report.offset} tree-absent=\{report.tree is None}",
+      )
+    @abnf.BudgetExceeded(reason) =>
+      println(
+        "\{rule}: indeterminate reason=\{reason} tree-absent=\{report.tree is None}",
+      )
+    @abnf.UnknownRule => abort("unexpected example rule")
+    @abnf.InvalidLimits => abort("unexpected example limits")
+  }
+}
+
+///|
+fn main {
+  let args = @env.args()
+  // JS env.args retains Node's executable and script path before user args.
+  guard args.length() == 4 else {
+    abort(
+      "Usage: provide URI-reference and Cookie field value as two quoted arguments",
+    )
+  }
+  // This textual example explicitly encodes argv as UTF-8. The library itself
+  // accepts Bytes; no URI decoding or Cookie unquoting is performed here.
+  let uri = @abnf.compile(@protocols.uri_grammar()).unwrap()
+  let cookie = @abnf.compile(@protocols.cookie_grammar()).unwrap()
+  diagnose(uri, "URI-reference", @utf8.encode(args[2][:]))
+  diagnose(cookie, "cookie-string", @utf8.encode(args[3][:]))
+}

@@ -1,0 +1,8 @@
+import {
+  "sundaysebasidian-byte/moonabnf" @abnf,
+  "sundaysebasidian-byte/moonabnf/examples/protocols",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+}
+
+pkgtype(kind: "executable")
