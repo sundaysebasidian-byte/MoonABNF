@@ -1,150 +1,156 @@
 # MoonABNF
 
-MoonBit 字节级 ABNF 库：**文法文本 → 文法 AST → 编译校验 → 输入派生树 → 原字节字段**。
-依据 [RFC 5234](https://www.rfc-editor.org/info/rfc5234/) 与
-[RFC 7405](https://www.rfc-editor.org/info/rfc7405/)，适合协议字段的离线诊断、配置校验和二进制 fixture 回归。
-这不是完整 HTTP/URI/Cookie 语义实现；预算耗尽保留为“未判定”。
+[![CI](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/ci.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/ci.yml)
+[![Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-本交付是未发布的开发候选，模块名 `sundaysebasidian-byte/moonabnf`。**历史正式包0.1.0不含输入树/捕获API**；
-候选的 `moon.mod` 仍写0.1.0，不代表新增功能已经发布。请使用交付中的 `source.zip`，不要用注册表旧包验证本页。
+用 MoonBit 写的字节级 ABNF 库：**直接拿 RFC 里的 ABNF 文法校验协议字段，不用手写解析器。**
 
-## 从源码归档快速上手
+文法文本 → 文法 AST → 编译校验 → 整段识别 / 输入派生树 → 按规则名取出原字节字段。
+实现依据 [RFC 5234](https://www.rfc-editor.org/rfc/rfc5234)（ABNF）与 [RFC 7405](https://www.rfc-editor.org/rfc/rfc7405)（大小写敏感字符串）。
 
-先把交付包解压到一个新的空目录，再解开其中的源码。需要已有可信 MoonBit SDK、Node.js；
-Python验收脚本仅用标准库。SDK选择见 [TOOLCHAIN.lock](TOOLCHAIN.lock)，本包不安装工具或更改全局配置。
+适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
-```sh
-unzip source.zip -d candidate
-cd candidate
-export MOONABNF_SDK=/absolute/path/to/existing-trusted-sdk
-scripts/moon-local.sh version --all
-scripts/moon-local.sh run examples/protocols/cmd --target js -j 1 -d > /tmp/moonabnf-demo.txt
-diff -u examples/protocols/cmd/expected_output.txt /tmp/moonabnf-demo.txt
-```
+## 快速开始
 
-演示先显示源文法规则与文法AST规则数，再显示输入树前三层、URI组件和重复Cookie字段。
-`empty=`有零宽值节点；引号与`%20`保留原样。最后分别显示非法Cookie的`no-match`和
-紧节点预算的`indeterminate`，两者均不返回部分树。建议三分钟讲解节奏见
-[现有讲解与取舍](docs/QUALITY_20261020.zh-CN.md#三分钟演示)。
-
-本云环境已复验的运行路径是 **JS**；GitHub Linux runner 的官方完整SDK已通过四后端验收，见下表。
-本地SDK缺件和默认Wasm初始化失败的原回执仍保留；本轮未升级或覆盖已有SDK。
-
-## 一个可用场景：离线协议字段诊断器
-
-场景是检查一条采集记录中的URI-reference与Cookie字段值，再把带原字节跨度的组件交给后续日志处理。
-它不建立连接、不发送请求，也不推断认证、Cookie安全策略或网络资源是否存在。
-以下是独立模块导入候选公共API的真实源码消费，参数可替换为自己的文本字段，不是假称第三方采用。
-
-在上一步的`candidate`目录中继续执行（外层目录必须是刚创建的空工作区）：
+需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，见 [TOOLCHAIN.lock](TOOLCHAIN.lock)）和 Node.js。
 
 ```sh
-cd ..
-cp candidate/integration/protocol_consumer/moon.work.in moon.work
-mkdir consumer
-cp candidate/integration/protocol_consumer/moon.mod.in consumer/moon.mod
-cp candidate/integration/protocol_consumer/moon.pkg.in consumer/moon.pkg
-cp candidate/integration/protocol_consumer/main.mbt.in consumer/main.mbt
-cd consumer
-../candidate/scripts/moon-local.sh tree --json
-../candidate/scripts/moon-local.sh run . --target js --frozen -j 1 -d -- 'https://example.test/a%20b?q=1' 'session=abc; theme="dark"; empty=; session=second'
-../candidate/scripts/moon-local.sh run . --target js --frozen -j 1 -d -- 'http://example.test/%GG' 'session=bad value'
+git clone https://github.com/sundaysebasidian-byte/MoonABNF.git
+cd MoonABNF
+moon test                                     # 全部单元测试
+moon run examples --target js                 # 协议 / 配置 / 二进制三个小场景
+moon run examples/protocols/cmd --target js   # URI 与 Cookie：输入树和字段提取
 ```
 
-依赖树中该模块应为`source.kind: local`且路径指向解压的`candidate`。`--frozen`运行不安装注册表依赖。
-第一条诊断输出`URI-reference: matched`、`cookie-string: matched`和各字段跨度；两个`session`均保留。
-第二条分别输出`no-match`的字节位置和`tree-absent=true`。
-**示例进程退出0表示报告生成完成，不表示字段均匹配**；脚本门禁应读取报告状态，或使用已有CLI的退出码契约。
-示例明确把argv文本编码为UTF-8，输入树本身不隐式解码、URI解码或Cookie去引号。
-
-`Program`可以编译一次复用；这个短命令只处理一条记录。所有数据由调用者传入，示例没有真实业务/个人数据或用户采用证据。
-正式 `moon package` 包消费者是独立门禁，仍使用 `python3 scripts/downstream.py`；
-**源码归档消费通过不能替代官方打包/注册表安装通过**。
-
-## 当前支持与证据矩阵（2026-10-22）
-
-| 范围 | 当前云环境证据 | 边界 |
-| --- | --- | --- |
-| JS库运行 | 4306ca1：debug/release各58/58 | 包含确定种子鲁棒性；不是无bug证明 |
-| JS CLI与差分 | 7826b166：CLI24；seed20260930、80文法/5440比较零差异 | 正则子集oracle，不覆盖全部递归文法 |
-| URI/Cookie、请求行 | JS协议用例、演示黄金输出及隔离消费者 | 本轮新字段诊断消费者另有原始命令回执 |
-| Wasm / Wasm GC | 静态check通过；各1个最小运行控制在框架StringBuilder初始化失败 | 完整运行矩阵受阻，未反复执行不变失败 |
-| native | 静态check通过；SDK缺运行时C源码 | 本轮build/test/消费者受阻，不称运行支持 |
-| 官方候选包消费 | SDK与PATH均缺mooncake | 未得到本轮打包/注册表消费回执 |
-| 开发分支/远端CI | 已获准公开开发分支；实际SHA/CI见当前提交回执与[Actions](https://github.com/sundaysebasidian-byte/MoonABNF/actions) | 分支公开不等于新包发布；历史0.1.0证据不替代候选 |
-
-另有独立 **GitHub Linux CI**：提交`3e0333a52e058b9213b84028c2aae2e1be35e966`的
-[run 39827943551](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/39827943551)
-已于2026-10-22 UTC终态成功。Ubuntu 26.04.1 runner从官方来源安装完整锁定SDK：
-moonc v0.10.14+7d59c7ec9，moon/moonrun 0.1.20260920（914d7da）。
-`scripts/acceptance.py`的19个阶段均通过，包括JS/Wasm/native的check、build、test，
-Wasm GC test、示例、请求行、CLI、差分、消费者保护，以及`moon package --frozen`归档的四后端独立消费者。
-[原始验收附件](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/39827943551/artifacts/12446339942)
-绑定该SHA；这不是注册表安装、跨平台认证或绝对无bug证明。新字段诊断消费者另在本云环境按上述命令验证。
-
-本云环境：Linux x86_64、Node v24.19.0、官方Wasm版moonc v0.10.14+7d59c7ec9；
-moon/moonrun从锁定914d7da0源码本地构建，显示日期20261012，不能冒充锁文件中的官方完整发行二进制。
-本轮从官方文档列出的安装来源只读获取发行路径时收到HTTP403，未执行安装脚本、重试或绕过。
-本云环境完整SDK补齐仍受阻；远端CI的成功不覆盖这些历史失败，也不把源码ZIP称为注册表安装。
-
-外层交付 `manifest.json` 为结果入口，`evidence/`逐项绑定命令、UTC、退出码、输入、种子、源码SHA和失败记录。
-58组与5440比较的历史提交身份分别保留；本轮只复验文档/消费者变化，不重复计作新用例数量。
-旧Mac/0.1.0/云端失败回执保留于原证据及[Mac记录](docs/MAC_REVIEW.zh-CN.md)、
-[发布历史](docs/PUBLICATION.md)，不是当前分支跨后端通过证明。
-
-可按需复验，避免覆盖已有证据目录：
+在自己的项目里使用：
 
 ```sh
-scripts/moon-local.sh test --target js -j 1 -d
-python3 scripts/verify_protocol_fixtures.py
-python3 scripts/cli_test.py
-python3 scripts/differential.py
+moon add sundaysebasidian-byte/moonabnf
 ```
 
-CLI/差分依赖先构建 `scripts/moon-local.sh build --target js -j 1 -d`。
-完整SDK环境的总门禁是 `python3 scripts/acceptance.py --output /absolute/new-evidence`；
-当前已知受阻环境不要无变化反复运行失败矩阵。
+```moonbit
+// moon.pkg
+import { "sundaysebasidian-byte/moonabnf" @abnf }
+```
 
-## API与设计取舍
+> 已发布的 0.1.0 包含 `parse` / `compile` / `recognize`；输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）在当前源码中，尚未发布新版本，需要时请用源码依赖。
 
-- `parse(Bytes)`返回**文法AST**；`compile(Bytes)`验证引用、生产性及可空前缀循环后得到可复用Program。
-- `Program::recognize`只识别整段输入；`parse_input`在完整匹配且预算充足时返回一棵**输入派生树**。
-  失败/未判定没有部分树，偏移是半开字节跨度，不能当Unicode字符索引。
-- ABNF替代传播全部不同端点；同端点保留首次见证，重复次数由小到大。不把ABNF当PEG，不枚举解析森林。
-- `rule_nodes_in(name, root)`在所选子树前序捕获，拒绝环、共享后代等畸形结构。
-  旧`rule_nodes`保留BFS存储顺序，嵌套时不保证输入出现顺序。
-- `span`是局部跨度检查；`extract(original_bytes,id)`复制原字节，空字段返回空Bytes。
-  树不认证传入Bytes身份；必须由调用方保存原输入，提取成功不等于重新验证。
-- 输入长度、工作/状态/深度、构树节点/边均有预算。`BudgetExceeded`表示未判定，不能改写为`NoMatch`。
+## 用法
 
-支持引用、增量替代、分组/可选/重复、字节数值序列/区间、core规则和默认/%i/%s字符串。
-prose-val可进入文法AST但不能编译为识别器；左递归/可空前缀循环编译拒绝，消耗输入的递归仍受预算限制。
-不支持Unicode数值终端、错误恢复、代码生成、流式输入或全部歧义枚举。
-URI不实现scheme语义、host first-match策略、DNS/端口策略/规范化；Cookie不实现浏览器存储、安全或完整HTTP语义。
-详细契约见[边界说明](docs/BOUNDARIES.zh-CN.md)、[输入树上手](docs/INPUT_TREE_QUICKSTART.zh-CN.md)和`pkg.generated.mbti`。
+### 1. 校验一个字段
 
-## 当期可追踪贡献
+```moonbit
+match @abnf.compile(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n") {
+  Err(d) => println("\{d.code} at line \{d.line}, column \{d.column}")
+  Ok(program) => {
+    let r = program.recognize("field", b"TRACE: aF12\r\n")
+    assert_true(r.status is @abnf.Matched)
+  }
+}
+```
 
-| 提交 | 实质内容 |
+文法写错时得到带错误码、字节偏移和行列号的 `Diagnostic`，例如 `undefined-rule`、`left-recursion`、`duplicate-rule`。
+
+### 2. 取出字段的原始字节
+
+```moonbit
+let program = @abnf.compile(
+  b"record = key \":\" value\r\nkey = 1*ALPHA\r\nvalue = 1*DIGIT\r\n",
+).unwrap()
+let input = b"Age:42"
+let report = program.parse_input("record", input)
+match report.status {
+  @abnf.Matched => {
+    let tree = report.tree.unwrap()
+    let ids = tree.rule_nodes_in("value", tree.root).unwrap()
+    assert_eq(tree.extract(input, ids[0]), Some(b"42"))
+  }
+  @abnf.NoMatch => println("no-match at byte \{report.offset}")
+  @abnf.BudgetExceeded(why) => println("indeterminate: \{why}")
+  _ => ()
+}
+```
+
+本页代码片段都在 [readme_test.mbt](readme_test.mbt) 中作为测试运行；完整示例见 [examples/input_tree/main.mbt](examples/input_tree/main.mbt)。
+
+### 3. 用真实 RFC 文法
+
+[examples/protocols](examples/protocols) 直接使用 RFC 3986（URI）和 RFC 6265（Cookie）的 ABNF，输出输入树前三层和各组件的字节跨度：
+
+```text
+URI components (syntax only, no percent decoding):
+  scheme=[0,5) raw=b"https"
+  host=[8,21) raw=b"[2001:db8::1]"
+  port=[22,26) raw=b"8443"
+  ...
+Cookie pairs (duplicates and quotes preserved):
+  cookie-name=[0,7) raw=b"session"
+  cookie-value=[8,11) raw=b"abc"
+  ...
+Invalid Cookie: no-match at byte 11
+Limited Cookie: indeterminate (tree-nodes), tree absent=true
+```
+
+另有 RFC 9110 ETag（[examples/http_etag](examples/http_etag)）与 RFC 9112 请求行（[examples/request_line](examples/request_line)）示例，输出都与仓库里的 `expected_output.txt` 逐字节比对。
+
+### 4. 命令行
+
+```sh
+scripts/cli.sh check fixtures/protocol.abnf
+scripts/cli.sh match fixtures/protocol.abnf field fixtures/protocol-valid.bin
+```
+
+输出 JSON，退出码可直接用于脚本门禁。
+
+## 规范覆盖
+
+| RFC 5234 / 7405 | 支持 |
 | --- | --- |
-| 接续基线97f5bb14及更早阶段 | 输入树、ETag/请求行/URI/Cookie文法等已有实现；不冒充本轮准备的新功能 |
-| 9e03879e | 安全子树捕获、契约/资源回归、可复现基准与协议演示 |
-| 7826b166 | 让演示显示文法AST、输入树和字段，增加预期输出与讲解节奏 |
-| 4306ca1 | 1024个有限变异文法、64个嵌套、256组预算的鲁棒性检查；与差分分开记账 |
-| 本次准备 | 文档入口、支持矩阵和参数化独立字段消费者；不增加核心解析功能 |
+| 规则定义 `=`、增量替代 `=/`，规则名大小写不敏感 | ✅ |
+| 替代 `/`、串联、分组 `( )`、可选 `[ ]` | ✅ |
+| 重复 `n*m`、`*m`、`n*`、`*`、`n` | ✅ |
+| 数值 `%b` `%d` `%x`：单值、点连接序列、区间 | ✅ |
+| 字符串：默认大小写不敏感，`%i` / `%s`（RFC 7405） | ✅ |
+| 注释、CRLF 行结构 | ✅ |
+| 附录 B 核心规则 ALPHA … WSP（16 条） | ✅ 内置，可被同名规则覆盖 |
+| prose-val `<...>` | 解析进 AST；编译时报 `prose-unsupported` |
 
-这些是工程事实，月度贡献有效性与资格由赛事审核判断；不制造提交数量或改写日期。
-用户计划按北京时间2026-10-24窗口准备，尚未提交，也不在此擅定提交时刻或官方截止时刻。
+编译阶段检查未定义规则、重复定义、不产生任何串的规则，以及左递归 / 可空前缀循环。
 
-## 依赖、许可与AI辅助
+## 设计取舍
 
-原创库与示例周边代码为[MIT](LICENSE)；SDK core依赖为Apache-2.0，NOTICE与许可在`licenses/`。
-没有新增第三方Mooncakes依赖；JS运行依赖Node，验证脚本依赖Python标准库。
-抽取的URI/Cookie/HTTP文法及RFC例子保留独立归属/适用通知，**不随周边代码改称MIT原创**。
-准确出处、改写范围与原字节哈希见[SOURCES.md](SOURCES.md)、[协议来源](fixtures/protocols/SOURCES.md)及`licenses/`。
+- **两棵树分开**：文法 AST 描述文法本身，输入派生树描述某段输入怎样被匹配。
+- **ABNF 不是 PEG**：替代分支会保留全部可能的结束位置，不会因为先匹配到短的分支就错判。
+- **资源有预算**：输入长度、工作量、状态数、深度、树节点都有上限。预算用完返回 `BudgetExceeded`（未判定），不会被当成“不匹配”。
+- **偏移是字节**：跨度是半开字节区间，`extract` 从调用方保存的原始输入里复制，不做 URI 解码或去引号。
+- 不做：Unicode 数值终端、错误恢复、代码生成、流式输入、歧义全枚举，以及 URI/Cookie 的语义层规则。
 
-[AI_USAGE.md](AI_USAGE.md)说明Codex参与的设计、实现、测试与文档；独立代理审阅不是人工审核，正则oracle也不是完整认证。
-建议本人能解释：为何区分两棵树、为何保留端点、为何未判定不能当拒绝、为何span依赖原Bytes，以及真实协议覆盖边界。
-技术事实与讲解供理解/核对，最终要求本人撰写的申报内容、身份材料与诚信承诺仍由本人处理。
-不虚构采用、性能优势、全后端支持或奖项保证。本轮公开开发分支范围已由用户明确授权；
-不合并主分支、不发布包或release、不部署、不报名或发送邮件。
+详细契约见 [边界说明](docs/BOUNDARIES.zh-CN.md) 和 [输入树上手](docs/INPUT_TREE_QUICKSTART.zh-CN.md)，公开接口见 [pkg.generated.mbti](pkg.generated.mbti)。
+
+## 测试
+
+- 单元与场景测试：解析器、编译器、识别器、输入树、边界、鲁棒性（1024 个变异文法、预算终止）。
+- 差分测试：随机生成 80 个文法、5440 次比对，结果与独立的正则 oracle 一致（`scripts/differential.py`）。
+- 真实协议语料：URI、Cookie、ETag、HTTP 请求行。
+- CI：[ci.yml](.github/workflows/ci.yml) 在官方 SDK 上跑完整验收（JS / Wasm / Wasm GC / native 的 check、build、test，示例、CLI、差分、下游包消费）；[fresh-clone.yml](.github/workflows/fresh-clone.yml) 模拟新用户 `git clone` 后直接 `moon check`、`moon test` 和本页的快速开始。
+
+本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-evidence`。
+各轮验证的命令、版本和结果记录在 [docs/VERIFICATION_20261022.zh-CN.md](docs/VERIFICATION_20261022.zh-CN.md) 和 `evidence/`。
+
+## 目录
+
+| 路径 | 内容 |
+| --- | --- |
+| `parser.mbt` `types.mbt` | ABNF 文本 → 文法 AST |
+| `compiler.mbt` `analysis.mbt` `core.mbt` | 规则合并、核心规则、引用 / 生产性 / 左递归检查 |
+| `recognizer.mbt` | 有预算的整段识别 |
+| `input_tree.mbt` `input_query.mbt` | 输入派生树、子树查询、字段提取 |
+| `cmd/main` | JSON 命令行 |
+| `examples/` | 可运行示例与黄金输出 |
+| `fixtures/` | 测试文法与 RFC 文法语料（来源见 [fixtures/protocols/SOURCES.md](fixtures/protocols/SOURCES.md)） |
+
+## 许可与来源
+
+代码 MIT（[LICENSE](LICENSE)）。从 RFC 摘录的 URI / Cookie / HTTP 文法保留原有归属，不改称 MIT 原创，出处与哈希见 [SOURCES.md](SOURCES.md)。
+开发中 AI 的参与方式见 [AI_USAGE.md](AI_USAGE.md)，设计说明见 [docs/UNDERSTANDING.md](docs/UNDERSTANDING.md)。
