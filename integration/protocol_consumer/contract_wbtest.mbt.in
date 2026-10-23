@@ -1,0 +1,132 @@
+///|
+fn json_field(value : Json, key : String) -> Json {
+  match value {
+    Object(fields) => fields[key]
+    _ => abort("expected JSON object")
+  }
+}
+
+///|
+fn items(value : Json) -> Array[Json] {
+  match value {
+    Array(values) => values
+    _ => abort("expected JSON array")
+  }
+}
+
+///|
+test "published RFC examples produce ingestible spans, not just recognition" {
+  let uri = @abnf.compile(@protocols.uri_grammar()).unwrap()
+  let cookie = @abnf.compile(@protocols.cookie_grammar()).unwrap()
+  // RFC3986 1.1.2 and RFC6265 3.1. Combined as one synthetic collection record.
+  let u = b"http://www.ietf.org/rfc/rfc2396.txt"
+  let c = b"SID=31d4d96e407aad42; lang=en-US"
+  assert_eq(uri.recognize("URI-reference", u).status, @abnf.Matched)
+  assert_eq(cookie.recognize("cookie-string", c).status, @abnf.Matched)
+  let (code, report) = record_report(
+    uri,
+    cookie,
+    u,
+    c,
+    @abnf.default_input_tree_limits(),
+  )
+  assert_eq(code, 0)
+  assert_eq(json_field(report, "decision"), Json("accept-syntax"))
+  let pairs = items(json_field(report, "cookies"))
+  assert_eq(pairs.length(), 2)
+  assert_eq(json_field(json_field(pairs[0], "name"), "raw"), Json("SID"))
+  assert_eq(
+    json_field(json_field(pairs[0], "value"), "raw"),
+    Json("31d4d96e407aad42"),
+  )
+  assert_eq(json_field(json_field(pairs[1], "name"), "raw"), Json("lang"))
+  assert_eq(json_field(json_field(pairs[1], "value"), "raw"), Json("en-US"))
+  assert_eq(json_field(json_field(pairs[1], "name"), "start"), Json(22))
+}
+
+///|
+test "record preserves duplicate order, quoted equals, empty value and raw percent encoding" {
+  let uri = @abnf.compile(@protocols.uri_grammar()).unwrap()
+  let cookie = @abnf.compile(@protocols.cookie_grammar()).unwrap()
+  let (code, report) = record_report(
+    uri,
+    cookie,
+    b"https://e.test/a%20b?q=1",
+    b"a=x=y; a=\"z\"; a=",
+    @abnf.default_input_tree_limits(),
+  )
+  assert_eq(code, 0)
+  let pairs = items(json_field(report, "cookies"))
+  assert_eq(pairs.length(), 3)
+  for i, expected in ["x=y", "\"z\"", ""] {
+    assert_eq(json_field(json_field(pairs[i], "value"), "raw"), Json(expected))
+  }
+  assert_eq(json_field(json_field(pairs[2], "value"), "start"), Json(16))
+  assert_eq(json_field(json_field(pairs[2], "value"), "end"), Json(16))
+  let components = items(json_field(report, "components"))
+  assert_eq(json_field(components[2], "rule"), Json("path-abempty"))
+  assert_eq(
+    json_field(json_field(components[2], "capture"), "raw"),
+    Json("/a%20b"),
+  )
+}
+
+///|
+test "reject never exports the other matched field and offsets count UTF8 bytes" {
+  let uri = @abnf.compile(@protocols.uri_grammar()).unwrap()
+  let cookie = @abnf.compile(@protocols.cookie_grammar()).unwrap()
+  for c in [b"a=bad value", b"a=\xC3\xA9", b"a=b\r\n"] {
+    let (code, report) = record_report(
+      uri,
+      cookie,
+      b"/ok",
+      c,
+      @abnf.default_input_tree_limits(),
+    )
+    assert_eq(code, 1)
+    assert_eq(json_field(report, "decision"), Json("reject"))
+    assert_eq(items(json_field(report, "components")).length(), 0)
+    assert_eq(items(json_field(report, "cookies")).length(), 0)
+    assert_eq(
+      json_field(json_field(report, "cookie"), "tree_absent"),
+      Json(true),
+    )
+  }
+  let (_, report) = record_report(
+    uri,
+    cookie,
+    b"/ok",
+    b"a=\xC3\xA9",
+    @abnf.default_input_tree_limits(),
+  )
+  assert_eq(json_field(json_field(report, "cookie"), "offset"), Json(2))
+}
+
+///|
+test "budget defers whole record, configuration errors differ, and programs remain reusable" {
+  let uri = @abnf.compile(@protocols.uri_grammar()).unwrap()
+  let cookie = @abnf.compile(@protocols.cookie_grammar()).unwrap()
+  let limits = @abnf.default_input_tree_limits()
+  assert_eq(cookie.recognize("cookie-string", b"a=b").status, @abnf.Matched)
+  let (code, report) = record_report(uri, cookie, b"/ok", b"a=b", {
+    ..limits,
+    max_nodes: 1,
+  })
+  assert_eq(code, 3)
+  assert_eq(json_field(report, "decision"), Json("defer"))
+  assert_eq(items(json_field(report, "components")).length(), 0)
+  assert_eq(items(json_field(report, "cookies")).length(), 0)
+  let (mixed, report) = record_report(uri, cookie, b"\xFF", b"a=bb", {
+    ..limits,
+    matching: { ..limits.matching, max_input_bytes: 3, },
+  })
+  assert_eq(mixed, 3)
+  assert_eq(json_field(json_field(report, "uri"), "status"), Json("no-match"))
+  let (invalid, _) = record_report(uri, cookie, b"/ok", b"a=b", {
+    ..limits,
+    max_nodes: 0,
+  })
+  assert_eq(invalid, 2)
+  let (again, _) = record_report(uri, cookie, b"/ok", b"a=b", limits)
+  assert_eq(again, 0)
+}

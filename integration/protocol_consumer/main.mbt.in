@@ -50,18 +50,153 @@ fn diagnose(program : @abnf.Program, rule : String, input : Bytes) -> Unit {
 }
 
 ///|
+extern "js" fn exit_code(code : Int) -> Unit =
+  #| code => { process.exitCode = code; }
+
+///|
+fn object(fields : Array[(String, Json)]) -> Json {
+  @json.to_json(Map(fields))
+}
+
+///|
+fn status_json(report : @abnf.InputTreeReport, size : Int) -> Json {
+  let (status, reason) = match report.status {
+    @abnf.Matched => ("matched", "")
+    @abnf.NoMatch => ("no-match", "")
+    @abnf.BudgetExceeded(why) => ("indeterminate", why)
+    _ => ("configuration-error", "")
+  }
+  object([
+    ("status", Json(status)),
+    ("reason", Json(reason)),
+    ("offset", Json(report.offset)),
+    ("input_bytes", Json(size)),
+    ("tree_absent", Json(report.tree is None)),
+  ])
+}
+
+///|
+fn capture_json(tree : @abnf.InputTree, input : Bytes, id : Int) -> Json {
+  let (start, end) = tree.span(id).unwrap()
+  // Matched URI/Cookie productions contain ASCII only. No percent decoding,
+  // unquoting, normalization, or Unicode indexing enters the capture path.
+  object([
+    ("start", Json(start)),
+    ("end", Json(end)),
+    ("raw", Json(@utf8.decode_lossy(tree.extract(input, id).unwrap()))),
+  ])
+}
+
+///|
+fn record_report(
+  uri_program : @abnf.Program,
+  cookie_program : @abnf.Program,
+  uri : Bytes,
+  cookie : Bytes,
+  limits : @abnf.InputTreeLimits,
+) -> (Int, Json) {
+  let u = uri_program.parse_input("URI-reference", uri, limits~)
+  let c = cookie_program.parse_input("cookie-string", cookie, limits~)
+  // Defer the whole record if either result is unknown. A syntactically good
+  // field from a rejected/deferred record is never promoted to ingestion data.
+  let (code, decision) = match (u.status, c.status) {
+    (@abnf.UnknownRule, _)
+    | (_, @abnf.UnknownRule)
+    | (@abnf.InvalidLimits, _)
+    | (_, @abnf.InvalidLimits) => (2, "configuration-error")
+    (@abnf.BudgetExceeded(_), _) | (_, @abnf.BudgetExceeded(_)) => (3, "defer")
+    (@abnf.NoMatch, _) | (_, @abnf.NoMatch) => (1, "reject")
+    (@abnf.Matched, @abnf.Matched) => (0, "accept-syntax")
+  }
+  let components : Array[Json] = []
+  let cookies : Array[Json] = []
+  if code == 0 {
+    let tree = u.tree.unwrap()
+    for
+      rule in [
+        "scheme", "host", "port", "path-abempty", "path-absolute", "path-noscheme",
+        "path-rootless", "path-empty", "query", "fragment",
+      ] {
+      for id in tree.rule_nodes_in(rule, tree.root).unwrap() {
+        components.push(
+          object([
+            ("rule", Json(rule)),
+            ("capture", capture_json(tree, uri, id)),
+          ]),
+        )
+      }
+    }
+    let tree = c.tree.unwrap()
+    for pair in tree.rule_nodes_in("cookie-pair", tree.root).unwrap() {
+      let name = tree.rule_nodes_in("cookie-name", pair).unwrap()[0]
+      let value = tree.rule_nodes_in("cookie-value", pair).unwrap()[0]
+      cookies.push(
+        object([
+          ("name", capture_json(tree, cookie, name)),
+          ("value", capture_json(tree, cookie, value)),
+        ]),
+      )
+    }
+  }
+  (
+    code,
+    object([
+      ("schema", Json("moonabnf.protocol-record.v1")),
+      ("decision", Json(decision)),
+      ("uri", status_json(u, uri.length())),
+      ("cookie", status_json(c, cookie.length())),
+      ("components", Json(components)),
+      ("cookies", Json(cookies)),
+    ]),
+  )
+}
+
+///|
 fn main {
   let args = @env.args()
   // JS env.args retains Node's executable and script path before user args.
-  guard args.length() == 4 else {
-    abort(
-      "Usage: provide URI-reference and Cookie field value as two quoted arguments",
-    )
+  let json_mode = args.length() >= 3 && args[2] == "--json"
+  guard (json_mode && (args.length() == 5 || args.length() == 6)) ||
+    (!json_mode && args.length() == 4) else {
+    println(object([("decision", Json("usage-error"))]).stringify())
+    exit_code(2)
+    return
+  }
+  let mut limits = @abnf.default_input_tree_limits()
+  if json_mode && args.length() == 6 {
+    let mut n = 0
+    for ch in args[5].to_array() {
+      let digit = ch.to_int() - 48
+      guard digit >= 0 && digit <= 9 && n <= (100000 - digit) / 10 else {
+        println(object([("decision", Json("invalid-node-budget"))]).stringify())
+        exit_code(2)
+        return
+      }
+      n = n * 10 + digit
+    }
+    guard n > 0 else {
+      println(object([("decision", Json("invalid-node-budget"))]).stringify())
+      exit_code(2)
+      return
+    }
+    limits = { ..limits, max_nodes: n, }
   }
   // This textual example explicitly encodes argv as UTF-8. The library itself
   // accepts Bytes; no URI decoding or Cookie unquoting is performed here.
   let uri = @abnf.compile(@protocols.uri_grammar()).unwrap()
   let cookie = @abnf.compile(@protocols.cookie_grammar()).unwrap()
-  diagnose(uri, "URI-reference", @utf8.encode(args[2][:]))
-  diagnose(cookie, "cookie-string", @utf8.encode(args[3][:]))
+  if json_mode {
+    let (code, report) = record_report(
+      uri,
+      cookie,
+      @utf8.encode(args[3][:]),
+      @utf8.encode(args[4][:]),
+      limits,
+    )
+    println(report.stringify())
+    exit_code(code)
+  } else {
+    diagnose(uri, "URI-reference", @utf8.encode(args[2][:]))
+    diagnose(cookie, "cookie-string", @utf8.encode(args[3][:]))
+  }
 }

@@ -19,6 +19,9 @@
 | RFC3986, Berners-Lee / Fielding / Masinter, January 2005 | https://www.rfc-editor.org/rfc/rfc3986.html#appendix-A | URI grammar in fixtures/protocols and examples/protocols; path-empty zero-count prose replaced by empty literal; §1.1.2 URI examples | Original copyright/BCP78 notice retained in licenses/rfc3986-notice; grammar/examples not relicensed as MIT |
 | RFC6265, A. Barth, April 2011 | https://www.rfc-editor.org/rfc/rfc6265.html#section-4.2.1 | Cookie grammar with explicit RFC9110 token/tchar; independent consumer imports this same attributed grammar | licenses/rfc6265-BSD and licenses/rfc9110-BSD; surrounding adapter/tests are self-authored |
 
+2026-10-23离线记录案例另使用RFC3986 §1.1.2的单个HTTP URI、RFC6265 §3.1的单个Cookie字段值；
+保留上述对应归属与许可。两项组合为一条采集记录及失败/重复/预算输入均为自制，不是生产流量或外部认证语料。
+
 标准语义的功能重实现与第三方原文抽取有区别。这里不附 RFC 原文、标准示例长段落或
 第三方测试集；新增RFC9110文法Code Component按上表单独归属。不是其他ABNF库源码移植。发布二进制时继续携带标准库及依赖
 许可证/NOTICE，并核对最终构建组件；当前交付为源码及自制材料。
