@@ -34,7 +34,7 @@ moon add sundaysebasidian-byte/moonabnf@0.2.0
 import { "sundaysebasidian-byte/moonabnf" @abnf }
 ```
 
-> 0.2.0 为待发布候选；上面的安装命令需等 registry 确认发布后使用。已发布的 0.1.0 包含 `parse` / `compile` / `recognize`；候选新增输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`），目前仍可使用源码依赖。
+> [0.2.0 已发布到 Mooncakes](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf)：包含 `parse` / `compile` / `recognize` 以及输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）。全新 registry 消费者已验证 Wasm、Wasm GC、JS 和 native；JS JSON 协议适配为需复制的 [集成示例](integration/protocol_consumer/main.mbt.in)，使用公开核心 API 和 `examples/protocols` 文法子包，并非根包 JSON 导出。
 
 ## 用法
 
