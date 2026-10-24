@@ -8,3 +8,16 @@ evidence/
 # Python verification helpers must not ship interpreter caches.
 __pycache__/
 *.pyc
+
+# Exclude local state, secrets and unrelated delivery archives.
+.git/
+.github/
+.DS_Store
+.moon/
+.env
+.env.*
+credentials.json
+*.key
+*.p12
+*.zip
+*.patch

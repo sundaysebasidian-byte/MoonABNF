@@ -26,7 +26,7 @@ moon run examples/protocols/cmd --target js   # URI 与 Cookie：输入树和字
 在自己的项目里使用：
 
 ```sh
-moon add sundaysebasidian-byte/moonabnf
+moon add sundaysebasidian-byte/moonabnf@0.2.0
 ```
 
 ```moonbit
@@ -34,7 +34,7 @@ moon add sundaysebasidian-byte/moonabnf
 import { "sundaysebasidian-byte/moonabnf" @abnf }
 ```
 
-> 已发布的 0.1.0 包含 `parse` / `compile` / `recognize`；输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）在当前源码中，尚未发布新版本，需要时请用源码依赖。
+> 0.2.0 为待发布候选；上面的安装命令需等 registry 确认发布后使用。已发布的 0.1.0 包含 `parse` / `compile` / `recognize`；候选新增输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`），目前仍可使用源码依赖。
 
 ## 用法
 
