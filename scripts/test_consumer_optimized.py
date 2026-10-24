@@ -18,13 +18,14 @@ EXPECTED = '\n'.join([
     'api/budget-and-independent-reuse: passed',
     'api/undefined-rule: undefined-rule', 'api/ast-incremental: passed']) + '\n'
 FAKE = r'''
-import json, os, pathlib, sys, zipfile
+import json, os, pathlib, re, sys, zipfile
 root = pathlib.Path(__file__).resolve().parent
 mode = os.environ['TEST_MODE']
 fault = os.environ['TEST_FAULT']
 cmd = sys.argv[1]
 if cmd == 'package':
-    out = root / '_build/publish/sundaysebasidian-byte-moonabnf-0.1.0.zip'
+    version = re.search(r'^version\s*=\s*"([^"]+)"', (root / 'moon.mod').read_text(), re.M).group(1)
+    out = root / ('_build/publish/sundaysebasidian-byte-moonabnf-' + version + '.zip')
     out.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(out, 'w') as z:
         for p in root.iterdir():
