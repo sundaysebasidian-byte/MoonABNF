@@ -11,17 +11,27 @@ import re
 import subprocess
 import tempfile
 from pathlib import Path
+from consumer_contract import registry_version, require
 
 ROOT = Path(__file__).resolve().parents[1]
 manifest = (ROOT / 'moon.mod').read_text()
 MODULE = re.search(r'^name\s*=\s*"([^"]+)"', manifest, re.M).group(1)
-VERSION = re.search(r'^version\s*=\s*"([^"]+)"', manifest, re.M).group(1)
 parser = argparse.ArgumentParser()
 parser.add_argument('--output', required=True, type=Path)
+parser.add_argument('--release-version', required=True,
+                    help='Explicit approved published version with the input-tree API; never inferred from local metadata')
+parser.add_argument('--moon', type=Path, default=ROOT / 'scripts/moon-local.sh',
+                    help='Explicit trusted moon executable for compatibility runs; default retains pinned SDK gate')
 args = parser.parse_args()
+try:
+    VERSION = registry_version(args.release_version)
+except ValueError as error:
+    parser.error(str(error))
 out = args.output.resolve()
+if out.exists() and (not out.is_dir() or any(out.iterdir())):
+    parser.error('Use an empty evidence directory; existing evidence is never overwritten.')
 out.mkdir(parents=True, exist_ok=True)
-moon = str(ROOT / 'scripts/moon-local.sh')
+moon = str(args.moon.resolve())
 records = []
 
 def run(name, command, cwd):
@@ -46,10 +56,10 @@ with tempfile.TemporaryDirectory(prefix='registry-consumer-', dir=ROOT / '_build
     run('registry-build-install', [moon, 'build', '--target', 'wasm', '-j', '1', '-d'], consumer)
     tree = json.loads(run('registry-tree', [moon, 'tree', '--json'], consumer).stdout)
     module = next(m for m in tree['modules'] if m['name'] == MODULE)
-    assert module['version'] == VERSION, module
-    assert module['source']['kind'] == 'registry', module
-    assert not module['workspace_member'], module
-    run('consumer-format', [moon, 'fmt'], consumer)
+    require(module['version'] == VERSION, 'Registry version mismatch: ' + repr(module))
+    require(module['source']['kind'] == 'registry', 'Expected registry source: ' + repr(module))
+    require(not module['workspace_member'], 'Registry dependency is a workspace member: ' + repr(module))
+    run('consumer-format', [moon, 'fmt', str(consumer)], consumer)
     expected = '\n'.join([
         'protocol/accept: matched offset=13', 'protocol/reject: no-match offset=6',
         'config/accept: matched offset=7', 'config/reject: no-match offset=6',
@@ -60,9 +70,11 @@ with tempfile.TemporaryDirectory(prefix='registry-consumer-', dir=ROOT / '_build
     for backend in ['wasm', 'wasm-gc', 'js', 'native']:
         r = run('registry-' + backend, [moon, 'run', '.', '--target', backend,
             '--frozen', '-j', '1', '-d'], consumer)
-        assert r.stdout == expected, (backend, r.stdout)
+        require(r.stdout == expected, 'Unexpected consumer output for ' + backend + ': ' + repr(r.stdout))
 
 summary = {'status': 'passed', 'module': MODULE, 'version': VERSION,
+           'version_selection': 'explicit --release-version; not local candidate metadata',
+           'api_contract': 'input-tree API consumer',
            'resolution': module, 'commands': records, 'local_workspace_override': False,
            'template_sha256': hashlib.sha256(template.read_bytes()).hexdigest(),
            'scope': 'fresh downstream registry install, three complete scenarios and public API assertions on four backends'}

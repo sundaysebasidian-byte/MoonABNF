@@ -43,7 +43,7 @@ fn main {
     (mode == "match" && args.length() != 6 && args.length() != 7) ||
     (mode == "batch" && (args.length() < 6 || args.length() > 261)) {
     exit_code(2)
-    output([("status", "usage-error".to_json())])
+    output([("status", Json("usage-error"))])
     return
   }
   let source = match read_file(args[3], 65536) {
@@ -56,12 +56,12 @@ fn main {
   let program = match @abnf.compile(source) {
     Err(d) => {
       output([
-        ("status", "grammar-error".to_json()),
-        ("code", d.code.to_json()),
-        ("message", d.message.to_json()),
-        ("offset", d.offset.to_json()),
-        ("line", d.line.to_json()),
-        ("column", d.column.to_json()),
+        ("status", Json("grammar-error")),
+        ("code", Json(d.code)),
+        ("message", Json(d.message)),
+        ("offset", Json(d.offset)),
+        ("line", Json(d.line)),
+        ("column", Json(d.column)),
       ])
       exit_code(2)
       return
@@ -69,10 +69,7 @@ fn main {
     Ok(p) => p
   }
   if mode == "check" {
-    output([
-      ("status", "valid".to_json()),
-      ("rules", program.rule_names().to_json()),
-    ])
+    output([("status", Json("valid")), ("rules", Json(program.rule_names()))])
     return
   }
   let mut limits = @abnf.default_match_limits()
@@ -81,14 +78,14 @@ fn main {
     for c in args[6].to_array() {
       let d = c.to_int() - 48
       if d < 0 || d > 9 || n > (10000000 - d) / 10 {
-        output([("status", "invalid-work-budget".to_json())])
+        output([("status", Json("invalid-work-budget"))])
         exit_code(2)
         return
       }
       n = n * 10 + d
     }
     if n == 0 {
-      output([("status", "invalid-work-budget".to_json())])
+      output([("status", Json("invalid-work-budget"))])
       exit_code(2)
       return
     }
@@ -133,11 +130,11 @@ fn main {
       }
     }
     output([
-      ("file", args[i].to_json()),
-      ("status", label.to_json()),
-      ("offset", report.offset.to_json()),
-      ("work", report.work.to_json()),
-      ("states", report.states.to_json()),
+      ("file", Json(args[i])),
+      ("status", Json(label)),
+      ("offset", Json(report.offset)),
+      ("work", Json(report.work)),
+      ("states", Json(report.states)),
     ])
   }
   exit_code(code)

@@ -12,4 +12,4 @@ keywords = [ "abnf", "rfc5234", "rfc7405", "parser" ]
 
 preferred_target = "wasm"
 
-description = "Byte-oriented ABNF AST, validated compilation and budgeted recognition"
+description = "Byte-oriented ABNF grammar AST, validation, budgeted recognition and input derivation trees"

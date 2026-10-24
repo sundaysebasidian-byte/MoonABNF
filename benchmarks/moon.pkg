@@ -1,0 +1,5 @@
+import {
+  "sundaysebasidian-byte/moonabnf" @abnf,
+  "sundaysebasidian-byte/moonabnf/examples/protocols",
+  "moonbitlang/core/bench",
+} for "test"

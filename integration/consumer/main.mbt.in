@@ -19,6 +19,19 @@ fn expect(name : String, r : @abnf.MatchReport, matched : Bool, offset : Int) ->
 fn main raise {
   // Protocol adapter: compile once before accepting fields for further processing.
   let protocol = checked(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n")
+  // The unpublished candidate must expose the new tree API to external callers.
+  let parsed = protocol.parse_input("field", b"TRACE: aF12\r\n")
+  assert_eq(parsed.status, @abnf.Matched)
+  let tree = parsed.tree.unwrap()
+  assert_true(tree.nodes[tree.root].kind is @abnf.RuleNode("field"))
+  assert_eq(tree.nodes[tree.root].end, 13)
+  let captures = tree.rule_nodes_in("HEXDIG", tree.root).unwrap()
+  assert_eq(captures.map(id => tree.extract(b"TRACE: aF12\r\n", id)),
+    [Some(b"a"), Some(b"F"), Some(b"1"), Some(b"2")])
+  assert_eq(tree.rule_nodes_in("HEXDIG", -1), None)
+  let limited = protocol.parse_input("field", b"TRACE: aF12\r\n", limits={ ..@abnf.default_input_tree_limits(), max_nodes: 1 })
+  assert_true(limited.status is @abnf.BudgetExceeded("tree-nodes"))
+  assert_true(limited.tree is None)
   expect("protocol/accept", protocol.recognize("field", b"TRACE: aF12\r\n"), true, 13)
   expect("protocol/reject", protocol.recognize("field", b"Trace:aF12\r\n"), false, 6)
   // Config editor: strict value case and actionable byte offset.

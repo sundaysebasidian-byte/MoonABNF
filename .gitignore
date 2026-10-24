@@ -4,3 +4,6 @@ target/
 target
 .mooncakes/
 .moonagent/
+# Local Python verification caches.
+__pycache__/
+*.pyc

@@ -8,6 +8,8 @@ import {
 // Values
 pub fn compile(Bytes, limits? : ParseLimits, max_work? : Int) -> Result[Program, Diagnostic]
 
+pub fn default_input_tree_limits() -> InputTreeLimits
+
 pub fn default_match_limits() -> MatchLimits
 
 pub fn default_parse_limits() -> ParseLimits
@@ -47,6 +49,63 @@ pub(all) struct Grammar {
 pub fn Grammar::equal(Self, Self) -> Bool
 pub fn Grammar::not_equal(Self, Self) -> Bool
 pub fn Grammar::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputNode {
+  kind : InputNodeKind
+  start : Int
+  end : Int
+  source_offset : Int
+  children : Array[Int]
+} derive(Eq, @debug.Debug)
+pub fn InputNode::equal(Self, Self) -> Bool
+pub fn InputNode::not_equal(Self, Self) -> Bool
+pub fn InputNode::to_repr(Self) -> @debug.Repr
+
+pub(all) enum InputNodeKind {
+  RuleNode(String)
+  LiteralNode
+  RangeNode
+  SequenceNode
+  ChoiceNode(Int)
+  RepeatNode(Int)
+} derive(Eq, @debug.Debug)
+pub fn InputNodeKind::equal(Self, Self) -> Bool
+pub fn InputNodeKind::not_equal(Self, Self) -> Bool
+pub fn InputNodeKind::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputTree {
+  nodes : Array[InputNode]
+  root : Int
+} derive(Eq, @debug.Debug)
+pub fn InputTree::equal(Self, Self) -> Bool
+pub fn InputTree::extract(Self, Bytes, Int) -> Bytes?
+pub fn InputTree::not_equal(Self, Self) -> Bool
+pub fn InputTree::rule_nodes(Self, String) -> Array[Int]
+pub fn InputTree::rule_nodes_in(Self, String, Int) -> Array[Int]?
+pub fn InputTree::span(Self, Int) -> (Int, Int)?
+pub fn InputTree::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputTreeLimits {
+  matching : MatchLimits
+  max_nodes : Int
+  max_edges : Int
+} derive(Eq, @debug.Debug)
+pub fn InputTreeLimits::equal(Self, Self) -> Bool
+pub fn InputTreeLimits::not_equal(Self, Self) -> Bool
+pub fn InputTreeLimits::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputTreeReport {
+  status : MatchStatus
+  tree : InputTree?
+  offset : Int
+  work : Int
+  states : Int
+  nodes : Int
+  edges : Int
+} derive(Eq, @debug.Debug)
+pub fn InputTreeReport::equal(Self, Self) -> Bool
+pub fn InputTreeReport::not_equal(Self, Self) -> Bool
+pub fn InputTreeReport::to_repr(Self) -> @debug.Repr
 
 pub(all) struct MatchLimits {
   max_input_bytes : Int
@@ -92,6 +151,7 @@ pub fn ParseLimits::to_repr(Self) -> @debug.Repr
 pub struct Program {
   // private fields
 }
+pub fn Program::parse_input(Self, String, Bytes, limits? : InputTreeLimits) -> InputTreeReport
 pub fn Program::recognize(Self, String, Bytes, limits? : MatchLimits) -> MatchReport
 pub fn Program::rule_names(Self) -> Array[String]
 

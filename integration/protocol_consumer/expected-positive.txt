@@ -1,0 +1,18 @@
+URI-reference: matched bytes=30
+  scheme=[0,5) raw=b"https"
+  host=[8,20) raw=b"example.test"
+  path-abempty=[20,26) raw=b"/a%20b"
+  query=[27,30) raw=b"q=1"
+cookie-string: matched bytes=49
+ pair:
+  cookie-name=[0,7) raw=b"session"
+  cookie-value=[8,11) raw=b"abc"
+ pair:
+  cookie-name=[13,18) raw=b"theme"
+  cookie-value=[19,25) raw=b"\x22dark\x22"
+ pair:
+  cookie-name=[27,32) raw=b"empty"
+  cookie-value=[33,33) raw=b""
+ pair:
+  cookie-name=[35,42) raw=b"session"
+  cookie-value=[43,49) raw=b"second"

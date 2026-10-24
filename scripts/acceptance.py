@@ -17,6 +17,8 @@ out = args.output.resolve(); out.mkdir(parents=True, exist_ok=True)
 commands = [
  ('toolchain', ['scripts/moon-local.sh', 'version', '--all']),
  ('format', ['scripts/moon-local.sh', 'fmt', '--check']),
+ ('consumer-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_consumer*.py']),
+ ('protocol-fixtures', ['python3', 'scripts/verify_protocol_fixtures.py']),
  ('check-wasm', ['scripts/moon-local.sh', 'check', '--target', 'wasm', '-j', '1', '-d']),
  ('build-wasm', ['scripts/moon-local.sh', 'build', '--target', 'wasm', '-j', '1', '-d']),
  ('test-wasm', ['scripts/moon-local.sh', 'test', '--target', 'wasm', '-j', '1', '-d']),
@@ -28,6 +30,7 @@ commands = [
  ('test-native', ['scripts/moon-local.sh', 'test', '--target', 'native', '-j', '1', '-d']),
  ('test-wasm-gc', ['scripts/moon-local.sh', 'test', '--target', 'wasm-gc', '-j', '1', '-d']),
  ('examples', ['scripts/moon-local.sh', 'run', 'examples', '-j', '1']),
+ ('example-request-line', ['python3', 'scripts/example_request_line.py', '--output', str(out / 'example-request-line')]),
  ('cli', ['python3', 'scripts/cli_test.py']),
  ('differential', ['python3', 'scripts/differential.py']),
  ('downstream', ['python3', 'scripts/downstream.py', '--output', str(out / 'downstream')]),

@@ -1,0 +1,6 @@
+import {
+  "sundaysebasidian-byte/moonabnf" @abnf,
+  "sundaysebasidian-byte/moonabnf/examples/request_line",
+}
+
+pkgtype(kind: "executable")

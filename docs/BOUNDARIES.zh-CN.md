@@ -1,6 +1,8 @@
-# 支持范围、边界与失败契约（本地待统一核准）
+# 支持范围、边界与失败契约（未发布输入树候选）
 
-这份 AI 辅助工程说明对应已发布 0.1.0 的实际行为。本轮只补文档与行为回归，未修改解析器、编译器、识别器或CLI实现；尚未提交/push/新发包。
+这份AI辅助说明对应当前未发布工作分支。公开0.1.0仅有文法AST与识别；
+本轮新增parse_input输入树，识别器仅复用预算合法性检查，CLI不增加树命令。
+当前验证见 [本轮记录](INPUT_TREE_REVIEW.zh-CN.md)，历史结果不覆盖新增API。
 
 ## 文法与输入
 
@@ -9,7 +11,9 @@
 | 标准范围 | RFC5234语法及RFC7405大小写前缀；数值终端是0..255字节；不是任意字符编码的完整标准认证 | parser_test、256字节core谓词、数值序列和case测试 |
 | 文法文本 | 规则名是ASCII字母开头，后接字母/数字/连字符；行尾与最后一行必须CRLF；折行由SP/HTAB开始；字符串/注释/prose文本只允许规范对应ASCII范围 | strict syntax、folding、invalid numeric/string/terminator回归 |
 | 转义和Unicode | ABNF引号内反斜杠是普通字符，`"a\nb"`表示四个字节，不表示换行。DQUOTE用%x22；UTF-8可用数值字节序列描述，识别器不解码/归一化Unicode | boundaries_test的literal ASCII/raw bytes回归 |
-| AST保留内容 | 语义AST保留规则、增量标志与节点字节位置；不保留注释、空白或独立括号节点；不提供原文round-trip、解析树或捕获组 | parser AST与独立消费者AST断言 |
+| AST保留内容 | 文法AST保留规则、增量标志与文法字节位置；不保留注释、空白或独立括号，不提供round-trip。parse_input另返回含规则/表达式结构与输入字节跨度的派生树 | parser AST、input_tree_test与消费者断言 |
+| 输入树歧义 | 各替代都探索、保留所有结束偏移；同端点保留首派生。重复按次数升序，精确次数内保留首路径；无歧义枚举或唯一性认证 | 不同端点延续、同端点分支、穷举小输入 |
+| 树预算及空重复 | 最小次数实际物化；recognize成功不保证parse_input在树预算内成功。失败无部分树；平坦可达树避免宽重复列表的深栈 | epsilon minima、百万空重复、finish耗尽 |
 | 空文法与空输入 | 空字节文法parse失败；仅注释/空行可parse成零规则AST，compile返回no-rules。被识别输入可为空，是否匹配由文法决定 | 新增comment-only回归、nullable repeats、max_input_bytes=0回归 |
 | 全文法校验 | 未选入口的规则也须合法、可生产、无左递归；0rule不会执行，但未定义引用和prose仍拒绝；core规则可显式覆盖/扩展 | 新增unused/zero-times回归、compiler core与循环测试 |
 | 替代与重复 | 无序选择，传播全部结束位置；没有PEG优先顺序或贪心短路。可空重复的集合稳定后停止，空元素可补足最小次数 | alternatives/nullable/exact counts、独立正则子集差分 |
@@ -28,6 +32,8 @@ README列出的字节、声明数、AST节点、嵌套、分析工作、识别�
 如需墙钟/进程级限制，由调用者在外层设置；本库没有流式增量输入、取消操作或沙箱。
 
 每次recognize独立记账，预算耗尽不污染后续调用；Program不暴露内部可变AST，rule_names返回独立数组。
+parse_input也独立记账。max_nodes/max_edges累计计探索、临时路径、孩子数组及最终压缩。
+返回树由调用方拥有，修改不影响Program；树不复制输入，调用者须保留原input并使用字节切片。
 无共享缓存不等于已验证多线程并发安全；当前batch与验收均串行。
 
 ## 失败结果
@@ -42,7 +48,7 @@ README列出的字节、声明数、AST节点、嵌套、分析工作、识别�
 
 ## CLI与后端
 
-CLI仅JS后端+Node.js普通文件适配；库的Wasm/Wasm GC/JS/native已在macOS和Linux测试。
+CLI仅JS后端+Node.js普通文件适配；历史识别库有macOS/Linux四后端记录。新树API已有Mac完整SDK四后端复验，见MAC_REVIEW.zh-CN.md；云端替代SDK失败日志保留。
 Windows、LLVM、浏览器JS运行、各类Wasm宿主、不同编译器版本/ABI、并发调用未验证，不宣称兼容。
 工具链以TOOLCHAIN.lock精确版本复现。已发布注册表版本0.1.0的下游三场景已在四后端通过。
 
@@ -55,6 +61,6 @@ CLI固定64KiB文法/输入与最多256个batch文件，读至上限+1后拒绝�
 ## 明确未测与不支持
 
 未测：Windows、完整第三方ABNF解析器差分、真实外部下游采用、多线程、真实broker、办公软件。
-不支持：Unicode数值终端、prose识别、左递归自动改写、代码生成、解析树、错误恢复、流式识别、完整协议/配置业务语义。
+不支持：Unicode数值终端、prose识别、左递归自动改写、代码生成、全部歧义树枚举、错误恢复、流式识别、完整协议/配置业务语义。
 正则子集5,440次差分只验证已列算法路径，不能改称完整ABNF标准认证。
 这份说明不是人工最终申报、官方验收或奖励承诺；最终申报须用户本人理解后撰写。
