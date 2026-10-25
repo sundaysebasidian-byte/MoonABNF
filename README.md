@@ -180,3 +180,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 验证后，可在该消费者的 `--json URI COOKIE [node-budget]` 最后加 `--diagnostics`。
 未加标志时黄金及退出0/1/3/2不变。原模板和 registry 消费者保持兼容已发布0.2.1；
 **这些新 API/扩展仍是本地开发源码，不属于已发布的0.2.1。**
+
+新手可先运行 `moon run examples/diagnostics --target js`：URI `%GG`、Cookie 空格、
+截断与尾随空格四例会显示原字节上下文、实际字节/EOF和局部期望，再对人工选择的合法
+修订重新解析并提取字段。它不自动更改输入，也不把预算不足当拒绝；示例使用合成协议字段。
