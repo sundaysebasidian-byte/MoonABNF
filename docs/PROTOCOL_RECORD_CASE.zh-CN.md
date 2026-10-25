@@ -103,7 +103,15 @@ cd consumer
   通用库仍接收Bytes。成功字段为ASCII，JSON raw不去引号；未知UTF-8字节不被偷偷修复成合法协议输入。
 - `accept-syntax`不验证Cookie Domain/Path/Secure/过期/认证/隐私策略。不要从本例推断完整HTTP支持。
 - 适配器只测JS；核心四后端及PR fresh-clone的既有CI保持其原提交身份。
-  这个私有候选未推送、未得到本轮远端CI回执；精确SHA、命令和实际退出码以交付manifest与原始日志为准。
+  发布后的registry消费者已有独立回执；本轮新复现脚本仅本地验证，未取得其新远端CI。
 
-源码元数据仍为历史0.1.0，不代表当前API或适配器已经发布。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
+实际发布包与当前manifest均为0.2.0。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
 AI辅助事实在[AI_USAGE.md](../AI_USAGE.md)。没有替用户撰写诚信声明、提交比赛或承诺获奖。
+
+## 一键核验实际发布包（2026-10-25 本地补强）
+
+```sh
+MOONABNF_SDK=/existing/trusted/sdk python3 scripts/registry_protocol_record_test.py --output /new/empty/registry-case
+```
+
+该命令在全新目录从registry安装精确0.2.0，检查依赖树source.kind=registry、非workspace member；随后以frozen单worker运行既有4项契约和JSON黄金/拒绝/预算/配置检查，拒绝/预算不导出部分字段，Program复用由既有白盒契约确认。脚本和模板的SHA256记录于本地回执。使用已发布公共核心与文法子包，不复制库算法，也不替代source-bound协议测试。需要已有SDK及Mooncakes网络可达；没有联网业务服务或生产数据。
