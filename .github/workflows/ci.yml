@@ -26,9 +26,50 @@ jobs:
           moon version --all
       - name: Check build test examples CLI and differential
         run: python3 scripts/acceptance.py --output "$RUNNER_TEMP/moonabnf-evidence"
+      - name: Source-bound JS protocol record adapter
+        timeout-minutes: 3
+        run: python3 scripts/protocol_record_test.py --output "$RUNNER_TEMP/protocol-record-evidence"
+      - name: Exact registry 0.2.0 JS protocol consumer without workspace substitution
+        timeout-minutes: 3
+        run: python3 scripts/registry_protocol_record_test.py --output "$RUNNER_TEMP/registry-protocol-evidence"
       - name: Preserve evidence even on failure
-        if: always()
+        if: ${{ false }} # No artifact storage billing in this Draft.
         uses: actions/upload-artifact@v4
         with:
           name: moonabnf-evidence
-          path: ${{ runner.temp }}/moonabnf-evidence
+          retention-days: 1
+          path: |
+            ${{ runner.temp }}/moonabnf-evidence/summary.json
+            ${{ runner.temp }}/moonabnf-evidence/SHA256.json
+            ${{ runner.temp }}/moonabnf-evidence/*.stdout.txt
+            ${{ runner.temp }}/moonabnf-evidence/*.stderr.txt
+      - name: Preserve protocol adapter evidence whitelist
+        if: ${{ false }} # No artifact storage billing in this Draft.
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-record-evidence
+          retention-days: 1
+          path: |
+            ${{ runner.temp }}/protocol-record-evidence/summary.json
+            ${{ runner.temp }}/protocol-record-evidence/commands.json
+            ${{ runner.temp }}/protocol-record-evidence/source-binding.json
+            ${{ runner.temp }}/protocol-record-evidence/*.stdout.txt
+            ${{ runner.temp }}/protocol-record-evidence/*.stderr.txt
+      - name: Validation status summary without artifact storage
+        if: always()
+        run: |
+          python3 - <<'PYCODE'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          names = ['moonabnf-evidence/summary.json', 'protocol-record-evidence/summary.json', 'registry-protocol-evidence/summary.json']
+          rows = []
+          for name in names:
+              path = root / name
+              if path.is_file():
+                  d = json.loads(path.read_text())
+                  rows.append({'name': name, 'status': d.get('status', d.get('overall')), 'commands': [{'name': r['name'], 'exit_code': r.get('exit_code'), 'status': r.get('status')} for r in d.get('commands', d.get('stages', []))]})
+          text = json.dumps(rows, indent=2)
+          print(text)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream: stream.write('```json\n' + text + '\n```\n')
+          PYCODE

@@ -1,31 +1,56 @@
-# MoonABNF 评审补充说明草稿
+# MoonABNF 0.2.0 评审补充说明
 
-用途：供作者核对、改写后向项目评审说明补强事实。尚未发送或提交，不替代本人撰写的正式申报书。反馈来源：评审邮件 `1a12f604fdaf15e0`，由用户侧主任务核实。
+供用户审阅的修正草稿，未发送、未提交。事实核对日期：2026 年 10 月 24 日。
 
-## 评审意见原文
+## 当前结论
 
-> 目前申报书中项目拟实现功能是比较完整的 ABNF 文法校验库，但还不是通用的 ABNF 解析器。建议扩展实现，增加输入解析树生成、真实协议场景验证等，让项目具有更强的通用性。
+MoonABNF 0.2.0 已在 Mooncakes 正式发布。输入派生树与字段提取不再仅存在于本地候选；评审可从 registry 安装实际版本核验。核心 API 与 JS 协议记录适配器的范围分别说明。
 
-## 回复草稿
+```sh
+moon add sundaysebasidian-byte/moonabnf@0.2.0
+```
 
-针对“通用 ABNF 解析器、输入解析树、真实协议场景”这三点意见，当前候选已补充以下实现与验证。
+- [包页面](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf)
+- 发布提交：`d3773eca760437a1b0a50b75f4449bf20e89c574`
+- 本稿固定文档提交：`5a410cc9c1aabec49a72a93161118e6a4eebe076`
+- [版本 PR #4](https://github.com/sundaysebasidian-byte/MoonABNF/pull/4)
 
-1. 调用方可传入自己的 ABNF 文法，通过 `compile(Bytes)` 得到可复用的 `Program`，再调用 `parse_input(入口规则名, 输入字节)`。完整匹配时返回输入派生树，包含命名规则、终端、序列、分支索引、实际重复次数及输入字节区间。原有 `parse(Bytes)` 返回文法 AST；新增接口返回某次输入的派生，二者在接口与示例中明确区分。
-2. 通用机制不绑定某个协议。随包提供 `examples/input_tree`：使用调用方定义的记录文法解析 `Age:42`，按规则名提取 `value` 的 `[4,6)` 字节；同时演示 `Age:` 的不匹配，以及树预算耗尽的未判定状态。所有这些场景调用同一套公共库接口。
-3. 真实规范场景使用 RFC 9110 的 ETag 字段值文法。示例解析 `W/"revision-7"`，提取弱标签标志和原始内容字节；测试覆盖全部 256 种内部字节、空标签、高位字节、非法小写前缀及不完整输入。本轮还补充 `W/""` 弱空标签，以及拒绝或预算耗尽后复用同一程序的回归。该示例证明规范字段解析与提取，范围不包含完整 HTTP 报文、缓存比较语义或线上部署。
-4. 本轮在官方云端 SDK（moonc v0.10.15、moon 0.1.20261012）上重新验证四个目标后端、CLI、正则子集差分及隔离下游候选包消费。具体数量与命令以本包的最终证据摘要为准。旧 Mac 锁定 SDK 的记录另存；新 SDK 结果不冒充旧 SDK 的重跑。
+## 针对评审关切的补充
 
-通用性仍有明确边界：输入按字节处理；左递归在编译时拒绝；歧义情况下返回一个确定的派生见证，不枚举全部解析树；所有运行受显式预算约束。预算耗尽返回 `BudgetExceeded`，不能当作“不匹配”。
+仓库既有草稿记载，评审建议增强通用解析能力，增加输入解析树生成和真实协议场景验证。本稿沿用该草稿所记反馈，不新增评审意见，不表示评审已认可下列结果。
 
-新增输入树 API 仍属于未发布候选。公开 0.1.0 不包含它，因此本轮没有把本地候选包消费写成新版本注册表验证，也没有发布、重提表单或发送上述说明。
+### 通用解析能力
 
-## 核对路径
+调用方可提供自己的 ABNF 文法，使用 `compile(Bytes)` 得到可复用 `Program`，再以 `parse_input(入口规则名, 输入字节)` 解析输入。完整匹配返回输入派生树，保留命名规则、终端、分支、重复和字节区间。`parse(Bytes)` 返回文法 AST；`parse_input` 返回某次输入的派生结构。
 
-| 评审关切 | 可检查的实现 | 可复现的证据 |
-|---|---|---|
-| 通用解析器 | `pkg.generated.mbti`、`compiler.mbt`、`input_tree.mbt` | `examples/input_tree`、独立消费者模块 |
-| 输入解析树生成 | `InputTreeReport`、`InputNode`、`Program::parse_input` | `input_tree_test.mbt`、独立 AST 见证重放 |
-| 真实协议场景 | `examples/http_etag` | ETag 命令、256 字节遍历及弱空标签回归 |
-| 可信测试口径 | 新旧 SDK 分开归档；来源/版本/输出显式校验 | 四后端最终原始日志、候选文件哈希、优化模式拒绝回归 |
+核心按字节处理输入，拒绝左递归；歧义时返回一个确定的派生见证，不枚举全部树。运行受预算约束，`BudgetExceeded` 表示预算内未判定，不是 `NoMatch`。
 
-评审允许在 10 月 31 日之前修改；现有反馈未注明精确截止时刻。本文不据此推定某个小时，也不表示项目已经通过审核。
+### 输入树与字段提取
+
+`InputTreeReport`、`InputNode`、`rule_nodes_in`、`span` 和 `extract` 支持定位字段并取回原输入字节。`examples/input_tree` 用调用方定义的记录文法演示 `Age:42` 中 `value` 的半开区间 `[4,6)`，同时展示不匹配和预算耗尽。`extract` 必须配合对应原输入使用。
+
+发布后，全新 registry 消费者四后端核心及输入树 API 检查通过，没有 workspace/path 覆盖。这证明所测配置下的实际可消费性，不是所有系统与工具链组合的兼容承诺。
+
+### 真实规范场景
+
+ETag、URI、Cookie 案例通过同一公共接口完成规范字段解析与提取。ETag 覆盖弱标签、空值、字节边界和非法输入；协议记录示例将 URI 与 Cookie 组织为 JSON，区分匹配、拒绝、预算耗尽和配置错误。
+
+发布后独立 JS 消费者的黄金输出、拒绝、预算、配置错误检查通过。JSON 适配器是可复制的集成示例，不是根包导出 API；目前只具有 JS 验证证据。核心四后端成功不能替代适配器跨后端测试。这些案例使用真实规范和测试输入，不声称接入真实下游生产系统、完整 HTTP 实现或线上部署。
+
+## 验证证据与复现
+
+0.2.0 由 CLI 成功回执、registry 版本/metadata 和下载包 checksum 一致性确认，不仅是 GitHub 合并。版本 PR #4、文档 PR #5 已合并；上述文档 SHA 的核心及锁定/最新 SDK fresh-clone 通过：
+
+- [核心验收](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40113025799)
+- [Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40113025784)
+- [固定 SHA 协议记录说明](https://github.com/sundaysebasidian-byte/MoonABNF/blob/5a410cc9c1aabec49a72a93161118e6a4eebe076/docs/PROTOCOL_RECORD_CASE.zh-CN.md)
+
+公共接口、示例与来源按该固定 SHA 检查，避免混入未来变更。上述是发布轮证据；本轮私有补丁、本地命令和未执行 CI 另行记录，不借既有主分支 CI 背书。
+
+## 边界与后续方向
+
+正则差分仅覆盖受限子集，不是完整 ABNF 第三方 oracle。树重放是见证检查，不等于完整规范认证。已有部分工作负载基准；本稿不提供未执行的新成对成本数字，不声称优于其他实现。
+
+下一步是独立 JS 适配器 CI，以及同输入、预算、SDK 下的识别/构树对照。这些计划未计入上述发布轮已完成结果。本轮准备和实测结果另存命令证据，不把五组自适应 bench 当独立五轮或 p95，不把节点数当 RSS。没有把 AI 辅助自测写成人类独立试用、采用或获奖依据。
+
+本文供用户审阅改写，未向评审发送、未代填表单。发布与测试通过不等于初审或获奖。[修正前草稿原文](https://github.com/sundaysebasidian-byte/MoonABNF/blob/5a410cc9c1aabec49a72a93161118e6a4eebe076/docs/REVIEWER_RESPONSE_DRAFT.zh-CN.md) 保留当时 SDK、候选和未发布口径，旧实测不改记为本轮测试。
