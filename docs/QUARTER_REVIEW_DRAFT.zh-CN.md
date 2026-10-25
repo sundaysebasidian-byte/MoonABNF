@@ -21,3 +21,7 @@
 ### 本轮本地实际回执
 
 registry_protocol_record_test.py已通过：精确0.2.0、source.kind=registry、workspace_member=false，既有4/4契约及JSON黄金/拒绝/预算/配置检查通过；拒绝/预算字段隔离与Program复用有断言。先显式安装，再使用frozen检查；首轮安装顺序失败的日志保留，不能抹去。未改旧registry消费者脚本。
+
+## 后续独立AI复审与五进程实测
+
+独立AI发现的隔离/快照/统计问题已修复并复测；五个独立PID的代表性协议基准已实跑，详见FIVE_PROCESS_BENCHMARK.zh-CN.md。原单次adaptive结果保留原身份。暖构建、未清OS缓存、无p95；没有跨实现性能优越性结论。AI审查不是外部人类认可。

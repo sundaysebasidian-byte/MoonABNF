@@ -56,7 +56,7 @@ def execute(command, cwd, output, name, env=None, seconds=120, rss_mib=512):
                 except ProcessLookupError:
                     pass
             code = child.wait()
-    return {'name': name, 'command': command, 'exit_code': code,
+    return {'name': name, 'command': command, 'pid': child.pid, 'exit_code': code,
             'status': 'passed' if code == 0 and not reason else 'partial/failed',
             'stop_reason': reason, 'elapsed_seconds': round(time.monotonic()-started, 3),
             'sampled_process_tree_rss_peak_bytes': peak,
