@@ -26,8 +26,10 @@ moon run examples/protocols/cmd --target js   # URI 与 Cookie：输入树和字
 在自己的项目里使用：
 
 ```sh
-moon add sundaysebasidian-byte/moonabnf@0.2.0
+moon add sundaysebasidian-byte/moonabnf@0.2.1
 ```
+
+0.2.1 保持 0.2.0 公共解析 API，补充可复现 registry 协议消费者、独立 AI 复审与五进程测量说明。JSON 适配器仍是集成示例。 版本内容及验证边界见 [0.2.1 说明](docs/release-0.2.1.zh-CN.md)；实际发布状态以 Mooncakes 为准。
 
 ```moonbit
 // moon.pkg

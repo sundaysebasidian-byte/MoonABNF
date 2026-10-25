@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Replay the existing JS protocol contract against exact registry 0.2.0, never a workspace."""
+"""Replay the existing JS protocol contract against an exact registry release, never a workspace."""
 import argparse, hashlib, json, os, re, time
 from pathlib import Path
 from bounded_run import execute
+from consumer_contract import registry_version
 ROOT=Path(__file__).resolve().parents[1]
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',required=True,type=Path);a=p.parse_args();out=a.output.resolve()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',required=True,type=Path);p.add_argument('--release-version',default='0.2.0',type=registry_version);a=p.parse_args();out=a.output.resolve();version=a.release_version
  if out.exists() or out==ROOT or ROOT in out.parents:p.error('Use a new output directory outside the source tree')
  for parent in [out,*out.parents]:
   if any((parent/name).exists() for name in ['moon.work','moon.work.json']):p.error('Output ancestry must not contain a workspace')
@@ -14,9 +15,9 @@ def main():
  out.mkdir(parents=True);consumer=out/'consumer';consumer.mkdir();templates=ROOT/'integration/protocol_consumer';hashes={};generated={};golden=(templates/'expected-record.json').read_bytes();hashes['expected-record.json']=hashlib.sha256(golden).hexdigest()
  for name in ['moon.mod','moon.pkg','main.mbt','contract_wbtest.mbt']:
   data=(templates/(name+'.in')).read_text();hashes[name]=hashlib.sha256(data.encode()).hexdigest()
-  if name=='moon.mod':data=re.sub(r'moonabnf@\d+\.\d+\.\d+','moonabnf@0.2.0',data)
+  if name=='moon.mod':data=re.sub(r'moonabnf@\d+\.\d+\.\d+','moonabnf@'+version,data)
   (consumer/name).write_text(data);generated[name]=hashlib.sha256(data.encode()).hexdigest()
- env=dict(os.environ,MOON_HOME=sdk,RUST_LOG='error');env['PATH']=sdk+'/bin:'+env['PATH'];moon=sdk+'/bin/moon';started=time.monotonic();rows=[];report={'status':'failed','version':'0.2.0','scope':'registry-only JS application adapter; not root JSON API','commands':rows,'template_sha256':hashes,'generated_consumer_sha256':generated}
+ env=dict(os.environ,MOON_HOME=sdk,RUST_LOG='error');env['PATH']=sdk+'/bin:'+env['PATH'];moon=sdk+'/bin/moon';started=time.monotonic();rows=[];report={'status':'failed','version':version,'scope':'registry-only JS application adapter; not root JSON API','commands':rows,'template_sha256':hashes,'generated_consumer_sha256':generated}
  def run(name,args,expected=0):
   remaining=120-(time.monotonic()-started)
   if remaining<=0:raise RuntimeError('120 second total deadline')
@@ -26,7 +27,7 @@ def main():
  try:
   run('registry-update',['update'])
   tree=json.loads(run('tree',['tree','--json']));module=next(m for m in tree['modules'] if m['name']=='sundaysebasidian-byte/moonabnf')
-  if module['version']!='0.2.0' or module['source']['kind']!='registry' or module['workspace_member']:raise RuntimeError('Registry dependency substituted')
+  if module['version']!=version or module['source']['kind']!='registry' or module['workspace_member']:raise RuntimeError('Registry dependency substituted')
   report['resolution']=module
   run('registry-install',['build','--target','js','-j','1']);run('check',['check','--target','js','--frozen','-j','1'])
   tests=run('contracts',['test','contract_wbtest.mbt','--target','js','--frozen','-j','1'])
