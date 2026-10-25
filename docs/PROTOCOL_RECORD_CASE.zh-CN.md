@@ -105,13 +105,15 @@ cd consumer
 - 适配器只测JS；核心四后端及PR fresh-clone的既有CI保持其原提交身份。
   发布后的registry消费者已有独立回执；本轮新复现脚本仅本地验证，未取得其新远端CI。
 
-实际发布包与当前manifest均为0.2.0。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
+当前正式发布版本与manifest均为0.2.1，发布与消费回执见[0.2.1说明](release-0.2.1.zh-CN.md)。上面的空目录源码方案消费解压快照，不是registry安装；两者要分开记录。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
 AI辅助事实在[AI_USAGE.md](../AI_USAGE.md)。没有替用户撰写诚信声明、提交比赛或承诺获奖。
 
 ## 一键核验实际发布包（2026-10-25 本地补强）
 
 ```sh
-MOONABNF_SDK=/existing/trusted/sdk python3 scripts/registry_protocol_record_test.py --output /new/empty/registry-case
+MOONABNF_SDK=/existing/trusted/sdk python3 scripts/registry_protocol_record_test.py --release-version 0.2.1 --output /new/empty/registry-case
 ```
 
-该命令在全新目录从registry安装精确0.2.0，检查依赖树source.kind=registry、非workspace member；随后以frozen单worker运行既有4项契约和JSON黄金/拒绝/预算/配置检查，拒绝/预算不导出部分字段，Program复用由既有白盒契约确认。脚本和模板的SHA256记录于本地回执。使用已发布公共核心与文法子包，不复制库算法，也不替代source-bound协议测试。需要已有SDK及Mooncakes网络可达；没有联网业务服务或生产数据。
+该命令在全新目录从registry安装精确0.2.1，检查依赖树source.kind=registry、非workspace member；随后以frozen单worker运行既有4项契约和JSON黄金/拒绝/预算/配置检查，拒绝/预算不导出部分字段，Program复用由既有白盒契约确认。脚本和模板的SHA256记录于本地回执。使用已发布公共核心与文法子包，不复制库算法，也不替代source-bound协议测试。需要已有SDK及Mooncakes网络可达；没有联网业务服务或生产数据。
+
+脚本保留默认0.2.0供历史回归，复现当前发布包须显式传上面的`--release-version 0.2.1`。未发布的`diagnose_input`与JSON诊断扩展只在开发源码中使用，见[README源码入口](../README.md#未发布源码有界输入失败解释)；本节registry命令使用原模板，不会调用新API。
