@@ -29,6 +29,9 @@ jobs:
       - name: Source-bound JS protocol record adapter
         timeout-minutes: 3
         run: python3 scripts/protocol_record_test.py --output "$RUNNER_TEMP/protocol-record-evidence"
+      - name: Exact registry 0.2.0 JS protocol consumer without workspace substitution
+        timeout-minutes: 3
+        run: python3 scripts/registry_protocol_record_test.py --output "$RUNNER_TEMP/registry-protocol-evidence"
       - name: Preserve evidence even on failure
         if: ${{ false }} # No artifact storage billing in this Draft.
         uses: actions/upload-artifact@v4
@@ -59,7 +62,7 @@ jobs:
           import json, os
           from pathlib import Path
           root = Path(os.environ['RUNNER_TEMP'])
-          names = ['moonabnf-evidence/summary.json', 'protocol-record-evidence/summary.json'] if 'moonabnf' in os.environ['GITHUB_REPOSITORY'].lower() else ['moonstomp-evidence/verification.json']
+          names = ['moonabnf-evidence/summary.json', 'protocol-record-evidence/summary.json', 'registry-protocol-evidence/summary.json']
           rows = []
           for name in names:
               path = root / name

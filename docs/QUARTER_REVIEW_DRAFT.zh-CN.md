@@ -12,7 +12,7 @@
 
 展示价值在于可复用解析能力、可解释的原字节见证与受限失败语义，不在测试数量。输入按字节、拒绝左递归、歧义返回一个确定见证，受work/states/depth/nodes/edges约束。BudgetExceeded不能当NoMatch。
 
-已有JS release成对成本只来自一次同进程adaptive统计；compile单列、相同输入和matching预算、算法计数与采样RSS分开。没有五轮独立实验或p95；没有与成熟第三方parser公平性能对照，因此不宣称更快、更省内存或完整规范认证。
+原有JS release单进程adaptive结果保留；后续已完成五次独立进程测量。compile单列、相同输入和matching预算、算法计数与采样RSS分开。没有p95；没有与成熟第三方parser公平性能对照，因此不宣称更快、更省内存或完整规范认证。
 
 ## 当前证据身份
 
