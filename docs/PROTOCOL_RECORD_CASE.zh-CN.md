@@ -105,7 +105,7 @@ cd consumer
 - 适配器只测JS；核心四后端及PR fresh-clone的既有CI保持其原提交身份。
   发布后的registry消费者已有独立回执；本轮新复现脚本仅本地验证，未取得其新远端CI。
 
-当前正式发布版本与manifest均为0.2.1，发布与消费回执见[0.2.1说明](release-0.2.1.zh-CN.md)。上面的空目录源码方案消费解压快照，不是registry安装；两者要分开记录。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
+当前正式发布版本为0.2.1，开发候选manifest为未发布的0.3.0，发布与消费回执见[0.2.1说明](release-0.2.1.zh-CN.md)。上面的空目录源码方案消费解压快照，不是registry安装；两者要分开记录。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
 AI辅助事实在[AI_USAGE.md](../AI_USAGE.md)。没有替用户撰写诚信声明、提交比赛或承诺获奖。
 
 ## 一键核验实际发布包（2026-10-25 本地补强）

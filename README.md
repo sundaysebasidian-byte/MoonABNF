@@ -11,6 +11,8 @@
 
 适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
+本地开发候选为0.3.0（有界输入失败诊断），尚未公开或发布；当前可安装版本仍为0.2.1。[候选变更与发布条件](docs/release-0.3.0.zh-CN.md)。
+
 ## 快速开始
 
 需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，见 [TOOLCHAIN.lock](TOOLCHAIN.lock)）和 Node.js。
