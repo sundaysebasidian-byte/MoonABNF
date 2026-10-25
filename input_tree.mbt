@@ -427,6 +427,7 @@ pub fn Program::parse_input(
     Some(e) => e
   }
   let runner : Runner = {
+    failures: None,
     program: self,
     input,
     limits: matching,

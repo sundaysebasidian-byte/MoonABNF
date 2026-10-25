@@ -10,4 +10,10 @@ moon add sundaysebasidian-byte/moonabnf@0.2.1
 
 五进程数字来自固定 Mac 的本地测量，缓存为暖，不能改称远端 CI 性能、p95 或跨实现优势。AI 复审不是外部人类认可。历史 0.2.0 发布证据和初次失败保留原日期，不冒充本次发布回执。
 
-版本 PR 为 [#6](https://github.com/sundaysebasidian-byte/MoonABNF/pull/6)。准确 head、合并记录及远端检查以该 PR 和 Actions 实际回执为准；正式包版本与 checksum 以 [Mooncakes](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf) 为准。本说明不代替 registry 上传及全新消费者回执，不包含比赛提交或获奖承诺。
+## 已完成的发布核验（2026-10-25）
+
+[版本 PR #6](https://github.com/sundaysebasidian-byte/MoonABNF/pull/6) 已合并，发布提交为 `5287ea18e897447add87b3032370c8434617cfad`。该提交的[核心验收](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40166229117)及[Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40166229123)成功。官方 CLI 发布退出0并返回HTTP 200，registry metadata为0.2.1、build_status为success；[精确版本页面](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.2.1/)。
+
+官方ZIP SHA256：`4c4612298fc05674caadcaeb4c5dcc22457f983d11184a5fb58b0b98f4a289ff`。全新消费者使用registry依赖、没有workspace/path覆盖，安装的130个包文件与ZIP一致；核心四后端及JS协议记录黄金、拒绝/预算/配置退出0/1/3/2通过。后者是复制的应用示例，不是根包JSON API。这些是已完成发布轮的回执，不表示本地开发分支获得新远端CI。
+
+后续开发的`diagnose_input`、CLI诊断及扩展模板**不在0.2.1**；源码用法见[README](../README.md#未发布源码有界输入失败解释)。旧草稿、0.2.0消费者和性能数据保留原提交/日期；不能把它们改记为新版本实测。本说明不包含比赛提交或获奖承诺。

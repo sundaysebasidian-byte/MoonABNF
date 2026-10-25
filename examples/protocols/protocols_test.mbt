@@ -142,3 +142,27 @@ test "RFC3986 section 1.1.2 examples and IPv6 boundary vectors" {
     assert_eq(r.tree, None)
   }
 }
+
+///|
+test "protocol failures have bounded local explanations without changing acceptance" {
+  for
+    (grammar, rule, input, expected_offset) in [
+      (
+        @protocols.uri_grammar(),
+        "URI-reference",
+        b"http://example.test/%GG",
+        21,
+      ),
+      (@protocols.cookie_grammar(), "cookie-string", b"a=bad value", 5),
+      (@protocols.uri_grammar(), "URI-reference", b"http://x/%", 10),
+    ] {
+    let p = @abnf.compile(grammar).unwrap()
+    let d = p.diagnose_input(rule, input)
+    assert_eq(d.report.status, @abnf.NoMatch)
+    assert_eq(d.report, p.recognize(rule, input))
+    assert_eq(d.failure.unwrap().offset, expected_offset)
+    assert_true(d.failure.unwrap().expected.length() <= 16)
+    assert_true(d.explanation_work <= 500000)
+    assert_eq(p.parse_input(rule, input).status, @abnf.NoMatch)
+  }
+}

@@ -28,7 +28,7 @@ jobs:
         run: python3 scripts/acceptance.py --output "$RUNNER_TEMP/moonabnf-evidence"
       - name: Source-bound JS protocol record adapter
         timeout-minutes: 3
-        run: python3 scripts/protocol_record_test.py --output "$RUNNER_TEMP/protocol-record-evidence"
+        run: python3 scripts/protocol_record_test.py --diagnostics --output "$RUNNER_TEMP/protocol-record-evidence"
       - name: Exact registry 0.2.0 JS protocol consumer without workspace substitution
         timeout-minutes: 3
         run: python3 scripts/registry_protocol_record_test.py --output "$RUNNER_TEMP/registry-protocol-evidence"

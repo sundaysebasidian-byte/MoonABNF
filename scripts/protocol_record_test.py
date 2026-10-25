@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--diagnostics', action='store_true', help='Unpublished opt-in source diagnostic extension; never used by registry consumer')
     args = parser.parse_args()
     out = args.output.resolve()
     if out == ROOT or ROOT in out.parents:
@@ -76,7 +77,7 @@ def main():
         (work / 'moon.work').write_text('members = ["candidate", "consumer"]\n')
         templates = ROOT / 'integration/protocol_consumer'
         for name in ['moon.mod', 'moon.pkg', 'main.mbt', 'contract_wbtest.mbt']:
-            text = (templates / (name + '.in')).read_text()
+            text = (templates / ('main.diagnostics.mbt.in' if name == 'main.mbt' and args.diagnostics else name + '.in')).read_text()
             if name == 'moon.mod':
                 text = re.sub(r'moonabnf@\d+\.\d+\.\d+', 'moonabnf@' + version, text)
             (consumer / name).write_text(text)
@@ -99,6 +100,15 @@ def main():
                 raise RuntimeError('Wrong decision: ' + name)
             if name in ['reject', 'budget'] and (report['components'] or report['cookies']):
                 raise RuntimeError('Rejected/deferred record leaked partial fields')
+        if args.diagnostics:
+            d = json.loads(run('diagnostic-reject', base + ['http://example.test/%GG', 'a=bad value', '--diagnostics'], consumer, 1))
+            if d['uri_diagnostic']['failure']['offset'] != 21 or d['cookie_diagnostic']['failure']['actual'] != 32:
+                raise RuntimeError('Protocol diagnostic byte mismatch')
+            if d['components'] or d['cookies'] or d['decision'] != 'reject':
+                raise RuntimeError('Diagnostic changed rejection/field isolation')
+            d = json.loads(run('diagnostic-budget', base + ['/ok', 'a=b', '1', '--diagnostics'], consumer, 3))
+            if d['decision'] != 'defer' or 'uri_diagnostic' in d or 'cookie_diagnostic' in d:
+                raise RuntimeError('Diagnostic overwrote tree-budget indeterminacy')
         for name, digest in hashes.items():
             if hashlib.sha256((candidate / name).read_bytes()).hexdigest() != digest:
                 raise RuntimeError('Candidate mutated during test: ' + name)
