@@ -31,14 +31,20 @@ fn output(fields : Array[(String, Json)]) -> Unit {
 fn main {
   let args = @env.args()
   if args.length() < 4 ||
-    (args[2] != "check" && args[2] != "match" && args[2] != "batch") {
+    (
+      args[2] != "check" &&
+      args[2] != "match" &&
+      args[2] != "diagnose" &&
+      args[2] != "batch"
+    ) {
     println(
-      "usage: node main.js check grammar.abnf | match grammar.abnf rule input.bin [work-budget] | batch grammar.abnf rule input.bin...",
+      "usage: node main.js check grammar.abnf | match grammar.abnf rule input.bin [work-budget] | diagnose grammar.abnf rule input.bin [work-budget] | batch grammar.abnf rule input.bin...",
     )
     exit_code(2)
     return
   }
-  let mode = args[2]
+  let diagnostics = args[2] == "diagnose"
+  let mode = if diagnostics { "match" } else { args[2] }
   if (mode == "check" && args.length() != 4) ||
     (mode == "match" && args.length() != 6 && args.length() != 7) ||
     (mode == "batch" && (args.length() < 6 || args.length() > 261)) {
@@ -103,7 +109,15 @@ fn main {
       }
       Some(s) => s
     }
-    let report = program.recognize(args[4], input, limits~)
+    let explained = if diagnostics {
+      Some(program.diagnose_input(args[4], input, limits~))
+    } else {
+      None
+    }
+    let report = match explained {
+      Some(d) => d.report
+      None => program.recognize(args[4], input, limits~)
+    }
     let label = match report.status {
       @abnf.Matched => "matched"
       @abnf.NoMatch => {
@@ -129,13 +143,17 @@ fn main {
         "invalid-limits"
       }
     }
-    output([
+    let fields = [
       ("file", Json(args[i])),
       ("status", Json(label)),
       ("offset", Json(report.offset)),
       ("work", Json(report.work)),
       ("states", Json(report.states)),
-    ])
+    ]
+    if diagnostics {
+      fields.push(("diagnostic", explained.unwrap().to_json()))
+    }
+    output(fields)
   }
   exit_code(code)
 }

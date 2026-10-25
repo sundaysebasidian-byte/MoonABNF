@@ -8,6 +8,8 @@ import {
 // Values
 pub fn compile(Bytes, limits? : ParseLimits, max_work? : Int) -> Result[Program, Diagnostic]
 
+pub fn default_input_diagnostic_limits() -> InputDiagnosticLimits
+
 pub fn default_input_tree_limits() -> InputTreeLimits
 
 pub fn default_match_limits() -> MatchLimits
@@ -30,6 +32,14 @@ pub fn Diagnostic::equal(Self, Self) -> Bool
 pub fn Diagnostic::not_equal(Self, Self) -> Bool
 pub fn Diagnostic::to_repr(Self) -> @debug.Repr
 
+pub(all) struct ExpectedInput {
+  expectation : InputExpectation
+  grammar_offset : Int?
+} derive(Eq, @debug.Debug)
+pub fn ExpectedInput::equal(Self, Self) -> Bool
+pub fn ExpectedInput::not_equal(Self, Self) -> Bool
+pub fn ExpectedInput::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Expr {
   Ref(String, Int)
   Literal(Bytes, Bool, Int)
@@ -49,6 +59,43 @@ pub(all) struct Grammar {
 pub fn Grammar::equal(Self, Self) -> Bool
 pub fn Grammar::not_equal(Self, Self) -> Bool
 pub fn Grammar::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputDiagnosticLimits {
+  max_work : Int
+  max_expectations : Int
+} derive(Eq, @debug.Debug)
+pub fn InputDiagnosticLimits::equal(Self, Self) -> Bool
+pub fn InputDiagnosticLimits::not_equal(Self, Self) -> Bool
+pub fn InputDiagnosticLimits::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputDiagnosticReport {
+  report : MatchReport
+  failure : InputFailure?
+  explanation_status : String
+  explanation_work : Int
+} derive(Eq, @debug.Debug)
+pub fn InputDiagnosticReport::equal(Self, Self) -> Bool
+pub fn InputDiagnosticReport::not_equal(Self, Self) -> Bool
+pub fn InputDiagnosticReport::to_json(Self) -> Json
+pub fn InputDiagnosticReport::to_repr(Self) -> @debug.Repr
+
+pub(all) enum InputExpectation {
+  ByteRange(Int, Int, Bool)
+  EndOfInput
+} derive(Eq, @debug.Debug)
+pub fn InputExpectation::equal(Self, Self) -> Bool
+pub fn InputExpectation::not_equal(Self, Self) -> Bool
+pub fn InputExpectation::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputFailure {
+  offset : Int
+  actual : Int?
+  expected : Array[ExpectedInput]
+  truncated : Bool
+} derive(Eq, @debug.Debug)
+pub fn InputFailure::equal(Self, Self) -> Bool
+pub fn InputFailure::not_equal(Self, Self) -> Bool
+pub fn InputFailure::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputNode {
   kind : InputNodeKind
@@ -151,6 +198,7 @@ pub fn ParseLimits::to_repr(Self) -> @debug.Repr
 pub struct Program {
   // private fields
 }
+pub fn Program::diagnose_input(Self, String, Bytes, limits? : MatchLimits, diagnostic_limits? : InputDiagnosticLimits) -> InputDiagnosticReport
 pub fn Program::parse_input(Self, String, Bytes, limits? : InputTreeLimits) -> InputTreeReport
 pub fn Program::recognize(Self, String, Bytes, limits? : MatchLimits) -> MatchReport
 pub fn Program::rule_names(Self) -> Array[String]

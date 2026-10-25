@@ -49,6 +49,7 @@ priv struct Runner {
   mut work : Int
   mut states : Int
   mut furthest : Int
+  failures : FailureCollector?
 }
 
 ///|
@@ -112,7 +113,7 @@ fn Runner::eval(
   }
   match e {
     Ref(name, _) => self.eval(self.program.rules[name], pos, depth + 1)
-    Literal(s, sensitive, _) => {
+    Literal(s, sensitive, grammar_pos) => {
       for i = 0; i < s.length(); i = i + 1 {
         let at = pos + i
         if at > self.furthest {
@@ -120,6 +121,11 @@ fn Runner::eval(
         }
         self.tick(at)
         if at >= self.input.length() {
+          self.expect(
+            at,
+            ByteRange(s[i].to_int(), s[i].to_int(), !sensitive),
+            grammar_pos,
+          )
           return []
         }
         let actual = self.input[at].to_int()
@@ -129,6 +135,7 @@ fn Runner::eval(
           } else {
             ascii_lower(actual) != ascii_lower(wanted)
           }) {
+          self.expect(at, ByteRange(wanted, wanted, !sensitive), grammar_pos)
           return []
         }
       }
@@ -136,12 +143,14 @@ fn Runner::eval(
       self.insert(ends, pos + s.length())
       ends
     }
-    Range(lo, hi, _) => {
+    Range(lo, hi, grammar_pos) => {
       if pos >= self.input.length() {
+        self.expect(pos, ByteRange(lo, hi, false), grammar_pos)
         return []
       }
       let value = self.input[pos].to_int()
       if value < lo || value > hi {
+        self.expect(pos, ByteRange(lo, hi, false), grammar_pos)
         return []
       }
       let ends : Array[Int] = []
@@ -278,6 +287,7 @@ pub fn Program::recognize(
     work: 0,
     states: 0,
     furthest: 0,
+    failures: None,
   }
   let status = try {
     let ends = runner.eval(e, 0, 0)
