@@ -4,7 +4,7 @@
 [![Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-用 MoonBit 写的字节级 ABNF 库：**直接拿 RFC 里的 ABNF 文法校验协议字段，不用手写解析器。**
+MoonABNF 用 MoonBit 实现字节级 ABNF 解析。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
 
 文法文本 → 文法 AST → 编译校验 → 整段识别 / 输入派生树 → 按规则名取出原字节字段。
 实现依据 [RFC 5234](https://www.rfc-editor.org/rfc/rfc5234)（ABNF）与 [RFC 7405](https://www.rfc-editor.org/rfc/rfc7405)（大小写敏感字符串）。

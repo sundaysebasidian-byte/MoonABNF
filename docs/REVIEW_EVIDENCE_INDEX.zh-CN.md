@@ -1,8 +1,6 @@
 # MoonABNF 评审问题证据索引
 
-核对日期 2026-10-26。供用户审阅和改写，未向评审发送或提交比赛；AI 辅助范围见 [AI_USAGE.md](../AI_USAGE.md)。是否解决评委顾虑由评委重新审核，本页不提供获奖概率。
-
-供审阅的简明技术正文见[当前补审草稿](REVIEW_RESUBMISSION_DRAFT.zh-CN.md)，不包含个人经历或诚信声明。
+2026-10-26。按原评语整理技术证据与剩余限制。正文见[技术补审草稿](REVIEW_RESUBMISSION_DRAFT.zh-CN.md)，供审阅，未提交。AI 辅助范围见 [AI_USAGE.md](../AI_USAGE.md)。
 
 当前已发布 **0.3.0**：[精确安装、提交、checksum 与验证范围](release-0.3.0.zh-CN.md)。以下源码链接固定到发布提交 `4fc9981cce43cfa0c24874193562f252c761d20f`，CI 固定到测试 head 或合并提交，不把历史徽章当成本次文档验证。
 
