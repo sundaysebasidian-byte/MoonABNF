@@ -124,7 +124,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 
 仓库 CLI 可用 `moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin [work-budget]`；
 原 `match` 输出不变。JSON 案例须用独立 `main.diagnostics.mbt.in` 扩展模板，
-`python3 scripts/protocol_record_test.py --diagnostics --output /new/external/evidence`
+`python3 scripts/protocol_record_test.py --diagnostics --output /tmp/moonabnf-protocol-record`
 验证后，可在该消费者的 `--json URI COOKIE [node-budget]` 最后加 `--diagnostics`。
 未加标志时黄金及退出0/1/3/2不变。原模板和 registry 消费者保持兼容已发布0.2.1；
 **诊断核心 API 已包含于 0.3.0；扩展 JSON 模板是可复制的 JS 示例，不是根包直接导出的协议适配器。**
@@ -165,7 +165,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 - 真实协议语料：URI、Cookie、ETag、HTTP 请求行。
 - CI：[ci.yml](.github/workflows/ci.yml) 在官方 SDK 上跑完整验收（JS / Wasm / Wasm GC / native 的 check、build、test，示例、CLI、差分、下游包消费）；[fresh-clone.yml](.github/workflows/fresh-clone.yml) 模拟新用户 `git clone` 后直接 `moon check`、`moon test` 和本页的快速开始。
 
-本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-evidence`。
+本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-acceptance`。
 
 ## 目录
 
