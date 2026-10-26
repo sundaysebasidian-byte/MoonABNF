@@ -1,7 +1,7 @@
 # 输入树 API：最短可复现路径
 
 这是未发布候选的用法。公开0.1.0不含该API；不要用旧版本安装结果验证以下功能。
-本轮捕获/URI/Cookie 示例、准确输入约束和演示见 [捕获契约与复用](QUALITY_20261020.zh-CN.md)。
+本轮捕获/URI/Cookie 示例、准确输入约束和演示见 [捕获契约与复用](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/QUALITY_20261020.zh-CN.md)。
 
 ## 从交付归档开始
 

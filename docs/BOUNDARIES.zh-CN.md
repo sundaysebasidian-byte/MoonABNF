@@ -2,7 +2,7 @@
 
 这份AI辅助说明对应当前未发布工作分支。公开0.1.0仅有文法AST与识别；
 本轮新增parse_input输入树，识别器仅复用预算合法性检查，CLI不增加树命令。
-当前验证见 [本轮记录](INPUT_TREE_REVIEW.zh-CN.md)，历史结果不覆盖新增API。
+当前验证见 [本轮记录](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/INPUT_TREE_REVIEW.zh-CN.md)，历史结果不覆盖新增API。
 
 ## 文法与输入
 
@@ -48,7 +48,7 @@ parse_input也独立记账。max_nodes/max_edges累计计探索、临时路径�
 
 ## CLI与后端
 
-CLI仅JS后端+Node.js普通文件适配；历史识别库有macOS/Linux四后端记录。新树API已有Mac完整SDK四后端复验，见MAC_REVIEW.zh-CN.md；云端替代SDK失败日志保留。
+CLI仅JS后端+Node.js普通文件适配；历史识别库有macOS/Linux四后端记录。新树API已有Mac完整SDK四后端复验，见[MAC_REVIEW](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/MAC_REVIEW.zh-CN.md)；云端替代SDK失败日志保留。
 Windows、LLVM、浏览器JS运行、各类Wasm宿主、不同编译器版本/ABI、并发调用未验证，不宣称兼容。
 工具链以TOOLCHAIN.lock精确版本复现。已发布注册表版本0.1.0的下游三场景已在四后端通过。
 

@@ -1,5 +1,0 @@
-moon 0.1.20260920 (914d7da 2026-09-20) ~/Documents/Codex/2026-09-10/ni-q/work/moonbit-sdk/bin/moon
-moonc v0.10.14+7d59c7ec9 (2026-09-18) ~/Documents/Codex/2026-09-10/ni-q/work/moonbit-sdk/bin/moonc
-moonrun 0.1.20260920 (914d7da 2026-09-20) ~/Documents/Codex/2026-09-10/ni-q/work/moonbit-sdk/bin/moonrun
-
-Feature flags enabled: rr_moon_mod,rr_moon_pkg
