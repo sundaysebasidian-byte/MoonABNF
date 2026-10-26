@@ -103,17 +103,17 @@ cd consumer
   通用库仍接收Bytes。成功字段为ASCII，JSON raw不去引号；未知UTF-8字节不被偷偷修复成合法协议输入。
 - `accept-syntax`不验证Cookie Domain/Path/Secure/过期/认证/隐私策略。不要从本例推断完整HTTP支持。
 - 适配器只测JS；核心四后端及PR fresh-clone的既有CI保持其原提交身份。
-  发布后的registry消费者已有独立回执；本轮新复现脚本仅本地验证，未取得其新远端CI。
+  0.3.0 精确源码绑定 JS 协议步骤与 fresh-clone 已通过远端 CI；实际 registry 的 JS 适配消费另有本地发布回执，二者不混同，见[版本说明](release-0.3.0.zh-CN.md)。
 
-当前正式发布版本为0.2.1，开发候选manifest为未发布的0.3.0，发布与消费回执见[0.2.1说明](release-0.2.1.zh-CN.md)。上面的空目录源码方案消费解压快照，不是registry安装；两者要分开记录。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
+当前正式发布版本为 0.3.0，含有界诊断 API，发布与实际 registry 消费范围见[0.3.0 说明](release-0.3.0.zh-CN.md)。上面的空目录源码方案消费解压快照，不是registry安装；两者要分开记录。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
 AI辅助事实在[AI_USAGE.md](../AI_USAGE.md)。没有替用户撰写诚信声明、提交比赛或承诺获奖。
 
 ## 一键核验实际发布包（2026-10-25 本地补强）
 
 ```sh
-MOONABNF_SDK=/existing/trusted/sdk python3 scripts/registry_protocol_record_test.py --release-version 0.2.1 --output /new/empty/registry-case
+MOONABNF_SDK=/existing/trusted/sdk python3 scripts/registry_protocol_record_test.py --release-version 0.3.0 --output /new/empty/registry-case
 ```
 
-该命令在全新目录从registry安装精确0.2.1，检查依赖树source.kind=registry、非workspace member；随后以frozen单worker运行既有4项契约和JSON黄金/拒绝/预算/配置检查，拒绝/预算不导出部分字段，Program复用由既有白盒契约确认。脚本和模板的SHA256记录于本地回执。使用已发布公共核心与文法子包，不复制库算法，也不替代source-bound协议测试。需要已有SDK及Mooncakes网络可达；没有联网业务服务或生产数据。
+该命令在全新目录从registry安装精确0.3.0，检查依赖树source.kind=registry、非workspace member；随后以frozen单worker运行既有4项契约和JSON黄金/拒绝/预算/配置检查，拒绝/预算不导出部分字段，Program复用由既有白盒契约确认。脚本和模板的SHA256记录于本地回执。使用已发布公共核心与文法子包，不复制库算法，也不替代source-bound协议测试。需要已有SDK及Mooncakes网络可达；没有联网业务服务或生产数据。
 
-脚本保留默认0.2.0供历史回归，复现当前发布包须显式传上面的`--release-version 0.2.1`。未发布的`diagnose_input`与JSON诊断扩展只在开发源码中使用，见[README源码入口](../README.md#未发布源码有界输入失败解释)；本节registry命令使用原模板，不会调用新API。
+脚本保留默认 0.2.0 供历史回归，复现当前包须显式传 `--release-version 0.3.0`。本节 registry 命令使用原模板，不调用诊断；已发布的 `diagnose_input` 与可复制的 JSON 诊断扩展另见[README 诊断入口](../README.md#030有界输入失败解释)。0.3.0 发布轮已另验实际 registry 诊断和 JS 扩展，不能把本节原模板的成功当成诊断测试。

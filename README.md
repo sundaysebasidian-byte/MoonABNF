@@ -11,7 +11,7 @@
 
 适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
-本地开发候选为0.3.0（有界输入失败诊断），尚未公开或发布；当前可安装版本仍为0.2.1。[候选变更与发布条件](docs/release-0.3.0.zh-CN.md)。
+**0.3.0 已正式发布**，包含输入派生树、字段提取与有界输入失败诊断。[发布版本及验证范围](docs/release-0.3.0.zh-CN.md)；[评审问题证据索引](docs/REVIEW_EVIDENCE_INDEX.zh-CN.md)。
 
 ## 快速开始
 
@@ -28,17 +28,17 @@ moon run examples/protocols/cmd --target js   # URI 与 Cookie：输入树和字
 在自己的项目里使用：
 
 ```sh
-moon add sundaysebasidian-byte/moonabnf@0.2.1
+moon add sundaysebasidian-byte/moonabnf@0.3.0
 ```
 
-0.2.1 保持 0.2.0 公共解析 API，补充可复现 registry 协议消费者、独立 AI 复审与五进程测量说明。JSON 适配器仍是集成示例。 版本内容及验证边界见 [0.2.1 说明](docs/release-0.2.1.zh-CN.md)；实际发布状态以 Mooncakes 为准。
+0.3.0 保留原识别与输入树 API，新增 `Program::diagnose_input` 及显式诊断 JSON 序列化。已从 registry 精确安装验证核心、输入树与诊断的四后端消费；协议 JSON 适配器仍是需复制的 JS 集成示例。历史 [0.2.1 说明](docs/release-0.2.1.zh-CN.md)保留原证据日期，不替代本次发布回执。
 
 ```moonbit
 // moon.pkg
 import { "sundaysebasidian-byte/moonabnf" @abnf }
 ```
 
-> [0.2.0 已发布到 Mooncakes](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf)：包含 `parse` / `compile` / `recognize` 以及输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）。全新 registry 消费者已验证 Wasm、Wasm GC、JS 和 native；JS JSON 协议适配为需复制的 [集成示例](integration/protocol_consumer/main.mbt.in)，使用公开核心 API 和 `examples/protocols` 文法子包，并非根包 JSON 导出。
+> [当前安装版本 0.3.0](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.3.0/)：包含 `parse` / `compile` / `recognize` 以及输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）。全新 registry 消费者已验证 Wasm、Wasm GC、JS 和 native；JS JSON 协议适配为需复制的 [集成示例](integration/protocol_consumer/main.mbt.in)，使用公开核心 API 和 `examples/protocols` 文法子包，并非根包 JSON 导出。
 
 ## 用法
 
@@ -163,9 +163,9 @@ scripts/cli.sh match fixtures/protocol.abnf field fixtures/protocol-valid.bin
 代码 MIT（[LICENSE](LICENSE)）。从 RFC 摘录的 URI / Cookie / HTTP 文法保留原有归属，不改称 MIT 原创，出处与哈希见 [SOURCES.md](SOURCES.md)。
 开发中 AI 的参与方式见 [AI_USAGE.md](AI_USAGE.md)，设计说明见 [docs/UNDERSTANDING.md](docs/UNDERSTANDING.md)。
 
-### 未发布源码：有界输入失败解释
+### 0.3.0：有界输入失败解释
 
-新开发入口 `program.diagnose_input(rule, input)` 保留原 `MatchReport`，仅对
+已发布入口 `program.diagnose_input(rule, input)` 保留原 `MatchReport`，仅对
 `NoMatch` 作额外有界重放。`failure` 含局部最远失败字节、`actual` 字节整数或
 EOF(None)、有限期望字节范围/ASCII 大小写语义或 EOF，以及可确定的原文法
 terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的位置为 None。
@@ -176,12 +176,12 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 `failure.truncated` 区分解释预算不足/截断与原匹配判定；原接受集合、树与匹配预算不变。
 `InputDiagnosticReport.to_json()` 只序列化解释，不另作接受判定。
 
-源码 CLI 可用 `moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin [work-budget]`；
+仓库 CLI 可用 `moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin [work-budget]`；
 原 `match` 输出不变。JSON 案例须用独立 `main.diagnostics.mbt.in` 扩展模板，
 `python3 scripts/protocol_record_test.py --diagnostics --output /new/external/evidence`
 验证后，可在该消费者的 `--json URI COOKIE [node-budget]` 最后加 `--diagnostics`。
 未加标志时黄金及退出0/1/3/2不变。原模板和 registry 消费者保持兼容已发布0.2.1；
-**这些新 API/扩展仍是本地开发源码，不属于已发布的0.2.1。**
+**诊断核心 API 已包含于 0.3.0；扩展 JSON 模板是可复制的 JS 示例，不是根包直接导出的协议适配器。**
 
 新手可先运行 `moon run examples/diagnostics --target js`：URI `%GG`、Cookie 空格、
 截断与尾随空格四例会显示原字节上下文、实际字节/EOF和局部期望，再对人工选择的合法

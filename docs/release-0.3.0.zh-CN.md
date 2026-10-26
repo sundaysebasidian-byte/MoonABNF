@@ -1,16 +1,38 @@
-# MoonABNF 0.3.0 发布候选
+# MoonABNF 0.3.0 发布回执
 
-状态：本地候选，尚未push、建立版本PR、合并或发布。当前Mooncakes最新包仍是0.2.1；不覆盖既有版本。
+状态核对：2026-10-26。0.3.0 已于 2026-10-25 正式发布；本次只修正文档，没有重新发包。
 
-相对0.2.1新增独立的`Program::diagnose_input`、有界局部失败解释及显式JSON序列化，配套源码CLI与可复制的JS协议诊断模板。原识别/构树接受集合、预算和API保留。解释是局部最远失败，不是唯一修复建议；成功和预算未判定不能被探索失败覆盖。详见[README](../README.md)。新增公共入口采用minor版本0.3.0。
+```sh
+moon add sundaysebasidian-byte/moonabnf@0.3.0
+```
 
-原协议模板继续兼容0.2.1，扩展模板只在包含新API的源码/后续发布包上使用；JSON适配器不是根包API。四协议失败示例使用合成输入；本地五进程测量仍保留原日期与版本，不宣称新性能或生产采用。
+- [Mooncakes 精确版本](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.3.0/)；[registry manifest](https://mooncakes.io/api/v0/manifest/sundaysebasidian-byte/moonabnf@0.3.0)。
+- [版本 PR #7](https://github.com/sundaysebasidian-byte/MoonABNF/pull/7) 已合并。
+- 测试 head：`e60205271b5dccdef67974c1dfe3e0a025f0afa8`。
+- 发布合并提交：[4fc9981cce43cfa0c24874193562f252c761d20f](https://github.com/sundaysebasidian-byte/MoonABNF/commit/4fc9981cce43cfa0c24874193562f252c761d20f)。
+- 官方 CLI 退出 0；manifest HTTP 200、build_status 为 success。[官方 ZIP](https://download.mooncakes.io/user/sundaysebasidian-byte/moonabnf/0.3.0.zip) 的 SHA256 与 metadata 一致，138 个发布文件与审计后的合并源码及安装文件一致：
 
-发布条件：
+```text
+ba46dfba24eaf680adb66b76906c78abc4f01276320249947f9335e7eae2deb0
+```
 
-1. 父线程确认两个公开仓库、候选SHA与版本范围后，正常push当前开发分支并建立独立版本PR；旧#6已合并，不复用它。
-2. 精确PR head的核心四后端、CLI（含诊断）、示例、差分、源码绑定JS协议诊断及pinned/latest fresh-clone检查通过；历史registry0.2.0回归不冒充0.3.0消费。
-3. 正常合并后核对合并提交CI、打包清单、公开源码与包内容。临发布再次只读确认0.3.0未占用，再以既有CLI登录发布一次；未知结果先只读核实。
-4. 真正发布回执后，从registry精确安装0.3.0到全新消费者，验证核心、诊断及JS协议适配；不能用workspace/path替代。不以候选测试预先声称发布成功。
+## 版本内容
 
-本候选未运行远端CI、未产生registry回执；不包含比赛提交或任何获奖概率承诺。
+相对 0.2.1 新增独立的 `Program::diagnose_input`、有界局部失败解释及显式 JSON 序列化，配套 CLI 与可复制的 JS 协议诊断模板。原识别/构树接受集合、预算和 API 保留。解释是最远失败分支的局部信息，不是唯一修复；成功与预算未判定不产生失败解释。新增公共入口采用 minor 版本 0.3.0。
+
+输入树、`rule_nodes_in`、`span`、`extract` 属于公共库 API。JSON 协议适配器是需复制的集成示例，不是根包导出；原模板兼容 0.2.1，诊断扩展需要 0.3.0。见[协议案例](PROTOCOL_RECORD_CASE.zh-CN.md)及[诊断示例固定源码](https://github.com/sundaysebasidian-byte/MoonABNF/blob/4fc9981cce43cfa0c24874193562f252c761d20f/examples/diagnostics/main.mbt)。
+
+## 已执行的验证
+
+| 证据 | 适用提交或版本 | 结果与边界 |
+| --- | --- | --- |
+| [精确 head 核心 CI](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40220959109) | `e602052…` | 四后端验收、CLI/诊断、示例、差分与源码绑定 JS 协议步骤成功 |
+| [精确 head fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40220959146) | `e602052…` | pinned/latest SDK 成功 |
+| [合后核心 CI](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40221161751) / [fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40221161767) | `4fc9981…` | 成功，不是本次文档分支的新 CI |
+| 发布后干净 registry 消费（本地发布回执） | 精确 `0.3.0`，无 workspace/path 覆盖 | 核心/输入树及诊断在 JS、Wasm、Wasm GC、native 均通过；JS 协议 JSON 黄金、退出 0/1/3/2 与诊断扩展通过 |
+
+完整本机发布/消费者日志保留私有；上表的本地结果是发布轮记录，不冒充公开 CI 附件或本次重新运行。发布后的文档修订不改变已发布归档中的旧文档。
+
+## 限制
+
+左递归拒绝、按字节解析、歧义返回一个确定派生见证，`BudgetExceeded` 为未判定。规范例子和自编负例不等于生产流量；JSON 适配器只验 JS。五个独立进程的性能数据仍属于原日期的本地测量，不是 0.3.0 新基准，不推 p95 或跨实现性能领先。评审问题映射见[证据索引](REVIEW_EVIDENCE_INDEX.zh-CN.md)；没有比赛提交或获奖承诺。
