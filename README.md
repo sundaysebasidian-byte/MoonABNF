@@ -167,6 +167,24 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 
 本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-acceptance`。
 
+## 性能
+
+`moon bench --release` 实测，每项 5 组取平均；GitHub Actions ubuntu-24.04（Intel Xeon 6973P-C，4 核），moonc v0.10.14。
+
+| 场景 | 输入 | JS | native |
+| --- | --- | --- | --- |
+| 编译 URI 文法 | — | 122 µs | 74.5 µs |
+| 识别 URI（IPv6 主机） | 40 B | 56.1 µs | 40.6 µs |
+| 构建 URI 派生树 | 40 B | 152 µs | 119 µs |
+| 编译 Cookie 文法 | — | 21.1 µs | 15.7 µs |
+| 识别 Cookie 头 | 33 B | 13.0 µs | 10.8 µs |
+| 构建 Cookie 派生树 | 33 B | 38.0 µs | 32.4 µs |
+| 识别定长二进制字段 | 4096 B | 255 µs | 192 µs |
+| 构建定长二进制派生树 | 4096 B | 2.21 ms | 1.59 ms |
+| 32 个 Cookie 对的子树查询 | 32 对 | 89.4 µs | 51.8 µs |
+
+数字只说明数量级，换机器会变。复现：`moon bench benchmarks --target native --release`；CI 见 [bench.yml](.github/workflows/bench.yml)，本表来自[这次运行](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40287620677)。
+
 ## 目录
 
 | 路径 | 内容 |
@@ -177,6 +195,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 | `input_tree.mbt` `input_query.mbt` | 输入派生树、子树查询、字段提取 |
 | `cmd/main` | JSON 命令行 |
 | `examples/` | 可运行示例与黄金输出 |
+| `benchmarks/` | `moon bench` 基准 |
 | `fixtures/` | 测试文法与 RFC 文法语料（来源见 [fixtures/protocols/SOURCES.md](fixtures/protocols/SOURCES.md)） |
 
 ## 许可与来源
