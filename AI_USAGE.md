@@ -30,7 +30,7 @@ MoonBit 实现、CLI、测试、Python 差分/验收脚本与文档，并在本�
 2026-10-12云端补强由Codex协助，独立检出公开HEAD 323a3728…，设计实现输入派生树，
 补规范ETag场景、预算/歧义/跨度回归及事实文档；另一个Codex代理独立只读审阅，
 不是人类审核。新增API未发布未push，本轮未提交/修改表单或发送邮件。
-工具链建立及新验证见docs/INPUT_TREE_REVIEW.zh-CN.md，不沿用历史通过记录。
+工具链建立及新验证见https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/INPUT_TREE_REVIEW.zh-CN.md，不沿用历史通过记录。
 
 独立 oracle 指不同算法与运行实现（Python 标准库正则引擎），不是独立人类或 AI reviewer。
 代码与测试可能有共同盲点；差分范围与未测项已列出。
@@ -40,7 +40,7 @@ MoonBit 实现、CLI、测试、Python 差分/验收脚本与文档，并在本�
 是否属于十月有效新增贡献由赛事组判断，
 不能通过调整 commit 日期制造十月记录。用户须理解实现并完成本人最终申报书。
 
-历史规则记录有“申报书务必人工撰写”要求，本轮没有重核章程全文。docs/TECHNICAL_FACTS.md 仅为 AI 辅助事实清单，
+历史规则记录有“申报书务必人工撰写”要求，本轮没有重核章程全文。https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/TECHNICAL_FACTS.md 仅为 AI 辅助事实清单，
 不属于可冒充人工的最终 Proposal。未填写表单、签署承诺或处理身份证/银行卡/学籍材料。
 
 发现并修复：CLI 的 JS FFI 初版用 null 表示 Optional 失败，但锁定编译器实际用
