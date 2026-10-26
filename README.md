@@ -11,7 +11,7 @@ MoonABNF 用 MoonBit 实现字节级 ABNF 解析。调用方提供文法，编�
 
 适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
-**0.3.0 已发布到 mooncakes**，包含输入派生树、字段提取与有界输入失败诊断，版本说明见 [release-0.3.0](docs/release-0.3.0.zh-CN.md)。
+**0.3.0 已发布到 mooncakes**，包含输入派生树、字段提取与有界输入失败诊断，版本说明见 [release-0.3.0](docs/release-0.3.0.zh-CN.md)，复审入口见[技术证据索引](docs/TECHNICAL_EVIDENCE.zh-CN.md)。
 
 ## 快速开始
 
@@ -169,7 +169,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 
 ## 性能
 
-`moon bench --release` 实测，每项 5 组取平均；GitHub Actions ubuntu-24.04（Intel Xeon 6973P-C，4 核），moonc v0.10.14。
+`moon bench --release` 实测，每项 5 组取平均；GitHub Actions ubuntu-24.04（AMD EPYC 9V45 96-Core Processor，4 个逻辑 CPU），moonc v0.10.14。
 
 | 场景 | 输入 | JS | native |
 | --- | --- | --- | --- |
