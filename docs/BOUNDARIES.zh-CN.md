@@ -1,8 +1,8 @@
-# 支持范围、边界与失败契约（未发布输入树候选）
+# 支持范围、边界与失败契约（0.3.0）
 
-这份AI辅助说明对应当前未发布工作分支。公开0.1.0仅有文法AST与识别；
-本轮新增parse_input输入树，识别器仅复用预算合法性检查，CLI不增加树命令。
-当前验证见 [本轮记录](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/INPUT_TREE_REVIEW.zh-CN.md)，历史结果不覆盖新增API。
+适用于已发布的 [MoonABNF 0.3.0](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.3.0/)。输入树与字段提取从 0.2.0 起已发布，0.3.0 增加有界输入诊断；安装与复现见[输入树上手](INPUT_TREE_QUICKSTART.zh-CN.md)和[技术证据索引](TECHNICAL_EVIDENCE.zh-CN.md)。
+
+历史 0.1.0 仅有文法 AST 与识别；它不代表当前安装版。旧候选记录保留在[原提交](https://github.com/sundaysebasidian-byte/MoonABNF/blob/3af48664afae0bf4414e238f72d64597c7f291ef/docs/BOUNDARIES.zh-CN.md)。
 
 ## 文法与输入
 
@@ -14,8 +14,8 @@
 | AST保留内容 | 文法AST保留规则、增量标志与文法字节位置；不保留注释、空白或独立括号，不提供round-trip。parse_input另返回含规则/表达式结构与输入字节跨度的派生树 | parser AST、input_tree_test与消费者断言 |
 | 输入树歧义 | 各替代都探索、保留所有结束偏移；同端点保留首派生。重复按次数升序，精确次数内保留首路径；无歧义枚举或唯一性认证 | 不同端点延续、同端点分支、穷举小输入 |
 | 树预算及空重复 | 最小次数实际物化；recognize成功不保证parse_input在树预算内成功。失败无部分树；平坦可达树避免宽重复列表的深栈 | epsilon minima、百万空重复、finish耗尽 |
-| 空文法与空输入 | 空字节文法parse失败；仅注释/空行可parse成零规则AST，compile返回no-rules。被识别输入可为空，是否匹配由文法决定 | 新增comment-only回归、nullable repeats、max_input_bytes=0回归 |
-| 全文法校验 | 未选入口的规则也须合法、可生产、无左递归；0rule不会执行，但未定义引用和prose仍拒绝；core规则可显式覆盖/扩展 | 新增unused/zero-times回归、compiler core与循环测试 |
+| 空文法与空输入 | 空字节文法parse失败；仅注释/空行可parse成零规则AST，compile返回no-rules。被识别输入可为空，是否匹配由文法决定 | comment-only回归、nullable repeats、max_input_bytes=0回归 |
+| 全文法校验 | 未选入口的规则也须合法、可生产、无左递归；0rule不会执行，但未定义引用和prose仍拒绝；core规则可显式覆盖/扩展 | unused/zero-times回归、compiler core与循环测试 |
 | 替代与重复 | 无序选择，传播全部结束位置；没有PEG优先顺序或贪心短路。可空重复的集合稳定后停止，空元素可补足最小次数 | alternatives/nullable/exact counts、独立正则子集差分 |
 | 左递归 | 编译拒绝直接、间接、可空前缀循环；不会自动改写。消耗字节的递归允许，仍可能耗尽预算 | compiler循环回归、consuming recursion与depth耗尽 |
 | 协议/配置边界 | 只识别字节格式，不验证认证、网络握手、校验和、字段含义、键重复或数字业务范围。如三位DIGIT可接受999，调用者仍需验证TTL业务范围 | 三场景仅格式断言；无broker/办公软件集成声明 |
@@ -43,19 +43,20 @@ parse_input也独立记账。max_nodes/max_edges累计计探索、临时路径�
 | Diagnostic | 编译/解析只返回一个诊断；offset从0计字节，line/column从1计字节位置；不提供恢复或完整期望集合；多规则同时非法时不保证跨后端选择同一首错规则 | syntax locations、compiler单故障与unused规则回归 |
 | Matched | 整个输入匹配，offset为输入长度；不接受仅匹配前缀 | alternatives、trailing suffix、三场景 |
 | NoMatch | 预算内未找到全匹配；offset是全部实际尝试的最远位置，可为EOF，不是唯一错误原因或解析树 | furthest real byte locations |
-| BudgetExceeded | 未完成当前算法的判定；即使早期分支已找到全匹配，后续探索仍可返回预算耗尽；不能改称确定的NoMatch。调用者可按资源策略拒绝/限流，但应保留未判定原因 | 新增discovered-match预算回归及四种耗尽路径 |
-| InvalidLimits/UnknownRule | 参数检查顺序：非法预算→超长输入→入口查找；同时存在问题时按此顺序返回。非输入错误offset/work/states为0 | 新增failure precedence回归 |
+| BudgetExceeded | 未完成当前算法的判定；即使早期分支已找到全匹配，后续探索仍可返回预算耗尽；不能改称确定的NoMatch。调用者可按资源策略拒绝/限流，但应保留未判定原因 | discovered-match预算回归及四种耗尽路径 |
+| InvalidLimits/UnknownRule | 参数检查顺序：非法预算→超长输入→入口查找；同时存在问题时按此顺序返回。非输入错误offset/work/states为0 | failure precedence回归 |
+
+`diagnose_input` 是独立入口：失败时给出最远失败分支的局部期望和实际字节/EOF；期望数量与工作预算有上限。它不提供唯一修复、完整错误集合或错误恢复。`Matched` 与 `BudgetExceeded` 不附失败解释。
 
 ## CLI与后端
 
-CLI仅JS后端+Node.js普通文件适配；历史识别库有macOS/Linux四后端记录。新树API已有Mac完整SDK四后端复验，见[MAC_REVIEW](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/MAC_REVIEW.zh-CN.md)；云端替代SDK失败日志保留。
-Windows、LLVM、浏览器JS运行、各类Wasm宿主、不同编译器版本/ABI、并发调用未验证，不宣称兼容。
-工具链以TOOLCHAIN.lock精确版本复现。已发布注册表版本0.1.0的下游三场景已在四后端通过。
+0.3.0 的独立 registry 消费者已验证 JS、Wasm、Wasm GC、native 的核心、输入树与诊断 API。CLI 和协议 JSON 适配示例只验证 JS + Node.js。发布提交及 CI 见[发布回执](release-0.3.0.zh-CN.md)。
+Windows、LLVM、浏览器 JS、其他 Wasm 宿主及并发调用未验证。源码复现使用 `TOOLCHAIN.lock`，不同 SDK 的记录分别看待。
 
 CLI固定64KiB文法/输入与最多256个batch文件，读至上限+1后拒绝，不会把截断前缀误当完整输入。
 文法过长是grammar-error/parse-budget、退出2；输入过长是budget-exceeded:input-bytes、退出3。
 输入文件I/O失败只写stderr，**不产生对应JSON行**；其他文件继续处理。调用者用JSON的file字段关联，不以行号强行对应输入列表，并须检查退出码和stderr。
-混合batch取最高退出码（3>2>1>0），因此退出3也可能伴随I/O失败；新增混合I/O/匹配/预算回归验证这一点。
+混合batch取最高退出码（3>2>1>0），因此退出3也可能伴随I/O失败；混合I/O/匹配/预算回归验证这一点。
 读取目录/设备/FIFO拒绝，FIFO非阻塞回归只在具备该设施的POSIX系统实测；不保证普通文件I/O墙钟时间或外部文件快照一致性。
 
 ## 明确未测与不支持
@@ -63,4 +64,3 @@ CLI固定64KiB文法/输入与最多256个batch文件，读至上限+1后拒绝�
 未测：Windows、完整第三方ABNF解析器差分、真实外部下游采用、多线程、真实broker、办公软件。
 不支持：Unicode数值终端、prose识别、左递归自动改写、代码生成、全部歧义树枚举、错误恢复、流式识别、完整协议/配置业务语义。
 正则子集5,440次差分只验证已列算法路径，不能改称完整ABNF标准认证。
-这份说明不是人工最终申报、官方验收或奖励承诺；最终申报须用户本人理解后撰写。
