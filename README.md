@@ -124,7 +124,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 
 仓库 CLI 可用 `moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin [work-budget]`；
 原 `match` 输出不变。JSON 案例须用独立 `main.diagnostics.mbt.in` 扩展模板，
-`python3 scripts/protocol_record_test.py --diagnostics --output /new/external/evidence`
+`python3 scripts/protocol_record_test.py --diagnostics --output /tmp/moonabnf-protocol-record`
 验证后，可在该消费者的 `--json URI COOKIE [node-budget]` 最后加 `--diagnostics`。
 未加标志时黄金及退出0/1/3/2不变。原模板和 registry 消费者保持兼容已发布0.2.1；
 **诊断核心 API 已包含于 0.3.0；扩展 JSON 模板是可复制的 JS 示例，不是根包直接导出的协议适配器。**
@@ -165,7 +165,25 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 - 真实协议语料：URI、Cookie、ETag、HTTP 请求行。
 - CI：[ci.yml](.github/workflows/ci.yml) 在官方 SDK 上跑完整验收（JS / Wasm / Wasm GC / native 的 check、build、test，示例、CLI、差分、下游包消费）；[fresh-clone.yml](.github/workflows/fresh-clone.yml) 模拟新用户 `git clone` 后直接 `moon check`、`moon test` 和本页的快速开始。
 
-本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-evidence`。
+本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-acceptance`。
+
+## 性能
+
+`moon bench --release` 实测，每项 5 组取平均；GitHub Actions ubuntu-24.04（Intel Xeon 6973P-C，4 核），moonc v0.10.14。
+
+| 场景 | 输入 | JS | native |
+| --- | --- | --- | --- |
+| 编译 URI 文法 | — | 122 µs | 74.5 µs |
+| 识别 URI（IPv6 主机） | 40 B | 56.1 µs | 40.6 µs |
+| 构建 URI 派生树 | 40 B | 152 µs | 119 µs |
+| 编译 Cookie 文法 | — | 21.1 µs | 15.7 µs |
+| 识别 Cookie 头 | 33 B | 13.0 µs | 10.8 µs |
+| 构建 Cookie 派生树 | 33 B | 38.0 µs | 32.4 µs |
+| 识别定长二进制字段 | 4096 B | 255 µs | 192 µs |
+| 构建定长二进制派生树 | 4096 B | 2.21 ms | 1.59 ms |
+| 32 个 Cookie 对的子树查询 | 32 对 | 89.4 µs | 51.8 µs |
+
+数字只说明数量级，换机器会变。复现：`moon bench benchmarks --target native --release`；CI 见 [bench.yml](.github/workflows/bench.yml)，本表来自[这次运行](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40287620677)。
 
 ## 目录
 
@@ -177,6 +195,7 @@ terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的�
 | `input_tree.mbt` `input_query.mbt` | 输入派生树、子树查询、字段提取 |
 | `cmd/main` | JSON 命令行 |
 | `examples/` | 可运行示例与黄金输出 |
+| `benchmarks/` | `moon bench` 基准 |
 | `fixtures/` | 测试文法与 RFC 文法语料（来源见 [fixtures/protocols/SOURCES.md](fixtures/protocols/SOURCES.md)） |
 
 ## 许可与来源
