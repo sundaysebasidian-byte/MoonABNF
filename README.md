@@ -11,7 +11,7 @@
 
 适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
-**0.3.0 已正式发布**，包含输入派生树、字段提取与有界输入失败诊断。[发布版本及验证范围](docs/release-0.3.0.zh-CN.md)；[评审问题证据索引](docs/REVIEW_EVIDENCE_INDEX.zh-CN.md)。
+**0.3.0 已正式发布**，包含输入派生树、字段提取与有界输入失败诊断。[发布版本及验证范围](docs/release-0.3.0.zh-CN.md)；[评审问题证据索引](docs/REVIEW_EVIDENCE_INDEX.zh-CN.md)；[技术补审草稿（供用户审阅）](docs/REVIEW_RESUBMISSION_DRAFT.zh-CN.md)。
 
 ## 快速开始
 
