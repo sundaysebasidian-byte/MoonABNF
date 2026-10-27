@@ -18,4 +18,4 @@
 
 外部规范安装版用例：[RFC3339 字段提取](RFC3339_REGISTRY_CASE.zh-CN.md)，两条官方样例和一条自编负例已通过；日期语义另行校验。
 
-当前文档基线：[3d0c1b4](https://github.com/sundaysebasidian-byte/MoonABNF/commit/3d0c1b44d24483bfd768456dda5d0ce6f2de0a4b)（[文档 PR #12](https://github.com/sundaysebasidian-byte/MoonABNF/pull/12)）。上述运行记录保持原适用提交，此次文档核对没有重跑功能测试。
+2026-10-27 文档修订：[PR #13](https://github.com/sundaysebasidian-byte/MoonABNF/pull/13)（合并提交 [c3e6793](https://github.com/sundaysebasidian-byte/MoonABNF/commit/c3e6793a50d4fc2848089d1e665b47f6f78ccee4)）。各项测试记录仍按对应运行提交引用。
