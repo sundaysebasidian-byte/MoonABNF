@@ -36,7 +36,7 @@ moon add sundaysebasidian-byte/moonabnf@0.3.0
 import { "sundaysebasidian-byte/moonabnf" @abnf }
 ```
 
-> [mooncakes 上的 0.3.0](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.3.0/) 包含 `parse` / `compile` / `recognize`、输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）和 `diagnose_input`，已从 registry 全新安装并在 Wasm、Wasm GC、JS、native 上验证。协议 JSON 适配器是需复制的 [集成示例](integration/protocol_consumer/main.mbt.in)，不是根包导出。
+> [mooncakes 上的 0.3.0](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.3.0/) 包含 `parse` / `compile` / `recognize`、输入派生树与字段提取（`parse_input`、`rule_nodes_in`、`extract`）和 `diagnose_input`，已从 registry 全新安装并在 Wasm、Wasm GC、JS、native 上验证。协议集成方式见下文。
 
 ## 用法
 
@@ -111,27 +111,16 @@ scripts/cli.sh match fixtures/protocol.abnf field fixtures/protocol-valid.bin
 
 ### 5. 解释为什么不匹配
 
-已发布入口 `program.diagnose_input(rule, input)` 保留原 `MatchReport`，仅对
-`NoMatch` 作额外有界重放。`failure` 含局部最远失败字节、`actual` 字节整数或
-EOF(None)、有限期望字节范围/ASCII 大小写语义或 EOF，以及可确定的原文法
-terminal expression 起点 `grammar_offset`；内建 core terminal 和 EOF 的位置为 None。
-它不是唯一修复建议，也不枚举全部失败路径。成功或 `BudgetExceeded` 不产生失败解释。
+`program.diagnose_input(rule, input)` 在不匹配时返回局部最远失败字节、实际输入字节或 EOF，以及有限期望集合。诊断使用独立预算，不改变原 `MatchReport`；`BudgetExceeded` 为未判定，而非 `NoMatch`。局部解释不代表唯一修复。
 
-`diagnostic_limits={ max_work: 500000, max_expectations: 16 }` 独立限制额外重放；
-工作包含重放、期望收集及去重，期望硬上限128。`explanation_status` 和
-`failure.truncated` 区分解释预算不足/截断与原匹配判定；原接受集合、树与匹配预算不变。
-`InputDiagnosticReport.to_json()` 只序列化解释，不另作接受判定。
+```sh
+moon run examples/diagnostics --target js
+moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
+```
 
-仓库 CLI 可用 `moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin [work-budget]`；
-原 `match` 输出不变。JSON 案例须用独立 `main.diagnostics.mbt.in` 扩展模板，
-`python3 scripts/protocol_record_test.py --diagnostics --output /tmp/moonabnf-protocol-record`
-验证后，可在该消费者的 `--json URI COOKIE [node-budget]` 最后加 `--diagnostics`。
-未加标志时黄金及退出0/1/3/2不变。原模板和 registry 消费者保持兼容已发布0.2.1；
-**诊断核心 API 已包含于 0.3.0；扩展 JSON 模板是可复制的 JS 示例，不是根包直接导出的协议适配器。**
+示例覆盖 URI `%GG`、非法 Cookie 空格、截断与尾随字节。完整契约见 [0.3.0 说明](docs/release-0.3.0.zh-CN.md)和[公开接口](pkg.generated.mbti)。
 
-新手可先运行 `moon run examples/diagnostics --target js`：URI `%GG`、Cookie 空格、
-截断与尾随空格四例会显示原字节上下文、实际字节/EOF和局部期望，再对人工选择的合法
-修订重新解析并提取字段。它不自动更改输入，也不把预算不足当拒绝；示例使用合成协议字段。
+协议 JSON 适配器是 [integration/protocol_consumer](integration/protocol_consumer) 下可复制的 JS 示例，不是根库导出；诊断扩展模板和运行方式见[协议案例](docs/PROTOCOL_RECORD_CASE.zh-CN.md)。
 
 ## 规范覆盖
 
