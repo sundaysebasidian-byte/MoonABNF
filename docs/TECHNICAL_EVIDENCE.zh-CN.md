@@ -1,6 +1,6 @@
 # MoonABNF 技术证据索引
 
-核对日期：2026-10-26。当前安装版 **0.3.0**。这里对应“从文法校验走向通用解析”的复审问题。
+核对日期：2026-10-27。当前安装版 **0.3.0**。这里对应“从文法校验走向通用解析”的复审问题。
 
 | 项目 | 内容与证据 |
 | --- | --- |
@@ -14,6 +14,8 @@
 
 基准 CPU 为 **AMD EPYC 9V45 96-Core Processor，4 个逻辑 CPU**，moonc 0.10.14。[固定 job](https://github.com/sundaysebasidian-byte/MoonABNF/actions/runs/40287620677/job/121454911195)是 README 表格来源；更正型号不改变数值。自适应分组均值不能称作五次独立进程或 p95。
 
-剩余边界：按字节解析，拒绝左递归，只返回一个确定派生见证；预算耗尽为未判定。URI/Cookie/ETag 使用规范语料与测试输入，尚无外部用户采用证据。竞赛表单和须本人撰写的个人说明由用户完成。来源与辅助工具使用见 [SOURCES](../SOURCES.md)、[AI_USAGE](../AI_USAGE.md)。
+剩余边界：按字节解析，拒绝左递归，只返回一个确定派生见证；预算耗尽为未判定。URI/Cookie/ETag 使用规范语料与测试输入，尚无外部用户采用证据。来源与辅助工具使用见 [SOURCES](../SOURCES.md)、[AI_USAGE](../AI_USAGE.md)。
 
 外部规范安装版用例：[RFC3339 字段提取](RFC3339_REGISTRY_CASE.zh-CN.md)，两条官方样例和一条自编负例已通过；日期语义另行校验。
+
+当前文档基线：[3d0c1b4](https://github.com/sundaysebasidian-byte/MoonABNF/commit/3d0c1b44d24483bfd768456dda5d0ce6f2de0a4b)（[文档 PR #12](https://github.com/sundaysebasidian-byte/MoonABNF/pull/12)）。上述运行记录保持原适用提交，此次文档核对没有重跑功能测试。
