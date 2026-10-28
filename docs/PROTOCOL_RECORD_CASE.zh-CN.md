@@ -116,4 +116,4 @@ MOONABNF_SDK=/existing/trusted/sdk python3 scripts/registry_protocol_record_test
 
 该命令在全新目录从registry安装精确0.3.0，检查依赖树source.kind=registry、非workspace member；随后以frozen单worker运行既有4项契约和JSON黄金/拒绝/预算/配置检查，拒绝/预算不导出部分字段，Program复用由既有白盒契约确认。脚本和模板的SHA256记录于本地回执。使用已发布公共核心与文法子包，不复制库算法，也不替代source-bound协议测试。需要已有SDK及Mooncakes网络可达；没有联网业务服务或生产数据。
 
-脚本保留默认 0.2.0 供历史回归，复现当前包须显式传 `--release-version 0.3.0`。本节 registry 命令使用原模板，不调用诊断；已发布的 `diagnose_input` 与可复制的 JSON 诊断扩展另见[README 诊断入口](../README.md#030有界输入失败解释)。0.3.0 发布轮已另验实际 registry 诊断和 JS 扩展，不能把本节原模板的成功当成诊断测试。
+脚本保留默认 0.2.0 供历史回归，复现当前包须显式传 `--release-version 0.3.0`。本节 registry 命令使用原模板，不调用诊断；已发布的 `diagnose_input` 与可复制的 JSON 诊断扩展另见[README 诊断入口](../README.md#5-解释为什么不匹配)。0.3.0 发布轮已另验实际 registry 诊断和 JS 扩展，不能把本节原模板的成功当成诊断测试。
