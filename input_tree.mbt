@@ -5,8 +5,8 @@ pub(all) enum InputNodeKind {
   LiteralNode
   RangeNode
   SequenceNode
-  ChoiceNode(Int)
-  RepeatNode(Int)
+  ChoiceNode(Int32)
+  RepeatNode(Int32)
 } derive(Eq, Debug)
 
 ///|
@@ -14,17 +14,17 @@ pub(all) enum InputNodeKind {
 /// implicit core expressions have synthetic offset 0. Children are node IDs.
 pub(all) struct InputNode {
   kind : InputNodeKind
-  start : Int
-  end : Int
-  source_offset : Int
-  children : Array[Int]
+  start : Int32
+  end : Int32
+  source_offset : Int32
+  children : Array[Int32]
 } derive(Eq, Debug)
 
 ///|
 /// Flat, reachable-only tree; root is always 0. No input bytes are copied.
 pub(all) struct InputTree {
   nodes : Array[InputNode]
-  root : Int
+  root : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -32,8 +32,8 @@ pub(all) struct InputTree {
 /// not only the returned tree. Match limits retain their existing meaning.
 pub(all) struct InputTreeLimits {
   matching : MatchLimits
-  max_nodes : Int
-  max_edges : Int
+  max_nodes : Int32
+  max_edges : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -46,23 +46,23 @@ pub fn default_input_tree_limits() -> InputTreeLimits {
 pub(all) struct InputTreeReport {
   status : MatchStatus
   tree : InputTree?
-  offset : Int
-  work : Int
-  states : Int
-  nodes : Int
-  edges : Int
+  offset : Int32
+  work : Int32
+  states : Int32
+  nodes : Int32
+  edges : Int32
 } derive(Eq, Debug)
 
 ///|
 priv struct Witness {
-  end : Int
-  id : Int
+  end : Int32
+  id : Int32
 }
 
 ///|
 priv struct PathLink {
-  previous : Int
-  node : Int
+  previous : Int32
+  node : Int32
 }
 
 ///|
@@ -71,8 +71,9 @@ priv struct TreeRunner {
   limits : InputTreeLimits
   arena : Array[InputNode]
   paths : Array[PathLink]
-  mut nodes : Int
-  mut edges : Int
+  mut nodes : Int32
+  mut edges : Int32
+  chart : Map[(String, Int32), Array[Witness]]
 }
 
 ///|
@@ -97,11 +98,11 @@ fn TreeRunner::charge_node(self : TreeRunner) -> Unit raise MatchStop {
 fn TreeRunner::node(
   self : TreeRunner,
   kind : InputNodeKind,
-  start : Int,
-  end : Int,
-  source_offset : Int,
-  children : Array[Int],
-) -> Int raise MatchStop {
+  start : Int32,
+  end : Int32,
+  source_offset : Int32,
+  children : Array[Int32],
+) -> Int32 raise MatchStop {
   self.charge_node()
   // children was constructed by a charged path traversal or a bounded literal.
   let id = self.arena.length()
@@ -112,8 +113,8 @@ fn TreeRunner::node(
 ///|
 fn TreeRunner::single(
   self : TreeRunner,
-  id : Int,
-) -> Array[Int] raise MatchStop {
+  id : Int32,
+) -> Array[Int32] raise MatchStop {
   self.edge()
   [id]
 }
@@ -121,9 +122,9 @@ fn TreeRunner::single(
 ///|
 fn TreeRunner::append(
   self : TreeRunner,
-  previous : Int,
-  node : Int,
-) -> Int raise MatchStop {
+  previous : Int32,
+  node : Int32,
+) -> Int32 raise MatchStop {
   self.edge()
   let id = self.paths.length()
   self.paths.push({ previous, node, })
@@ -133,9 +134,9 @@ fn TreeRunner::append(
 ///|
 fn TreeRunner::children(
   self : TreeRunner,
-  path : Int,
-) -> Array[Int] raise MatchStop {
-  let out : Array[Int] = []
+  path : Int32,
+) -> Array[Int32] raise MatchStop {
+  let out : Array[Int32] = []
   let mut at = path
   while at >= 0 {
     self.edge()
@@ -160,7 +161,7 @@ fn TreeRunner::children(
 fn TreeRunner::contains(
   self : TreeRunner,
   out : Array[Witness],
-  end : Int,
+  end : Int32,
 ) -> Bool raise MatchStop {
   for old in out {
     self.runner.tick(end)
@@ -175,8 +176,8 @@ fn TreeRunner::contains(
 fn TreeRunner::insert(
   self : TreeRunner,
   out : Array[Witness],
-  end : Int,
-  id : Int,
+  end : Int32,
+  id : Int32,
 ) -> Unit raise MatchStop {
   if end > self.runner.furthest {
     self.runner.furthest = end
@@ -195,8 +196,8 @@ fn TreeRunner::insert(
 fn TreeRunner::eval(
   self : TreeRunner,
   e : Expr,
-  pos : Int,
-  depth : Int,
+  pos : Int32,
+  depth : Int32,
 ) -> Array[Witness] raise MatchStop {
   let runner = self.runner
   if pos > runner.furthest {
@@ -209,7 +210,18 @@ fn TreeRunner::eval(
   let out : Array[Witness] = []
   match e {
     Ref(name, source) =>
-      for w in self.eval(runner.program.rules[name], pos, depth + 1) {
+      for
+        w in (if !runner.program.productive.contains(name) {
+          []
+        } else if runner.program.left_recursive {
+          let cached = self.chart.get((name, pos)).unwrap_or([])
+          for w in cached {
+            runner.tick(w.end)
+          }
+          cached.copy()
+        } else {
+          self.eval(runner.program.rules[name], pos, depth + 1)
+        }) {
         let id = self.node(
           RuleNode(name),
           pos,
@@ -229,7 +241,7 @@ fn TreeRunner::eval(
         if at >= runner.input.length() {
           return out
         }
-        let actual = runner.input[at].to_int()
+        let actual = runner.input.at(at)
         let wanted = s[i].to_int()
         if (if sensitive {
             actual != wanted
@@ -244,7 +256,7 @@ fn TreeRunner::eval(
     }
     Range(lo, hi, source) =>
       if pos < runner.input.length() {
-        let value = runner.input[pos].to_int()
+        let value = runner.input.at(pos)
         if value >= lo && value <= hi {
           self.insert(
             out,
@@ -352,27 +364,21 @@ fn TreeRunner::eval(
 /// keep wide repetitions from making a recursive list on the runtime stack.
 fn TreeRunner::finish(
   self : TreeRunner,
-  root : Int,
+  root : Int32,
 ) -> InputTree raise MatchStop {
   let pending = [root]
-  let ids : Map[Int, Int] = Map([(root, 0)])
   let nodes : Array[InputNode] = []
   let mut i = 0
   while i < pending.length() {
     self.charge_node()
     let old = self.arena[pending[i]]
-    let children : Array[Int] = []
+    let children : Array[Int32] = []
     for child in old.children {
       self.edge()
-      let id = match ids.get(child) {
-        Some(id) => id
-        None => {
-          let id = pending.length()
-          ids[child] = id
-          pending.push(child)
-          id
-        }
-      }
+      // Chart witnesses can be shared internally. Public InputTree is a tree,
+      // so materialize each occurrence separately, charging nodes/edges.
+      let id = pending.length()
+      pending.push(child)
       children.push(id)
     }
     nodes.push({ ..old, children, })
@@ -395,11 +401,12 @@ fn TreeRunner::finish(
 ///   assert_eq(report.tree.unwrap().nodes[0].end, 2)
 /// }
 /// ```
-pub fn Program::parse_input(
+fn Program::parse_symbols(
   self : Program,
   start : String,
-  input : Bytes,
-  limits? : InputTreeLimits = default_input_tree_limits(),
+  input : Symbols,
+  limits : InputTreeLimits,
+  initial_work : Int32,
 ) -> InputTreeReport {
   let matching = limits.matching
   let empty : InputTreeReport = {
@@ -426,12 +433,16 @@ pub fn Program::parse_input(
     None => return { ..empty, status: UnknownRule, }
     Some(e) => e
   }
+  if !self.productive.contains(name) {
+    return { ..empty, status: NoMatch, }
+  }
   let runner : Runner = {
     failures: None,
+    chart: Map([]),
     program: self,
     input,
     limits: matching,
-    work: 0,
+    work: initial_work,
     states: 0,
     furthest: 0,
   }
@@ -442,11 +453,16 @@ pub fn Program::parse_input(
     paths: [],
     nodes: 0,
     edges: 0,
+    chart: Map([]),
   }
   let mut tree : InputTree? = None
   let status = try {
-    let ends = tree_runner.eval(e, 0, 0)
-    let mut selected : Int? = None
+    let ends = if self.left_recursive {
+      tree_runner.solve(name)
+    } else {
+      tree_runner.eval(e, 0, 0)
+    }
+    let mut selected : Int32? = None
     for w in ends {
       runner.tick(w.end)
       if w.end == input.length() {
@@ -515,3 +531,49 @@ pub extend InputTreeReport with Eq::{equal, not_equal}
 
 ///|
 pub extend InputTreeReport with @debug.Debug::{to_repr}
+
+///|
+// Cache only the first finite witness for each endpoint. Each new witness
+// refers to already constructed nodes, so nullable cycles cannot create a
+// cyclic output tree. This is one derivation, not an exhaustive parse forest.
+fn TreeRunner::solve(
+  self : TreeRunner,
+  start : String,
+) -> Array[Witness] raise MatchStop {
+  let names = self.runner.reachable_rules(start)
+  let mut changed = true
+  while changed {
+    changed = false
+    for name in names {
+      for pos = self.runner.input.length(); pos >= 0; pos = pos - 1 {
+        self.runner.tick(pos)
+        if !self.chart.contains((name, pos)) {
+          if self.runner.states >= self.runner.limits.max_states {
+            raise MatchStop("states")
+          }
+          self.runner.states = self.runner.states + 1
+        }
+        let old = self.chart.get((name, pos)).unwrap_or([])
+        let results = self.eval(self.runner.program.rules[name], pos, 0)
+        for w in results {
+          if !self.contains(old, w.end) {
+            self.insert(old, w.end, w.id)
+            changed = true
+          }
+        }
+        self.chart[(name, pos)] = old
+      }
+    }
+  }
+  self.chart.get((start, 0)).unwrap_or([])
+}
+
+///|
+pub fn Program::parse_input(
+  self : Program,
+  start : String,
+  input : Bytes,
+  limits~ : InputTreeLimits = default_input_tree_limits(),
+) -> InputTreeReport {
+  self.parse_symbols(start, ByteSymbols(input), limits, 0)
+}

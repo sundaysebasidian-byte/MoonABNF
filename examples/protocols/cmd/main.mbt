@@ -2,7 +2,7 @@
 fn show_field(
   tree : @abnf.InputTree,
   input : Bytes,
-  root : Int,
+  root : Int32,
   name : String,
 ) -> Unit {
   for id in tree.rule_nodes_in(name, root).unwrap() {
@@ -48,7 +48,7 @@ fn node_label(kind : @abnf.InputNodeKind) -> String {
 }
 
 ///|
-fn show_node(tree : @abnf.InputTree, id : Int, indent : String) -> Unit {
+fn show_node(tree : @abnf.InputTree, id : Int32, indent : String) -> Unit {
   let node = tree.nodes[id]
   println("\{indent}\{node_label(node.kind)} [\{node.start},\{node.end})")
 }

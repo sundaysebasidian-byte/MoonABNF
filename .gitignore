@@ -7,3 +7,6 @@ target
 # Local Python verification caches.
 __pycache__/
 *.pyc
+
+# Pinned CI SDK is always project-local, never published.
+.toolchains/

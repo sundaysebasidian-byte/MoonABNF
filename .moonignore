@@ -21,3 +21,11 @@ credentials.json
 *.p12
 *.zip
 *.patch
+
+# Isolated SDKs and private coordination/submission material are not libraries.
+.toolchains/
+recheck-evidence/
+FINAL_CONTENT_SHA256.json
+docs/APPLICATION_DRAFT_20261030.md
+docs/development-history/
+docs/UNDERSTANDING.md

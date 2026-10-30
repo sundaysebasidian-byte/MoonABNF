@@ -3,21 +3,21 @@
 pub(all) struct Diagnostic {
   code : String
   message : String
-  offset : Int
-  line : Int
-  column : Int
+  offset : Int32
+  line : Int32
+  column : Int32
 } derive(Eq, Debug)
 
 ///|
 /// Public AST. Repeat maximum None means unbounded; positions refer to source.
 pub(all) enum Expr {
-  Ref(String, Int)
-  Literal(Bytes, Bool, Int)
-  Range(Int, Int, Int)
-  Sequence(Array[Expr], Int)
-  Choice(Array[Expr], Int)
-  Repeat(Int, Int?, Expr, Int)
-  Prose(String, Int)
+  Ref(String, Int32)
+  Literal(Bytes, Bool, Int32)
+  Range(Int32, Int32, Int32)
+  Sequence(Array[Expr], Int32)
+  Choice(Array[Expr], Int32)
+  Repeat(Int32, Int32?, Expr, Int32)
+  Prose(String, Int32)
 } derive(Eq, Debug)
 
 ///|
@@ -25,7 +25,7 @@ pub(all) struct Rule {
   name : String
   expression : Expr
   incremental : Bool
-  offset : Int
+  offset : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -36,10 +36,10 @@ pub(all) struct Grammar {
 ///|
 /// Hard implementation ceilings prevent caller budgets from risking the stack.
 pub(all) struct ParseLimits {
-  max_bytes : Int
-  max_rules : Int
-  max_nodes : Int
-  max_depth : Int
+  max_bytes : Int32
+  max_rules : Int32
+  max_nodes : Int32
+  max_depth : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -50,7 +50,7 @@ pub fn default_parse_limits() -> ParseLimits {
 ///|
 fn diagnostic(
   source : Bytes,
-  offset : Int,
+  offset : Int32,
   code : String,
   message : String,
 ) -> Diagnostic {
@@ -68,7 +68,7 @@ fn diagnostic(
 }
 
 ///|
-fn Expr::offset(self : Expr) -> Int {
+fn Expr::offset(self : Expr) -> Int32 {
   match self {
     Ref(_, p)
     | Literal(_, _, p)
@@ -81,7 +81,7 @@ fn Expr::offset(self : Expr) -> Int {
 }
 
 ///|
-fn ascii_lower(c : Int) -> Int {
+fn ascii_lower(c : Int32) -> Int32 {
   if c >= 65 && c <= 90 {
     c + 32
   } else {
@@ -90,13 +90,13 @@ fn ascii_lower(c : Int) -> Int {
 }
 
 ///|
-fn alpha(c : Int) -> Bool {
+fn alpha(c : Int32) -> Bool {
   let v = ascii_lower(c)
   v >= 97 && v <= 122
 }
 
 ///|
-fn digit(c : Int) -> Bool {
+fn digit(c : Int32) -> Bool {
   c >= 48 && c <= 57
 }
 

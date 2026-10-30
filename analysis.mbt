@@ -89,22 +89,9 @@ fn leading(
 fn validate_recursion(
   rules : Map[String, Expr],
   a : Analysis,
-) -> Unit raise ParseFailure {
+) -> Bool raise ParseFailure {
   let names = rules.keys().collect()
   names.sort()
-  let productive = fixed_point(rules, false, a)
-  for name in names {
-    if !productive.contains(name) {
-      raise ParseFailure(
-        diagnostic(
-          a.source,
-          rules[name].offset(),
-          "nonproductive-rule",
-          "rule \{name} cannot derive a finite string",
-        ),
-      )
-    }
-  }
   let nullable = fixed_point(rules, true, a)
   let graph : Map[String, Array[String]] = Map([])
   for name in names {
@@ -122,14 +109,7 @@ fn validate_recursion(
       for next in graph[node] {
         a.tick(rules[root].offset())
         if next == root {
-          raise ParseFailure(
-            diagnostic(
-              a.source,
-              rules[root].offset(),
-              "left-recursion",
-              "nullable-prefix cycle from rule \{root}; rewrite the grammar",
-            ),
-          )
+          return true
         }
         if !seen.contains(next) {
           seen[next] = true
@@ -138,4 +118,5 @@ fn validate_recursion(
       }
     }
   }
+  false
 }

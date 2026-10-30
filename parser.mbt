@@ -6,9 +6,10 @@ priv suberror ParseFailure {
 ///|
 priv struct Parser {
   source : Bytes
-  mut pos : Int
-  mut nodes : Int
+  mut pos : Int32
+  mut nodes : Int32
   limits : ParseLimits
+  numeric_ceiling : Int32
 }
 
 ///|
@@ -21,7 +22,7 @@ fn[T] Parser::fail(
 }
 
 ///|
-fn Parser::peek(self : Parser) -> Int {
+fn Parser::peek(self : Parser) -> Int32 {
   if self.pos < self.source.length() {
     self.source[self.pos].to_int()
   } else {
@@ -30,7 +31,7 @@ fn Parser::peek(self : Parser) -> Int {
 }
 
 ///|
-fn Parser::take(self : Parser, c : Int) -> Bool {
+fn Parser::take(self : Parser, c : Int32) -> Bool {
   if self.peek() == c {
     self.pos = self.pos + 1
     true
@@ -40,7 +41,7 @@ fn Parser::take(self : Parser, c : Int) -> Bool {
 }
 
 ///|
-fn Parser::need(self : Parser, c : Int) -> Unit raise ParseFailure {
+fn Parser::need(self : Parser, c : Int32) -> Unit raise ParseFailure {
   if !self.take(c) {
     self.fail("syntax", "expected byte \{c}")
   }
@@ -108,9 +109,9 @@ fn Parser::name(self : Parser) -> String raise ParseFailure {
 ///|
 fn Parser::number(
   self : Parser,
-  base : Int,
-  ceiling : Int,
-) -> Int raise ParseFailure {
+  base : Int32,
+  ceiling : Int32,
+) -> Int32 raise ParseFailure {
   let start = self.pos
   let mut value = 0
   while true {
@@ -141,7 +142,7 @@ fn Parser::number(
 fn Parser::literal(
   self : Parser,
   sensitive : Bool,
-  start : Int,
+  start : Int32,
 ) -> Expr raise ParseFailure {
   self.need(34)
   let bytes : Array[Byte] = []
@@ -157,7 +158,7 @@ fn Parser::literal(
 }
 
 ///|
-fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
+fn Parser::element(self : Parser, depth : Int32) -> Expr raise ParseFailure {
   if depth > self.limits.max_depth {
     self.fail("parse-budget", "grammar nesting depth exhausted")
   }
@@ -209,9 +210,9 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
       120 => 16
       _ => self.fail("syntax", "unknown percent prefix")
     }
-    let lo = self.number(base, 255)
+    let lo = self.number(base, self.numeric_ceiling)
     if self.take(45) {
-      let hi = self.number(base, 255)
+      let hi = self.number(base, self.numeric_ceiling)
       if lo > hi {
         self.fail("range", "descending numeric range")
       }
@@ -219,7 +220,7 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
     }
     let es = [self.node(Range(lo, lo, start))]
     while self.take(46) {
-      let n = self.number(base, 255)
+      let n = self.number(base, self.numeric_ceiling)
       es.push(self.node(Range(n, n, start)))
     }
     return if es.length() == 1 { es[0] } else { self.node(Sequence(es, start)) }
@@ -228,7 +229,7 @@ fn Parser::element(self : Parser, depth : Int) -> Expr raise ParseFailure {
 }
 
 ///|
-fn Parser::repetition(self : Parser, depth : Int) -> Expr raise ParseFailure {
+fn Parser::repetition(self : Parser, depth : Int32) -> Expr raise ParseFailure {
   let start = self.pos
   let exact = if digit(self.peek()) {
     Some(self.number(10, 1000000))
@@ -256,7 +257,10 @@ fn Parser::repetition(self : Parser, depth : Int) -> Expr raise ParseFailure {
 }
 
 ///|
-fn Parser::concatenation(self : Parser, depth : Int) -> Expr raise ParseFailure {
+fn Parser::concatenation(
+  self : Parser,
+  depth : Int32,
+) -> Expr raise ParseFailure {
   let start = self.pos
   let es = [self.repetition(depth)]
   while true {
@@ -279,7 +283,7 @@ fn Parser::concatenation(self : Parser, depth : Int) -> Expr raise ParseFailure 
 }
 
 ///|
-fn Parser::alternation(self : Parser, depth : Int) -> Expr raise ParseFailure {
+fn Parser::alternation(self : Parser, depth : Int32) -> Expr raise ParseFailure {
   let start = self.pos
   let es = [self.concatenation(depth)]
   while true {
@@ -301,9 +305,10 @@ fn Parser::alternation(self : Parser, depth : Int) -> Expr raise ParseFailure {
 
 ///|
 /// Strict grammar input: CRLF required, including the final rule terminator.
-pub fn parse(
+fn parse_domain(
   source : Bytes,
-  limits? : ParseLimits = default_parse_limits(),
+  limits : ParseLimits,
+  numeric_ceiling : Int32,
 ) -> Result[Grammar, Diagnostic] {
   if limits.max_bytes < 0 ||
     limits.max_bytes > 1048576 ||
@@ -324,7 +329,7 @@ pub fn parse(
       diagnostic(source, 0, "parse-budget", "grammar byte budget exhausted"),
     )
   }
-  let p = { source, pos: 0, nodes: 0, limits, }
+  let p = { source, pos: 0, nodes: 0, limits, numeric_ceiling, }
   try {
     let rules : Array[Rule] = []
     while p.pos < source.length() {
@@ -357,4 +362,25 @@ pub fn parse(
   } catch {
     ParseFailure(d) => Err(d)
   }
+}
+
+///|
+/// Legacy byte-domain grammar parser, with numeric values limited to 255.
+pub fn parse(
+  source : Bytes,
+  limits~ : ParseLimits = default_parse_limits(),
+) -> Result[Grammar, Diagnostic] {
+  parse_domain(source, limits, 255)
+}
+
+///|
+/// Encoding-independent numeric AST, restricted to nonnegative Int32 values.
+/// RFC 5234 does not prescribe an external character encoding. This parser
+/// deliberately does not imply Unicode or byte recognition. Source offsets
+/// remain byte offsets into the ASCII grammar source.
+pub fn parse_numeric(
+  source : Bytes,
+  limits~ : ParseLimits = default_parse_limits(),
+) -> Result[Grammar, Diagnostic] {
+  parse_domain(source, limits, 2147483647)
 }

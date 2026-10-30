@@ -1,6 +1,6 @@
 ///|
 /// Node adapter: bounded regular-file reads only. No parsing or matching in JS.
-extern "js" fn read_file(path : String, max : Int) -> Bytes? =
+extern "js" fn read_file(path : String, max : Int32) -> Bytes? =
   #| (path, max) => {
   #|   const fs = require('node:fs');
   #|   let fd;
@@ -19,7 +19,7 @@ extern "js" fn read_file(path : String, max : Int) -> Bytes? =
   #| }
 
 ///|
-extern "js" fn exit_code(code : Int) -> Unit =
+extern "js" fn exit_code(code : Int32) -> Unit =
   #| code => { process.exitCode = code; }
 
 ///|

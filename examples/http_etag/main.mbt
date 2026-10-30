@@ -12,8 +12,8 @@ pub fn grammar() -> Bytes {
 /// Application adapter metadata; value bytes remain opaque, without unescaping.
 pub(all) struct TagSpan {
   weak : Bool
-  value_start : Int
-  value_end : Int
+  value_start : Int32
+  value_end : Int32
 } derive(Eq)
 
 ///|

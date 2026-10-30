@@ -2,9 +2,9 @@
 /// Matching rule nodes in the tree's stable storage order (breadth-first for
 /// parse_input results). Rule names are ASCII case-insensitive as in ABNF.
 /// Does not traverse caller-mutable children, so malformed cycles cannot loop.
-pub fn InputTree::rule_nodes(self : InputTree, name : String) -> Array[Int] {
+pub fn InputTree::rule_nodes(self : InputTree, name : String) -> Array[Int32] {
   let wanted = lower_name(name)
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   for id, node in self.nodes {
     if node.kind is RuleNode(rule) && lower_name(rule) == wanted {
       result.push(id)
@@ -34,15 +34,15 @@ pub fn InputTree::rule_nodes(self : InputTree, name : String) -> Array[Int] {
 pub fn InputTree::rule_nodes_in(
   self : InputTree,
   name : String,
-  root : Int,
-) -> Array[Int]? {
+  root : Int32,
+) -> Array[Int32]? {
   if root < 0 || root >= self.nodes.length() {
     return None
   }
   let wanted = lower_name(name)
-  let seen : Map[Int, Bool] = Map([(root, true)])
+  let seen : Map[Int32, Bool] = Map([(root, true)])
   let pending = [root]
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   while !pending.is_empty() {
     let id = pending.pop().unwrap()
     let node = self.nodes[id]
@@ -101,7 +101,7 @@ pub fn InputTree::rule_nodes_in(
 /// Half-open byte span, or None for an invalid node ID or malformed span.
 /// Zero-width spans are valid. This local check does not validate topology,
 /// the root, grammar membership or the span against an input length.
-pub fn InputTree::span(self : InputTree, node : Int) -> (Int, Int)? {
+pub fn InputTree::span(self : InputTree, node : Int32) -> (Int32, Int32)? {
   if node < 0 || node >= self.nodes.length() {
     return None
   }
@@ -121,7 +121,7 @@ pub fn InputTree::span(self : InputTree, node : Int) -> (Int, Int)? {
 pub fn InputTree::extract(
   self : InputTree,
   input : Bytes,
-  node : Int,
+  node : Int32,
 ) -> Bytes? {
   match self.span(node) {
     Some((start, end)) if end <= input.length() =>

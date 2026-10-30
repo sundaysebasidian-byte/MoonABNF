@@ -4,7 +4,7 @@
 /// referenced rule, avoiding reliance on the evaluator's implicit core table.
 fn replay(
   tree : @moonabnf.InputTree,
-  id : Int,
+  id : Int32,
   expr : @moonabnf.Expr,
   rules : Map[String, @moonabnf.Expr],
   input : Bytes,

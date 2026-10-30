@@ -6,7 +6,11 @@ import {
 }
 
 // Values
-pub fn compile(Bytes, limits? : ParseLimits, max_work? : Int) -> Result[Program, Diagnostic]
+pub fn compile(Bytes, limits? : ParseLimits, max_work? : Int32) -> Result[Program, Diagnostic]
+
+pub fn compile_scalar(Bytes, bindings? : Array[ProseBinding], limits? : ParseLimits, max_work? : Int32) -> Result[ScalarProgram, Diagnostic]
+
+pub fn compile_with_prose(Bytes, Array[ProseBinding], limits? : ParseLimits, max_work? : Int32) -> Result[Program, Diagnostic]
 
 pub fn default_input_diagnostic_limits() -> InputDiagnosticLimits
 
@@ -16,7 +20,13 @@ pub fn default_match_limits() -> MatchLimits
 
 pub fn default_parse_limits() -> ParseLimits
 
+pub fn default_scalar_input_tree_limits() -> ScalarInputTreeLimits
+
+pub fn default_scalar_match_limits() -> ScalarMatchLimits
+
 pub fn parse(Bytes, limits? : ParseLimits) -> Result[Grammar, Diagnostic]
+
+pub fn parse_numeric(Bytes, limits? : ParseLimits) -> Result[Grammar, Diagnostic]
 
 // Errors
 
@@ -24,9 +34,9 @@ pub fn parse(Bytes, limits? : ParseLimits) -> Result[Grammar, Diagnostic]
 pub(all) struct Diagnostic {
   code : String
   message : String
-  offset : Int
-  line : Int
-  column : Int
+  offset : Int32
+  line : Int32
+  column : Int32
 } derive(Eq, @debug.Debug)
 pub fn Diagnostic::equal(Self, Self) -> Bool
 pub fn Diagnostic::not_equal(Self, Self) -> Bool
@@ -34,20 +44,20 @@ pub fn Diagnostic::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ExpectedInput {
   expectation : InputExpectation
-  grammar_offset : Int?
+  grammar_offset : Int32?
 } derive(Eq, @debug.Debug)
 pub fn ExpectedInput::equal(Self, Self) -> Bool
 pub fn ExpectedInput::not_equal(Self, Self) -> Bool
 pub fn ExpectedInput::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Expr {
-  Ref(String, Int)
-  Literal(Bytes, Bool, Int)
-  Range(Int, Int, Int)
-  Sequence(Array[Expr], Int)
-  Choice(Array[Expr], Int)
-  Repeat(Int, Int?, Expr, Int)
-  Prose(String, Int)
+  Ref(String, Int32)
+  Literal(Bytes, Bool, Int32)
+  Range(Int32, Int32, Int32)
+  Sequence(Array[Expr], Int32)
+  Choice(Array[Expr], Int32)
+  Repeat(Int32, Int32?, Expr, Int32)
+  Prose(String, Int32)
 } derive(Eq, @debug.Debug)
 pub fn Expr::equal(Self, Self) -> Bool
 pub fn Expr::not_equal(Self, Self) -> Bool
@@ -61,8 +71,8 @@ pub fn Grammar::not_equal(Self, Self) -> Bool
 pub fn Grammar::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputDiagnosticLimits {
-  max_work : Int
-  max_expectations : Int
+  max_work : Int32
+  max_expectations : Int32
 } derive(Eq, @debug.Debug)
 pub fn InputDiagnosticLimits::equal(Self, Self) -> Bool
 pub fn InputDiagnosticLimits::not_equal(Self, Self) -> Bool
@@ -72,7 +82,7 @@ pub(all) struct InputDiagnosticReport {
   report : MatchReport
   failure : InputFailure?
   explanation_status : String
-  explanation_work : Int
+  explanation_work : Int32
 } derive(Eq, @debug.Debug)
 pub fn InputDiagnosticReport::equal(Self, Self) -> Bool
 pub fn InputDiagnosticReport::not_equal(Self, Self) -> Bool
@@ -80,7 +90,7 @@ pub fn InputDiagnosticReport::to_json(Self) -> Json
 pub fn InputDiagnosticReport::to_repr(Self) -> @debug.Repr
 
 pub(all) enum InputExpectation {
-  ByteRange(Int, Int, Bool)
+  ByteRange(Int32, Int32, Bool)
   EndOfInput
 } derive(Eq, @debug.Debug)
 pub fn InputExpectation::equal(Self, Self) -> Bool
@@ -88,8 +98,8 @@ pub fn InputExpectation::not_equal(Self, Self) -> Bool
 pub fn InputExpectation::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputFailure {
-  offset : Int
-  actual : Int?
+  offset : Int32
+  actual : Int32?
   expected : Array[ExpectedInput]
   truncated : Bool
 } derive(Eq, @debug.Debug)
@@ -99,10 +109,10 @@ pub fn InputFailure::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputNode {
   kind : InputNodeKind
-  start : Int
-  end : Int
-  source_offset : Int
-  children : Array[Int]
+  start : Int32
+  end : Int32
+  source_offset : Int32
+  children : Array[Int32]
 } derive(Eq, @debug.Debug)
 pub fn InputNode::equal(Self, Self) -> Bool
 pub fn InputNode::not_equal(Self, Self) -> Bool
@@ -113,8 +123,8 @@ pub(all) enum InputNodeKind {
   LiteralNode
   RangeNode
   SequenceNode
-  ChoiceNode(Int)
-  RepeatNode(Int)
+  ChoiceNode(Int32)
+  RepeatNode(Int32)
 } derive(Eq, @debug.Debug)
 pub fn InputNodeKind::equal(Self, Self) -> Bool
 pub fn InputNodeKind::not_equal(Self, Self) -> Bool
@@ -122,20 +132,20 @@ pub fn InputNodeKind::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputTree {
   nodes : Array[InputNode]
-  root : Int
+  root : Int32
 } derive(Eq, @debug.Debug)
 pub fn InputTree::equal(Self, Self) -> Bool
-pub fn InputTree::extract(Self, Bytes, Int) -> Bytes?
+pub fn InputTree::extract(Self, Bytes, Int32) -> Bytes?
 pub fn InputTree::not_equal(Self, Self) -> Bool
-pub fn InputTree::rule_nodes(Self, String) -> Array[Int]
-pub fn InputTree::rule_nodes_in(Self, String, Int) -> Array[Int]?
-pub fn InputTree::span(Self, Int) -> (Int, Int)?
+pub fn InputTree::rule_nodes(Self, String) -> Array[Int32]
+pub fn InputTree::rule_nodes_in(Self, String, Int32) -> Array[Int32]?
+pub fn InputTree::span(Self, Int32) -> (Int32, Int32)?
 pub fn InputTree::to_repr(Self) -> @debug.Repr
 
 pub(all) struct InputTreeLimits {
   matching : MatchLimits
-  max_nodes : Int
-  max_edges : Int
+  max_nodes : Int32
+  max_edges : Int32
 } derive(Eq, @debug.Debug)
 pub fn InputTreeLimits::equal(Self, Self) -> Bool
 pub fn InputTreeLimits::not_equal(Self, Self) -> Bool
@@ -144,21 +154,21 @@ pub fn InputTreeLimits::to_repr(Self) -> @debug.Repr
 pub(all) struct InputTreeReport {
   status : MatchStatus
   tree : InputTree?
-  offset : Int
-  work : Int
-  states : Int
-  nodes : Int
-  edges : Int
+  offset : Int32
+  work : Int32
+  states : Int32
+  nodes : Int32
+  edges : Int32
 } derive(Eq, @debug.Debug)
 pub fn InputTreeReport::equal(Self, Self) -> Bool
 pub fn InputTreeReport::not_equal(Self, Self) -> Bool
 pub fn InputTreeReport::to_repr(Self) -> @debug.Repr
 
 pub(all) struct MatchLimits {
-  max_input_bytes : Int
-  max_work : Int
-  max_states : Int
-  max_depth : Int
+  max_input_bytes : Int32
+  max_work : Int32
+  max_states : Int32
+  max_depth : Int32
 } derive(Eq, @debug.Debug)
 pub fn MatchLimits::equal(Self, Self) -> Bool
 pub fn MatchLimits::not_equal(Self, Self) -> Bool
@@ -166,9 +176,9 @@ pub fn MatchLimits::to_repr(Self) -> @debug.Repr
 
 pub(all) struct MatchReport {
   status : MatchStatus
-  offset : Int
-  work : Int
-  states : Int
+  offset : Int32
+  work : Int32
+  states : Int32
 } derive(Eq, @debug.Debug)
 pub fn MatchReport::equal(Self, Self) -> Bool
 pub fn MatchReport::not_equal(Self, Self) -> Bool
@@ -186,10 +196,10 @@ pub fn MatchStatus::not_equal(Self, Self) -> Bool
 pub fn MatchStatus::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ParseLimits {
-  max_bytes : Int
-  max_rules : Int
-  max_nodes : Int
-  max_depth : Int
+  max_bytes : Int32
+  max_rules : Int32
+  max_nodes : Int32
+  max_depth : Int32
 } derive(Eq, @debug.Debug)
 pub fn ParseLimits::equal(Self, Self) -> Bool
 pub fn ParseLimits::not_equal(Self, Self) -> Bool
@@ -203,15 +213,92 @@ pub fn Program::parse_input(Self, String, Bytes, limits? : InputTreeLimits) -> I
 pub fn Program::recognize(Self, String, Bytes, limits? : MatchLimits) -> MatchReport
 pub fn Program::rule_names(Self) -> Array[String]
 
+pub(all) struct ProseBinding {
+  name : String
+  predicate : ProsePredicate
+} derive(Eq, @debug.Debug)
+pub fn ProseBinding::equal(Self, Self) -> Bool
+pub fn ProseBinding::not_equal(Self, Self) -> Bool
+pub fn ProseBinding::to_repr(Self) -> @debug.Repr
+
+pub(all) enum ProsePredicate {
+  Words(Array[Array[Int32]])
+  SymbolRange(Int32, Int32)
+  Concat(Array[ProsePredicate])
+  Alternative(Array[ProsePredicate])
+  Repetition(Int32, Int32?, ProsePredicate)
+} derive(Eq, @debug.Debug)
+pub fn ProsePredicate::equal(Self, Self) -> Bool
+pub fn ProsePredicate::not_equal(Self, Self) -> Bool
+pub fn ProsePredicate::to_repr(Self) -> @debug.Repr
+
 pub(all) struct Rule {
   name : String
   expression : Expr
   incremental : Bool
-  offset : Int
+  offset : Int32
 } derive(Eq, @debug.Debug)
 pub fn Rule::equal(Self, Self) -> Bool
 pub fn Rule::not_equal(Self, Self) -> Bool
 pub fn Rule::to_repr(Self) -> @debug.Repr
+
+pub(all) enum ScalarInputError {
+  InvalidScalar(Int32, Int32)
+} derive(Eq, @debug.Debug)
+pub fn ScalarInputError::equal(Self, Self) -> Bool
+pub fn ScalarInputError::not_equal(Self, Self) -> Bool
+pub fn ScalarInputError::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ScalarInputTree {
+  nodes : Array[InputNode]
+  root : Int32
+} derive(Eq, @debug.Debug)
+pub fn ScalarInputTree::equal(Self, Self) -> Bool
+pub fn ScalarInputTree::extract(Self, Array[Int32], Int32) -> Array[Int32]?
+pub fn ScalarInputTree::not_equal(Self, Self) -> Bool
+pub fn ScalarInputTree::rule_nodes(Self, String) -> Array[Int32]
+pub fn ScalarInputTree::rule_nodes_in(Self, String, Int32) -> Array[Int32]?
+pub fn ScalarInputTree::span(Self, Int32) -> (Int32, Int32)?
+pub fn ScalarInputTree::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ScalarInputTreeLimits {
+  matching : ScalarMatchLimits
+  max_nodes : Int32
+  max_edges : Int32
+} derive(Eq, @debug.Debug)
+pub fn ScalarInputTreeLimits::equal(Self, Self) -> Bool
+pub fn ScalarInputTreeLimits::not_equal(Self, Self) -> Bool
+pub fn ScalarInputTreeLimits::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ScalarInputTreeReport {
+  status : MatchStatus
+  tree : ScalarInputTree?
+  offset : Int32
+  work : Int32
+  states : Int32
+  nodes : Int32
+  edges : Int32
+} derive(Eq, @debug.Debug)
+pub fn ScalarInputTreeReport::equal(Self, Self) -> Bool
+pub fn ScalarInputTreeReport::not_equal(Self, Self) -> Bool
+pub fn ScalarInputTreeReport::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ScalarMatchLimits {
+  max_input_scalars : Int32
+  max_work : Int32
+  max_states : Int32
+  max_depth : Int32
+} derive(Eq, @debug.Debug)
+pub fn ScalarMatchLimits::equal(Self, Self) -> Bool
+pub fn ScalarMatchLimits::not_equal(Self, Self) -> Bool
+pub fn ScalarMatchLimits::to_repr(Self) -> @debug.Repr
+
+pub struct ScalarProgram {
+  // private fields
+}
+pub fn ScalarProgram::parse_input(Self, String, Array[Int32], limits? : ScalarInputTreeLimits) -> Result[ScalarInputTreeReport, ScalarInputError]
+pub fn ScalarProgram::recognize(Self, String, Array[Int32], limits? : ScalarMatchLimits) -> Result[MatchReport, ScalarInputError]
+pub fn ScalarProgram::rule_names(Self) -> Array[String]
 
 // Type aliases
 

@@ -1,4 +1,11 @@
-moonc v0.10.14+7d59c7ec9 (2026-09-18)
-moon 0.1.20260920 (914d7da 2026-09-20)
-moonrun 0.1.20260920 (914d7da 2026-09-20)
-SDK location: set MOONABNF_SDK to an existing trusted installation (or use MOON_HOME)
+{
+  "compiler": "0.10.18+6c83a7f62",
+  "moon": "0.1.20261028",
+  "sdk_url": "https://cli.moonbitlang.com/binaries/0.10.18%2B6c83a7f62/moonbit-linux-x86_64.tar.gz",
+  "sdk_sha256": "0e4cde1ace98e8ef00552a937738b59c6901c4b8a004ebad71ea0e63688f63f1",
+  "core_url": "https://cli.moonbitlang.com/cores/core-0.10.18%2B6c83a7f62.tar.gz",
+  "core_sha256": "30a8ae1c1e1e8fde478ea742cbc928c8f4ae1f5c00090afe3f10c97be9e5da64",
+  "hash_basis": "prior recorded bytes, rechecked after fresh official download; not claimed separately vendor-signed checksums",
+  "new_implementation": true,
+  "scope": "ABNF candidate; no added dependency; prior 0.10.14 lock retained in old archive"
+}

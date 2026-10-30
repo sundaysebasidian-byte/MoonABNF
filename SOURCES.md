@@ -27,3 +27,5 @@
 许可证/NOTICE，并核对最终构建组件；当前交付为源码及自制材料。
 
 Protocol corpus exception: fixtures/protocols/*.abnf and the corresponding embedded grammar are third-party grammar Code Components with the notices above; surrounding code and generated test inputs are MIT.
+
+2026-10-30 scalar/prose增量另核对 RFC5234 §2.4/§4、Unicode17 §3.9 scalar定义（https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-3/）。仅依据概念自实现，未复制标准正文或第三方算法源码。

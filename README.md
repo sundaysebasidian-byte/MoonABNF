@@ -1,10 +1,18 @@
+> Local follow-on: explicit prose languages now support concatenation, alternatives and repetition; see [composed prose](docs/COMPOSED_PROSE_20261030.md). This follow-on is not the published review branch or registry release.
+
+> 后续隔离增量候选：本目录新增 `parse_numeric`、Unicode scalar独立API、显式有限prose绑定及范围谓词。**未发布，旧Bytes API保留。** 用法/限制/新证据见 [scalar与prose增量](docs/SCALAR_PROSE_EXTENSION_20261030.md)。下方旧发布版和先前修复记录仍是历史范围。
+
+> 候选复现：本次修复使用 MoonBit **0.10.18+6c83a7f62**，不是旧发布版 0.10.14。请从本地候选源码包运行，不要用下方 `moon add ...@0.3.0` 获取新能力。完整范围与证据见 [复审回应](docs/REVIEW_RESPONSE_20261030.md)。AI 辅助草稿，待本人最终审阅定稿及提交。
+
+> 本地 2026-10-30 修复候选：新增有预算的左递归识别与输入树；尚未发布，不能当作 Mooncakes 0.3.0 能力。详见 [修复与兼容目标](docs/LEFT_RECURSION_REVIEW_20261030.md)。下文发布回执仍指原 0.3.0。
+
 # MoonABNF
 
 [![CI](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/ci.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/ci.yml)
 [![Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-MoonABNF 用 MoonBit 实现字节级 ABNF 解析。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
+MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节API，本地候选另有独立scalar应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
 
 文法文本 → 文法 AST → 编译校验 → 整段识别 / 输入派生树 → 按规则名取出原字节字段。
 实现依据 [RFC 5234](https://www.rfc-editor.org/rfc/rfc5234)（ABNF）与 [RFC 7405](https://www.rfc-editor.org/rfc/rfc7405)（大小写敏感字符串）。
@@ -13,9 +21,9 @@ MoonABNF 用 MoonBit 实现字节级 ABNF 解析。调用方提供文法，编�
 
 **0.3.0 已发布到 mooncakes**，包含输入派生树、字段提取与有界输入失败诊断，版本说明见 [release-0.3.0](docs/release-0.3.0.zh-CN.md)，复审入口见[技术证据索引](docs/TECHNICAL_EVIDENCE.zh-CN.md)。
 
-## 快速开始
+## 原发布版快速开始（不是本地修复候选）
 
-需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，见 [TOOLCHAIN.lock](TOOLCHAIN.lock)）和 Node.js。
+需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，旧发布版锁见保留的原候选包；当前 [TOOLCHAIN.lock](TOOLCHAIN.lock) 锁定修复候选）和 Node.js。
 
 ```sh
 git clone https://github.com/sundaysebasidian-byte/MoonABNF.git
@@ -52,7 +60,7 @@ match @abnf.compile(b"field = %i\"Trace\" \":\" SP 1*8HEXDIG CRLF\r\n") {
 }
 ```
 
-文法写错时得到带错误码、字节偏移和行列号的 `Diagnostic`，例如 `undefined-rule`、`left-recursion`、`duplicate-rule`。
+文法写错时得到带错误码、字节偏移和行列号的 `Diagnostic`，例如 `undefined-rule`、`prose-unsupported`、`duplicate-rule`。
 
 ### 2. 取出字段的原始字节
 
@@ -133,21 +141,23 @@ moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
 | 字符串：默认大小写不敏感，`%i` / `%s`（RFC 7405） | ✅ |
 | 注释、CRLF 行结构 | ✅ |
 | 附录 B 核心规则 ALPHA … WSP（16 条） | ✅ 内置，可被同名规则覆盖 |
-| prose-val `<...>` | 解析进 AST；编译时报 `prose-unsupported` |
+| prose-val `<...>` | 原compile仍拒绝；新增compile_with_prose/compile_scalar接受显式有限词表或单符号范围绑定 |
 
-编译阶段检查未定义规则、重复定义、不产生任何串的规则，以及左递归 / 可空前缀循环。
+编译阶段检查未定义规则和重复定义；无有限终结推导的闭合规则视为空语言；左递归 / 可空前缀循环改用有预算不动点识别与输入树路径，不再直接拒绝。
 
 ## 设计取舍
 
 - **两棵树分开**：文法 AST 描述文法本身，输入派生树描述某段输入怎样被匹配。
 - **ABNF 不是 PEG**：替代分支会保留全部可能的结束位置，不会因为先匹配到短的分支就错判。
 - **资源有预算**：输入长度、工作量、状态数、深度、树节点都有上限。预算用完返回 `BudgetExceeded`（未判定），不会被当成“不匹配”。
-- **偏移是字节**：跨度是半开字节区间，`extract` 从调用方保存的原始输入里复制，不做 URI 解码或去引号。
-- 不做：Unicode 数值终端、错误恢复、代码生成、流式输入、歧义全枚举，以及 URI/Cookie 的语义层规则。
+- **偏移单位按入口分开**：Bytes树跨度是半开字节区间，ScalarInputTree跨度是scalar索引；文法位置始终是字节。extract使用对应输入类型，不做URI/UTF解码。
+- 不做：任意外部编码/无限整数、自然语言prose解释或通用回调、错误恢复、代码生成、流式输入、歧义全枚举，以及URI/Cookie语义层规则。
 
 详细契约见 [边界说明](docs/BOUNDARIES.zh-CN.md) 和 [输入树上手](docs/INPUT_TREE_QUICKSTART.zh-CN.md)，公开接口见 [pkg.generated.mbti](pkg.generated.mbti)。
 
 ## 测试
+
+当前c89f804组合scalar/prose候选四后端各90/90；独立副本增加3组反例后native/JS各93/93（前序86/86仅历史阶段），完整check/示例/原始审查回执保存在私有交付材料，未随公开仓库提供；公开源码可自行复现。下列历史CLI/差分/CI/性能数据未因这次新增入口自动成为新域验证。
 
 - 单元与场景测试：解析器、编译器、识别器、输入树、边界、鲁棒性（1024 个变异文法、预算终止）。
 - 差分测试：随机生成 80 个文法、5440 次比对，结果与独立的正则 oracle 一致（`scripts/differential.py`）。
@@ -191,3 +201,5 @@ moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
 
 代码 MIT（[LICENSE](LICENSE)）。从 RFC 摘录的 URI / Cookie / HTTP 文法保留原有归属，不改称 MIT 原创，出处与哈希见 [SOURCES.md](SOURCES.md)。
 开发中 AI 的参与方式见 [AI_USAGE.md](AI_USAGE.md)，设计说明见 [docs/UNDERSTANDING.md](docs/UNDERSTANDING.md)。
+
+重复次数的十进制语法计数目前限制为 1,000,000；超出会被实现拒绝。这是资源实现边界，不是 RFC 5234 对合法 ABNF 的限制。

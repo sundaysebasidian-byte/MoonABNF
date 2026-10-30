@@ -1,7 +1,7 @@
 ///|
 /// ByteRange's third value denotes ASCII case-insensitive matching, not Unicode.
 pub(all) enum InputExpectation {
-  ByteRange(Int, Int, Bool)
+  ByteRange(Int32, Int32, Bool)
   EndOfInput
 } derive(Eq, Debug)
 
@@ -10,13 +10,13 @@ pub(all) enum InputExpectation {
 /// None denotes implicit core terminals or an end-of-input requirement.
 pub(all) struct ExpectedInput {
   expectation : InputExpectation
-  grammar_offset : Int?
+  grammar_offset : Int32?
 } derive(Eq, Debug)
 
 ///|
 pub(all) struct InputDiagnosticLimits {
-  max_work : Int
-  max_expectations : Int
+  max_work : Int32
+  max_expectations : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -26,8 +26,8 @@ pub fn default_input_diagnostic_limits() -> InputDiagnosticLimits {
 
 ///|
 pub(all) struct InputFailure {
-  offset : Int
-  actual : Int?
+  offset : Int32
+  actual : Int32?
   expected : Array[ExpectedInput]
   truncated : Bool
 } derive(Eq, Debug)
@@ -39,13 +39,13 @@ pub(all) struct InputDiagnosticReport {
   report : MatchReport
   failure : InputFailure?
   explanation_status : String
-  explanation_work : Int
+  explanation_work : Int32
 } derive(Eq, Debug)
 
 ///|
 priv struct FailureCollector {
-  max_expectations : Int
-  mut offset : Int
+  max_expectations : Int32
+  mut offset : Int32
   expected : Array[ExpectedInput]
   mut truncated : Bool
 }
@@ -53,9 +53,9 @@ priv struct FailureCollector {
 ///|
 fn Runner::expect(
   self : Runner,
-  at : Int,
+  at : Int32,
   expectation : InputExpectation,
-  source : Int,
+  source : Int32,
 ) -> Unit raise MatchStop {
   match self.failures {
     None => ()
@@ -100,8 +100,8 @@ pub fn Program::diagnose_input(
   self : Program,
   start : String,
   input : Bytes,
-  limits? : MatchLimits = default_match_limits(),
-  diagnostic_limits? : InputDiagnosticLimits = default_input_diagnostic_limits(),
+  limits~ : MatchLimits = default_match_limits(),
+  diagnostic_limits~ : InputDiagnosticLimits = default_input_diagnostic_limits(),
 ) -> InputDiagnosticReport {
   let report = self.recognize(start, input, limits~)
   if report.status != NoMatch {
@@ -109,6 +109,22 @@ pub fn Program::diagnose_input(
       report,
       failure: None,
       explanation_status: "not-applicable",
+      explanation_work: 0,
+    }
+  }
+  if !self.productive.contains(lower_name(start)) {
+    return {
+      report,
+      failure: None,
+      explanation_status: "empty-language",
+      explanation_work: 0,
+    }
+  }
+  if self.left_recursive {
+    return {
+      report,
+      failure: None,
+      explanation_status: "generalized-explanation-unavailable",
       explanation_work: 0,
     }
   }
@@ -131,12 +147,13 @@ pub fn Program::diagnose_input(
   }
   let runner = {
     program: self,
-    input,
+    input: ByteSymbols(input),
     limits: { ..limits, max_work: diagnostic_limits.max_work, },
     work: 0,
     states: 0,
     furthest: 0,
     failures: Some(failures),
+    chart: Map([]),
   }
   let status = try {
     let ends = runner.eval(self.rules[lower_name(start)], 0, 0)
@@ -214,7 +231,7 @@ pub extend InputDiagnosticReport with @debug.Debug::{to_repr}
 pub fn InputDiagnosticReport::to_json(self : InputDiagnosticReport) -> Json {
   let failure : Json = match self.failure {
     None => {
-      let empty : Int? = None
+      let empty : Int32? = None
       @json.to_json(empty)
     }
     Some(f) => {
@@ -253,11 +270,11 @@ pub fn InputDiagnosticReport::to_json(self : InputDiagnosticReport) -> Json {
 }
 
 ///|
-fn diagnostic_optional_int(value : Int?) -> Json {
+fn diagnostic_optional_int(value : Int32?) -> Json {
   match value {
     Some(n) => Json(n)
     None => {
-      let empty : Int? = None
+      let empty : Int32? = None
       @json.to_json(empty)
     }
   }

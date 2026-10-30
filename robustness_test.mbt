@@ -2,11 +2,11 @@
 // Reproducible robustness corpus, not a grammar-validity oracle. UInt arithmetic
 // is modulo 2^32; use upper bits for bounded draws, with no platform RNG.
 struct RobustRng {
-  mut state : UInt
+  mut state : UInt32
 }
 
 ///|
-fn RobustRng::draw(self : RobustRng, bound : Int) -> Int {
+fn RobustRng::draw(self : RobustRng, bound : Int32) -> Int32 {
   self.state = self.state * 1664525U + 1013904223U
   ((self.state >> 8) % bound.reinterpret_as_uint()).reinterpret_as_int()
 }
@@ -35,7 +35,7 @@ fn check_diagnostic(source : Bytes, d : @moonabnf.Diagnostic) -> Unit raise {
 }
 
 ///|
-fn mutated_source(rng : RobustRng, seed : Bytes, mode : Int) -> Bytes {
+fn mutated_source(rng : RobustRng, seed : Bytes, mode : Int32) -> Bytes {
   let at = rng.draw(seed.length() + 1)
   let bytes : Array[Byte] = []
   if mode == 0 {

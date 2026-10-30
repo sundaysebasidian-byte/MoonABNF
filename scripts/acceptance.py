@@ -17,6 +17,8 @@ out = args.output.resolve(); out.mkdir(parents=True, exist_ok=True)
 commands = [
  ('toolchain', ['scripts/moon-local.sh', 'version', '--all']),
  ('format', ['scripts/moon-local.sh', 'fmt', '--check']),
+ ('installer-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_install_ci_sdk.py']),
+ ('scalar-example', ['scripts/moon-local.sh', 'run', 'examples/scalar_prose', '--target', 'native']),
  ('consumer-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_consumer*.py']),
  ('protocol-fixtures', ['python3', 'scripts/verify_protocol_fixtures.py']),
  ('check-wasm', ['scripts/moon-local.sh', 'check', '--target', 'wasm', '-j', '1', '-d']),
@@ -50,7 +52,7 @@ for name, command in commands:
     print(f'{name}: {record["status"]} ({record["elapsed_seconds"]}s)', flush=True)
     if r.returncode != 0: print(r.stdout + r.stderr, flush=True)
 source_hashes = {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
-    for p in sorted(ROOT.rglob('*')) if p.is_file() and '.git' not in p.parts and '_build' not in p.parts and 'evidence' not in p.parts}
+    for p in sorted(ROOT.rglob('*')) if p.is_file() and '.git' not in p.parts and '_build' not in p.parts and 'evidence' not in p.parts and 'recheck-evidence' not in p.parts and '.toolchains' not in p.parts and '__pycache__' not in p.parts}
 sha = subprocess.run(['git','rev-parse','HEAD'], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 dirty = subprocess.run(['git','status','--porcelain'], cwd=ROOT, capture_output=True, text=True).stdout
 summary = {'time_utc':datetime.now(timezone.utc).isoformat(), 'host':platform.platform(),

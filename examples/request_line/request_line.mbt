@@ -23,11 +23,11 @@ pub fn grammar() -> Bytes {
 /// Fields lifted from a successful `request-line` derivation. Every field is a
 /// `[start, end)` byte span of the original input; nothing is copied or decoded.
 pub(all) struct RequestLine {
-  verb : (Int, Int)
-  path : (Int, Int)
-  query : (Int, Int)?
-  major : Int
-  minor : Int
+  verb : (Int32, Int32)
+  path : (Int32, Int32)
+  query : (Int32, Int32)?
+  major : Int32
+  minor : Int32
 } derive(Eq)
 
 ///|
@@ -40,7 +40,7 @@ pub fn extract(tree : @abnf.InputTree, input : Bytes) -> RequestLine {
   let mut meth = (0, 0)
   let mut path = (0, 0)
   let mut query = None
-  let mut digits : Array[Int] = []
+  let mut digits : Array[Int32] = []
   for node in tree.nodes {
     match node.kind {
       @abnf.RuleNode("method") => meth = (node.start, node.end)
@@ -76,7 +76,7 @@ pub fn parse(
 }
 
 ///|
-fn text(input : Bytes, start : Int, end : Int) -> String {
+fn text(input : Bytes, start : Int32, end : Int32) -> String {
   let shown = input[start:end].to_owned()
   let s = @utf8.decode_lossy(shown)
   s.replace_all(old="\r", new="\\r").replace_all(old="\n", new="\\n")
@@ -86,8 +86,8 @@ fn text(input : Bytes, start : Int, end : Int) -> String {
 fn dump_node(
   tree : @abnf.InputTree,
   input : Bytes,
-  id : Int,
-  depth : Int,
+  id : Int32,
+  depth : Int32,
   hidden : Array[String],
   leaf : Array[String],
   out : Array[String],

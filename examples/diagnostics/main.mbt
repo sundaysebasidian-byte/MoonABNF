@@ -1,5 +1,5 @@
 ///|
-fn byte_label(value : Int) -> String raise {
+fn byte_label(value : Int32) -> String raise {
   if value == 32 {
     "32 SPACE"
   } else if value >= 33 && value <= 126 {

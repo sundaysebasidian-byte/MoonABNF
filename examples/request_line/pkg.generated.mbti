@@ -18,11 +18,11 @@ pub fn parse(@moonabnf.Program, Bytes) -> Result[RequestLine, String]
 
 // Types and methods
 pub(all) struct RequestLine {
-  verb : (Int, Int)
-  path : (Int, Int)
-  query : (Int, Int)?
-  major : Int
-  minor : Int
+  verb : (Int32, Int32)
+  path : (Int32, Int32)
+  query : (Int32, Int32)?
+  major : Int32
+  minor : Int32
 } derive(Eq)
 pub fn RequestLine::equal(Self, Self) -> Bool
 pub fn RequestLine::not_equal(Self, Self) -> Bool

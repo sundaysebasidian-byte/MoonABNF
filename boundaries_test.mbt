@@ -26,8 +26,7 @@ test "all grammar rules are validated even if unused or repeated zero times" {
     d.code == "undefined-rule",
   )
   assert_true(
-    @moonabnf.compile(b"x = \"a\"\r\nunused = unused / \"b\"\r\n") is Err(d) &&
-    d.code == "left-recursion",
+    @moonabnf.compile(b"x = \"a\"\r\nunused = unused / \"b\"\r\n") is Ok(_),
   )
   assert_true(
     @moonabnf.compile(b"x = 0absent / \"a\"\r\n") is Err(d) &&

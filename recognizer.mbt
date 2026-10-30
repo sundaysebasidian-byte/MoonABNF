@@ -1,10 +1,10 @@
 ///|
 /// Work counts expression dispatches, byte comparisons and endpoint operations.
 pub(all) struct MatchLimits {
-  max_input_bytes : Int
-  max_work : Int
-  max_states : Int
-  max_depth : Int
+  max_input_bytes : Int32
+  max_work : Int32
+  max_states : Int32
+  max_depth : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -31,9 +31,9 @@ pub(all) enum MatchStatus {
 /// Budget exhaustion is indeterminate, even if an explored branch matched.
 pub(all) struct MatchReport {
   status : MatchStatus
-  offset : Int
-  work : Int
-  states : Int
+  offset : Int32
+  work : Int32
+  states : Int32
 } derive(Eq, Debug)
 
 ///|
@@ -44,16 +44,17 @@ priv suberror MatchStop {
 ///|
 priv struct Runner {
   program : Program
-  input : Bytes
+  input : Symbols
   limits : MatchLimits
-  mut work : Int
-  mut states : Int
-  mut furthest : Int
+  mut work : Int32
+  mut states : Int32
+  mut furthest : Int32
   failures : FailureCollector?
+  chart : Map[(String, Int32), Array[Int32]]
 }
 
 ///|
-fn Runner::tick(self : Runner, _pos : Int) -> Unit raise MatchStop {
+fn Runner::tick(self : Runner, _pos : Int32) -> Unit raise MatchStop {
   if self.work >= self.limits.max_work {
     raise MatchStop("work")
   }
@@ -64,8 +65,8 @@ fn Runner::tick(self : Runner, _pos : Int) -> Unit raise MatchStop {
 /// Every endpoint comparison is charged, including duplicates.
 fn Runner::contains(
   self : Runner,
-  es : Array[Int],
-  pos : Int,
+  es : Array[Int32],
+  pos : Int32,
 ) -> Bool raise MatchStop {
   for old in es {
     self.tick(pos)
@@ -79,8 +80,8 @@ fn Runner::contains(
 ///|
 fn Runner::insert(
   self : Runner,
-  es : Array[Int],
-  pos : Int,
+  es : Array[Int32],
+  pos : Int32,
 ) -> Unit raise MatchStop {
   if pos > self.furthest {
     self.furthest = pos
@@ -101,9 +102,9 @@ fn Runner::insert(
 fn Runner::eval(
   self : Runner,
   e : Expr,
-  pos : Int,
-  depth : Int,
-) -> Array[Int] raise MatchStop {
+  pos : Int32,
+  depth : Int32,
+) -> Array[Int32] raise MatchStop {
   if pos > self.furthest {
     self.furthest = pos
   }
@@ -112,7 +113,18 @@ fn Runner::eval(
     raise MatchStop("depth")
   }
   match e {
-    Ref(name, _) => self.eval(self.program.rules[name], pos, depth + 1)
+    Ref(name, _) =>
+      if !self.program.productive.contains(name) {
+        []
+      } else if self.program.left_recursive {
+        let cached = self.chart.get((name, pos)).unwrap_or([])
+        for end in cached {
+          self.tick(end)
+        }
+        cached.copy()
+      } else {
+        self.eval(self.program.rules[name], pos, depth + 1)
+      }
     Literal(s, sensitive, grammar_pos) => {
       for i = 0; i < s.length(); i = i + 1 {
         let at = pos + i
@@ -128,7 +140,7 @@ fn Runner::eval(
           )
           return []
         }
-        let actual = self.input[at].to_int()
+        let actual = self.input.at(at)
         let wanted = s[i].to_int()
         if (if sensitive {
             actual != wanted
@@ -139,7 +151,7 @@ fn Runner::eval(
           return []
         }
       }
-      let ends : Array[Int] = []
+      let ends : Array[Int32] = []
       self.insert(ends, pos + s.length())
       ends
     }
@@ -148,17 +160,17 @@ fn Runner::eval(
         self.expect(pos, ByteRange(lo, hi, false), grammar_pos)
         return []
       }
-      let value = self.input[pos].to_int()
+      let value = self.input.at(pos)
       if value < lo || value > hi {
         self.expect(pos, ByteRange(lo, hi, false), grammar_pos)
         return []
       }
-      let ends : Array[Int] = []
+      let ends : Array[Int32] = []
       self.insert(ends, pos + 1)
       ends
     }
     Choice(es, _) => {
-      let ends : Array[Int] = []
+      let ends : Array[Int32] = []
       for child in es {
         for at in self.eval(child, pos, depth + 1) {
           self.insert(ends, at)
@@ -167,10 +179,10 @@ fn Runner::eval(
       ends
     }
     Sequence(es, _) => {
-      let mut frontier : Array[Int] = []
+      let mut frontier : Array[Int32] = []
       self.insert(frontier, pos)
       for child in es {
-        let next : Array[Int] = []
+        let next : Array[Int32] = []
         for at in frontier {
           for end in self.eval(child, at, depth + 1) {
             self.insert(next, end)
@@ -191,14 +203,14 @@ fn Runner::eval(
 ///|
 fn Runner::repeat(
   self : Runner,
-  lo : Int,
-  hi : Int?,
+  lo : Int32,
+  hi : Int32?,
   child : Expr,
-  pos : Int,
-  depth : Int,
-) -> Array[Int] raise MatchStop {
-  let ends : Array[Int] = []
-  let mut frontier : Array[Int] = []
+  pos : Int32,
+  depth : Int32,
+) -> Array[Int32] raise MatchStop {
+  let ends : Array[Int32] = []
+  let mut frontier : Array[Int32] = []
   self.insert(frontier, pos)
   let mut count = 0
   while true {
@@ -211,7 +223,7 @@ fn Runner::repeat(
     if hi is Some(max) && count >= max {
       break
     }
-    let next : Array[Int] = []
+    let next : Array[Int32] = []
     for at in frontier {
       for end in self.eval(child, at, depth + 1) {
         self.insert(next, end)
@@ -258,11 +270,12 @@ fn valid_match_limits(limits : MatchLimits) -> Bool {
 
 ///|
 /// Recognize the entire byte sequence, not just a prefix.
-pub fn Program::recognize(
+fn Program::recognize_symbols(
   self : Program,
   start : String,
-  input : Bytes,
-  limits? : MatchLimits = default_match_limits(),
+  input : Symbols,
+  limits : MatchLimits,
+  initial_work : Int32,
 ) -> MatchReport {
   if !valid_match_limits(limits) {
     return { status: InvalidLimits, offset: 0, work: 0, states: 0, }
@@ -280,17 +293,25 @@ pub fn Program::recognize(
     None => return { status: UnknownRule, offset: 0, work: 0, states: 0, }
     Some(e) => e
   }
+  if !self.productive.contains(name) {
+    return { status: NoMatch, offset: 0, work: 0, states: 0, }
+  }
   let runner = {
     program: self,
     input,
     limits,
-    work: 0,
+    work: initial_work,
     states: 0,
     furthest: 0,
     failures: None,
+    chart: Map([]),
   }
   let status = try {
-    let ends = runner.eval(e, 0, 0)
+    let ends = if self.left_recursive {
+      runner.solve(name)
+    } else {
+      runner.eval(e, 0, 0)
+    }
     if runner.contains(ends, input.length()) {
       Matched
     } else {
@@ -328,3 +349,88 @@ pub extend MatchReport with Eq::{equal, not_equal}
 
 ///|
 pub extend MatchReport with @debug.Debug::{to_repr}
+
+///|
+// Monotone least fixed point over finite (rule,start,end) facts. No recursive
+// rule expansion occurs in this path. Work/states charge every evaluation and
+// insertion; exhaustion remains indeterminate, never a grammar rejection.
+fn Runner::solve(self : Runner, start : String) -> Array[Int32] raise MatchStop {
+  let names = self.reachable_rules(start)
+  let mut changed = true
+  while changed {
+    changed = false
+    for name in names {
+      for pos = self.input.length(); pos >= 0; pos = pos - 1 {
+        self.tick(pos)
+        if !self.chart.contains((name, pos)) {
+          if self.states >= self.limits.max_states {
+            raise MatchStop("states")
+          }
+          self.states = self.states + 1
+        }
+        let old = self.chart.get((name, pos)).unwrap_or([])
+        let results = self.eval(self.program.rules[name], pos, 0)
+        for end in results {
+          if !self.contains(old, end) {
+            self.insert(old, end)
+            changed = true
+          }
+        }
+        self.chart[(name, pos)] = old
+      }
+    }
+  }
+  self.chart.get((start, 0)).unwrap_or([])
+}
+
+///|
+fn Runner::collect_refs(
+  self : Runner,
+  e : Expr,
+  names : Array[String],
+  seen : Map[String, Bool],
+) -> Unit raise MatchStop {
+  self.tick(0)
+  match e {
+    Ref(name, _) =>
+      if !seen.contains(name) {
+        seen[name] = true
+        names.push(name)
+      }
+    Sequence(es, _) | Choice(es, _) =>
+      for child in es {
+        self.collect_refs(child, names, seen)
+      }
+    Repeat(_, hi, child, _) =>
+      if hi != Some(0) {
+        self.collect_refs(child, names, seen)
+      }
+    _ => ()
+  }
+}
+
+///|
+fn Runner::reachable_rules(
+  self : Runner,
+  start : String,
+) -> Array[String] raise MatchStop {
+  let names = [start]
+  let seen : Map[String, Bool] = Map([(start, true)])
+  let mut at = 0
+  while at < names.length() {
+    self.collect_refs(self.program.rules[names[at]], names, seen)
+    at = at + 1
+  }
+  names.sort()
+  names
+}
+
+///|
+pub fn Program::recognize(
+  self : Program,
+  start : String,
+  input : Bytes,
+  limits~ : MatchLimits = default_match_limits(),
+) -> MatchReport {
+  self.recognize_symbols(start, ByteSymbols(input), limits, 0)
+}
