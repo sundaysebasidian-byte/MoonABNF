@@ -12,7 +12,7 @@ checks = []
 def invoke(args, code, status=None):
     r = subprocess.run(['node', str(CLI), *map(str, args)], capture_output=True, text=True, timeout=10)
     assert r.returncode == code, (args, r.returncode, r.stdout, r.stderr)
-    rows = [json.loads(x) for x in r.stdout.splitlines() if x.startswith('{')]
+    rows = [json.loads(x) for x in r.stdout.splitlines()]
     if status is not None: assert rows[0]['status'] == status, rows
     checks.append({'command': [str(a) for a in args], 'exit_code': r.returncode, 'stdout': r.stdout, 'stderr': r.stderr})
     return rows

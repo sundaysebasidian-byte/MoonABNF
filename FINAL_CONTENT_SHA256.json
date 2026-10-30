@@ -15,7 +15,7 @@
     "AGENTS.md": "8b04acce8cb4af1d79fc7fb05364818f274a0908a4db81ce959f946c7a64b4b7",
     "AI_USAGE.md": "a92e28eaf9c07af4206c8d20df7a56cc740f1515dd8320143983de247d0ae81b",
     "LICENSE": "0aefaa81ec9406a59e67bfa072df18ff6c7337bf6d6e394de6a007401d8871d9",
-    "README.md": "dda4bbdcf1cfa4536db555cb4f7f4e27b0f3b1a7a9553449b50b2dbb72e90d0e",
+    "README.md": "0530d1908305fd71c83d038abbf0aafae37fe2cac3ce3751e1c51083bdef5a28",
     "SOURCES.md": "da8c9cb7d5a7b1c40993d5b72a9ca5b078634f1e809a931081f7e1a63f0d0f74",
     "TOOLCHAIN.lock": "1541f8c82c82e5232f52fb360ff36f7eb2ce0897d3e907b002f05a56743c269b",
     "analysis.mbt": "10913616b6b8af1b7e4e67a41919c76531c15fb87cc42131cb5bf3acc6ebfe75",
@@ -34,7 +34,7 @@
     "docs/INPUT_TREE_QUICKSTART.zh-CN.md": "e8a2a826c4a68cf4fbf6257316c8184fa6328c42a4c1b6e7f76c2177f23100f2",
     "docs/LEFT_RECURSION_REVIEW_20261030.md": "014022dd6056b597d7cf037736573f335cdf5e0bdedbf67ae8ddc6c4218b654f",
     "docs/PROTOCOL_RECORD_CASE.zh-CN.md": "f5932458337b181c587af59e34a9a549f323d12621e28e87014c1673a1186c12",
-    "docs/REVIEW_RESPONSE_20261030.md": "c7ed538e27d59ff1f5de3eccb0cce34adc6da6097efbc4e5e26e4bb8174aead6",
+    "docs/REVIEW_RESPONSE_20261030.md": "d7843f7926a97276210252b72e1b05c07773ac4526fe7d36dc6c4e397b932a3d",
     "docs/RFC3339_REGISTRY_CASE.zh-CN.md": "4437bd4049620ff21213c3fb67247618663d9b92fd5d0ab14a7a31ee368d94ed",
     "docs/SCALAR_PROSE_EXTENSION_20261030.md": "ce6ccb5c992ec1c21f426b84ed2276e5cc503c88795b1dde66d401c86d357cf3",
     "docs/TECHNICAL_EVIDENCE.zh-CN.md": "4788d056e319ea207a53a7696b06807413840daf6d52b24cba5e040bcb523b46",
@@ -133,10 +133,10 @@
     "scalar.mbt": "c754e2d7ef0dc9a5271c35b68fcbc2b8f86eef84909a7f2e0d358e4e1bf5451a",
     "scalar_prose_test.mbt": "cb2c53732b11dc51552452ebc2f1480d6011e7699b142b956c18553a0e63c8f5",
     "scenarios_test.mbt": "19ad06cf3abac0ba95165ece52ad97914a82a81c07fae165725b85cc9303a5f6",
-    "scripts/acceptance.py": "bbd36114fcd92e9ea971567b06b29ce638b04cae6341f1401f674559fa94d4c6",
+    "scripts/acceptance.py": "f7aaea335a3b61d96b69018019660d4aeec22bc396fa0b36aed39ff94368f304",
     "scripts/bounded_run.py": "ad50abe712d60ea8aaf4a9e5e438619ab56730fd385c5071e2a9e1dde2e6ef70",
-    "scripts/cli.sh": "8bec5af6eecc4d445df9fb553a8e9b7dcb847b6c5c5cf99b266be2c87acc6bb7",
-    "scripts/cli_test.py": "f6d0e549d3936877b28bc8a6dcd845e9343c597346c48bb080bb75be9fa07ae1",
+    "scripts/cli.sh": "6d01159606bed50178a3184a73f6b01962c1717f1c284c0adab80e1193f19c5c",
+    "scripts/cli_test.py": "81d951396f74202d498481d431b2a43c5f37325675de53a96db0b90575700744",
     "scripts/consumer_contract.py": "b1331075cf413d56799d59000ea2855b7eb8ede5e4096d5f8fa20388158e7b40",
     "scripts/diagnostic_cli_test.py": "c2a891948955cc0a6222eb591ef59a624da9e4740f63a05aaec097e949c55335",
     "scripts/differential.py": "ecd5aaa15e275b1670f1f521a1f7688b95e3eaf2afe6d35af610fa085042d3c7",
@@ -153,6 +153,8 @@
     "scripts/test_install_ci_sdk.py": "7d183a590943157d301a06173cd757bf50fbc8a96804f7d7ea27df8146d7c0bd",
     "scripts/verify_protocol_fixtures.py": "46c1f5aadd5855ae25654dffe13749a173304d46ad132559e86a254a701e5829",
     "symbol_domains.mbt": "346c84f50cf187518e25bab92148ccf6428e2ca114e4a5338b6c69959460a1bd",
-    "types.mbt": "bb39d71141ce15ae46f60b25b6b91528577132cbd6362506a34ec2cd45c58022"
-  }
+    "types.mbt": "bb39d71141ce15ae46f60b25b6b91528577132cbd6362506a34ec2cd45c58022",
+    "scripts/shell_cli_json_test.py": "f502b7ff1e256fa8489bce1ac9e4937dd31a65778fac2beb1d01b0f76bb4bf0b"
+  },
+  "functional_source_commit_note": "Parser library matches c89f804; shell entrypoint and integration regressions additionally revised in this tree."
 }

@@ -1,10 +1,10 @@
-> Local follow-on: explicit prose languages now support concatenation, alternatives and repetition; see [composed prose](docs/COMPOSED_PROSE_20261030.md). This follow-on is not the published review branch or registry release.
+> Review branch: explicit prose languages now support concatenation, alternatives and repetition; see [composed prose](docs/COMPOSED_PROSE_20261030.md). These changes are available on `review/moonbit-20261030`, not in the registry release.
 
-> 后续隔离增量候选：本目录新增 `parse_numeric`、Unicode scalar独立API、显式有限prose绑定及范围谓词。**未发布，旧Bytes API保留。** 用法/限制/新证据见 [scalar与prose增量](docs/SCALAR_PROSE_EXTENSION_20261030.md)。下方旧发布版和先前修复记录仍是历史范围。
+> 当前复审修订：本目录新增 `parse_numeric`、Unicode scalar独立API、显式有限prose绑定及范围谓词。**已公开于复审分支，未发布新的 registry 版本；旧Bytes API保留。** 用法/限制/新证据见 [scalar与prose增量](docs/SCALAR_PROSE_EXTENSION_20261030.md)。下方旧发布版和先前修复记录仍是历史范围。
 
-> 候选复现：本次修复使用 MoonBit **0.10.18+6c83a7f62**，不是旧发布版 0.10.14。请从本地候选源码包运行，不要用下方 `moon add ...@0.3.0` 获取新能力。完整范围与证据见 [复审回应](docs/REVIEW_RESPONSE_20261030.md)。AI 辅助草稿，待本人最终审阅定稿及提交。
+> 候选复现：本次修复使用 MoonBit **0.10.18+6c83a7f62**，不是旧发布版 0.10.14。请从 `review/moonbit-20261030` 分支或对应源码包运行，不要用下方 `moon add ...@0.3.0` 获取新能力。完整范围与证据见 [复审回应](docs/REVIEW_RESPONSE_20261030.md)。AI 辅助草稿，待本人最终审阅定稿及提交。
 
-> 本地 2026-10-30 修复候选：新增有预算的左递归识别与输入树；尚未发布，不能当作 Mooncakes 0.3.0 能力。详见 [修复与兼容目标](docs/LEFT_RECURSION_REVIEW_20261030.md)。下文发布回执仍指原 0.3.0。
+> 2026-10-30 公开复审修订：新增有预算的左递归识别与输入树；未发布新的 registry 版本，不能当作 Mooncakes 0.3.0 能力。详见 [修复与兼容目标](docs/LEFT_RECURSION_REVIEW_20261030.md)。下文发布回执仍指原 0.3.0。
 
 # MoonABNF
 
@@ -12,7 +12,7 @@
 [![Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节API，本地候选另有独立scalar应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
+MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节API，当前复审分支另有独立scalar应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
 
 文法文本 → 文法 AST → 编译校验 → 整段识别 / 输入派生树 → 按规则名取出原字节字段。
 实现依据 [RFC 5234](https://www.rfc-editor.org/rfc/rfc5234)（ABNF）与 [RFC 7405](https://www.rfc-editor.org/rfc/rfc7405)（大小写敏感字符串）。

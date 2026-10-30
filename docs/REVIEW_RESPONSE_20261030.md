@@ -27,7 +27,7 @@
 
 ## 4. 版本绑定与复现
 
-公开基线 `7daa6aa1c523c74a906a87b1bc1271892bccd02e`；已验证功能源码基线为 `c89f80421b9591cb9117e1494e150e87370314fa`；本次仅文档与清单修订，新能力属于当前源码候选，非Mooncakes0.3.0。旧冻结包保留，不覆盖；文件哈希见根目录 `FINAL_CONTENT_SHA256.json`（明确排除清单自身，不作自引用），包哈希由交付回执另列，避免自引用。
+公开基线 `7daa6aa1c523c74a906a87b1bc1271892bccd02e`；已验证功能源码基线为 `c89f80421b9591cb9117e1494e150e87370314fa`；解析库功能基线保持不变，后续已修 shell CLI 构建日志污染 stdout，并加入冷/热 JSONL 回归；新能力属于当前公开复审分支，非Mooncakes0.3.0。旧冻结包保留，不覆盖；文件哈希见根目录 `FINAL_CONTENT_SHA256.json`（明确排除清单自身，不作自引用），包哈希由交付回执另列，避免自引用。
 
 本次确有算法/API/测试增量；使用已批准隔离SDK **0.10.18+6c83a7f62**。设置MOON_HOME/PATH后执行 `moon check --target native --deny-warn`、`moon test --target native`、`moon run examples/scalar_prose --target native`；其余目标替换为js、wasm、wasm-gc。无需新增库依赖。
 
