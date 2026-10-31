@@ -3,7 +3,7 @@
 extern "js" fn read_file(path : String, max : Int32) -> Bytes? =
   #| (path, max) => {
   #|   const fs = require('node:fs');
-  #|   let fd;
+  #|   let fd, result, failed = false;
   #|   try {
   #|     fd = fs.openSync(path, fs.constants.O_RDONLY | fs.constants.O_NONBLOCK);
   #|     const stat = fs.fstatSync(fd);
@@ -11,11 +11,17 @@ extern "js" fn read_file(path : String, max : Int32) -> Bytes? =
   #|     const buffer = Buffer.alloc(max + 1);
   #|     let n = 0, got;
   #|     while (n < buffer.length && (got = fs.readSync(fd, buffer, n, buffer.length - n, null)) > 0) n += got;
-  #|     return new Uint8Array(buffer.subarray(0, n));
+  #|     result = new Uint8Array(buffer.subarray(0, n));
   #|   } catch (e) {
   #|     console.error(`I/O: ${path}: ${e.message}`);
-  #|     return undefined;
-  #|   } finally { if (fd !== undefined) fs.closeSync(fd); }
+  #|     failed = true;
+  #|   } finally {
+  #|     if (fd !== undefined) {
+  #|       try { fs.closeSync(fd); }
+  #|       catch (e) { console.error(`I/O: ${path}: close: ${e.message}`); failed = true; }
+  #|     }
+  #|   }
+  #|   return failed ? undefined : result;
   #| }
 
 ///|
@@ -54,6 +60,11 @@ fn main {
   }
   let source = match read_file(args[3], 65536) {
     None => {
+      output([
+        ("status", Json("io-error")),
+        ("stage", Json("grammar")),
+        ("file", Json(args[3])),
+      ])
       exit_code(2)
       return
     }
@@ -102,6 +113,11 @@ fn main {
   for i = 5; i < count; i = i + 1 {
     let input = match read_file(args[i], limits.max_input_bytes) {
       None => {
+        output([
+          ("status", Json("io-error")),
+          ("stage", Json("input")),
+          ("file", Json(args[i])),
+        ])
         if code < 2 {
           code = 2
         }

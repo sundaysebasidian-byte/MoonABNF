@@ -55,10 +55,10 @@ with tempfile.TemporaryDirectory(prefix='moonabnf-cli-') as directory:
     rows = invoke(['batch', g, 's', yes, no], 1); assert len(rows) == 2
     rows = invoke(['batch', g, 'x', huge, yes], 3); assert len(rows) == 2
     rows = invoke(['batch', g, 's', d / 'missing.bin', yes], 2)
-    assert len(rows) == 1 and rows[0]['status'] == 'matched' and rows[0]['file'] == str(yes)
+    assert len(rows) == 2 and rows[0] == {'status':'io-error','stage':'input','file':str(d / 'missing.bin')} and rows[1]['status'] == 'matched' and rows[1]['file'] == str(yes)
     assert 'I/O:' in checks[-1]['stderr']
     rows = invoke(['batch', g, 'x', d / 'missing.bin', huge], 3)
-    assert len(rows) == 1 and rows[0]['status'] == 'budget-exceeded:input-bytes'
+    assert len(rows) == 2 and rows[0] == {'status':'io-error','stage':'input','file':str(d / 'missing.bin')} and rows[1]['status'] == 'budget-exceeded:input-bytes'
     assert 'I/O:' in checks[-1]['stderr']
     invoke(['batch', g, 'x', *([yes] * 257)], 2, 'usage-error')
     invoke(['check', g, 'unexpected'], 2, 'usage-error')

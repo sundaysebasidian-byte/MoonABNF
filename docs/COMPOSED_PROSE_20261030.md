@@ -1,6 +1,6 @@
 # Explicit composed prose languages
 
-Local extension based on review commit f884dd0. Not published, not submitted; the existing review branch remains unchanged. This is a product usability extension, not a claim that reviewers required these exact constructors or that prose natural language has a canonical executable meaning.
+This composed-prose extension is available on the public `review/moonbit-20261030` branch (verified snapshot: `64bf3996e06f7b082ac8d793e586ad3983494268`). It has not been released to the package registry or submitted for reassessment by this assistant. This feature status is separate from later CLI I/O improvements that may still be private candidates. This is a product usability extension, not a claim that reviewers required these exact constructors or that prose natural language has a canonical executable meaning.
 
 `ProsePredicate` retains `Words` and `SymbolRange`, and adds:
 

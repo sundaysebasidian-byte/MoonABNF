@@ -203,3 +203,9 @@ moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
 开发中 AI 的参与方式见 [AI_USAGE.md](AI_USAGE.md)，设计说明见 [docs/UNDERSTANDING.md](docs/UNDERSTANDING.md)。
 
 重复次数的十进制语法计数目前限制为 1,000,000；超出会被实现拒绝。这是资源实现边界，不是 RFC 5234 对合法 ABNF 的限制。
+
+### CLI I/O error records
+
+For valid `check`, `match`, `diagnose`, and `batch` invocations, a failed grammar/input regular-file read emits a JSON object with `status: "io-error"`, `stage: "grammar"` or `"input"`, and `file`. The detailed operating-system cause remains on stderr. Batch input read failures keep their original position and do not suppress later results. Exit 2 signals usage/grammar/I/O errors; an encountered indeterminate budget result keeps exit 3 even when another input fails to read. A missing/unrecognized command prints human-readable usage rather than a JSON result; consumers must check exit status and stderr. Build output goes to stderr. This does not change FIFO/nonregular-file rejection or the bounded reader.
+
+Read completion includes closing the opened descriptor: a close failure produces the same structured I/O refusal, never a successful match. If both reading and closing fail, both causes remain on stderr and later batch inputs still run. This is a CLI filesystem-adapter guarantee, not a change to grammar recognition.

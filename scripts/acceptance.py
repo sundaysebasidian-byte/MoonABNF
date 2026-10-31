@@ -36,6 +36,8 @@ commands = [
  ('example-input-diagnostics', ['scripts/moon-local.sh', 'run', 'examples/diagnostics', '--target', 'js', '--frozen', '-j', '1']),
  ('cli', ['python3', 'scripts/cli_test.py']),
  ('shell-cli-json', ['python3', 'scripts/shell_cli_json_test.py']),
+ ('cli-io-json', ['python3', 'scripts/cli_io_json_test.py']),
+ ('cli-close-error', ['python3', 'scripts/cli_close_error_test.py']),
  ('diagnostic-cli', ['python3', 'scripts/diagnostic_cli_test.py']),
  ('differential', ['python3', 'scripts/differential.py']),
  ('downstream', ['python3', 'scripts/downstream.py', '--output', str(out / 'downstream')]),
