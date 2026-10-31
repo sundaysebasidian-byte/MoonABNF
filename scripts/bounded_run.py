@@ -11,7 +11,7 @@ import time
 
 def process_rss(root):
     result = subprocess.run(['ps', '-axo', 'pid=,ppid=,rss='],
-                            capture_output=True, text=True, check=True)
+                            capture_output=True, text=True, check=True, timeout=2)
     rows = [tuple(map(int, row.split())) for row in result.stdout.splitlines()]
     selected = {root}
     while True:
@@ -20,6 +20,37 @@ def process_rss(root):
             break
         selected |= more
     return sum(rss for pid, _, rss in rows if pid in selected) * 1024
+
+
+def process_group_running(group):
+    """Live members of our new session's process group; zombies do not run work."""
+    result = subprocess.run(['ps', '-axo', 'pid=,pgid=,stat='],
+                            capture_output=True, text=True, check=True, timeout=2)
+    return [int(pid) for pid, pgid, state in
+            (row.split() for row in result.stdout.splitlines())
+            if int(pgid) == group and not state.startswith('Z')]
+
+
+def stop_process_group(child, grace=2):
+    """Stop the group even if its leader has exited; never target another group."""
+    try:
+        os.killpg(child.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        child.wait()
+        return
+    deadline = time.monotonic() + grace
+    try:
+        while process_group_running(child.pid) and time.monotonic() < deadline:
+            child.poll()  # reap the leader, but keep waiting for live descendants
+            time.sleep(.05)
+    finally:
+        # A leader exiting on TERM does not prove its descendants also exited.
+        # KILL the same task-owned group after the grace period (or monitor error).
+        try:
+            os.killpg(child.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        child.wait()
 
 
 def execute(command, cwd, output, name, env=None, seconds=120, rss_mib=512):
@@ -46,15 +77,19 @@ def execute(command, cwd, output, name, env=None, seconds=120, rss_mib=512):
         except Exception as error:
             reason = 'resource monitor failed: ' + type(error).__name__
         finally:
-            if reason:
-                # This new process group belongs only to the command we started.
+            if not reason:
                 try:
-                    os.killpg(child.pid, signal.SIGTERM)
-                    child.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    os.killpg(child.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
+                    if process_group_running(child.pid):
+                        reason = 'descendants remained after command exit'
+                except Exception as error:
+                    reason = 'resource monitor failed: ' + type(error).__name__
+            if reason:
+                # start_new_session isolates this command's group. Waiting only
+                # for its leader would leave TERM-ignoring descendants behind.
+                try:
+                    stop_process_group(child)
+                except Exception as error:
+                    reason += '; cleanup monitor failed: ' + type(error).__name__
             code = child.wait()
     return {'name': name, 'command': command, 'pid': child.pid, 'exit_code': code,
             'status': 'passed' if code == 0 and not reason else 'partial/failed',

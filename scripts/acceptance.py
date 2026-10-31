@@ -20,6 +20,7 @@ commands = [
  ('installer-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_install_ci_sdk.py']),
  ('scalar-example', ['scripts/moon-local.sh', 'run', 'examples/scalar_prose', '--target', 'native']),
  ('consumer-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_consumer*.py']),
+ ('process-group-guards', ['python3', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_bounded_run.py']),
  ('protocol-fixtures', ['python3', 'scripts/verify_protocol_fixtures.py']),
  ('check-wasm', ['scripts/moon-local.sh', 'check', '--target', 'wasm', '-j', '1', '-d']),
  ('build-wasm', ['scripts/moon-local.sh', 'build', '--target', 'wasm', '-j', '1', '-d']),
