@@ -1,10 +1,10 @@
-> 下文描述已发布 0.3.0 的历史边界。本地 2026-10-30 候选已新增左递归支持，后续候选又新增scalar与有限prose绑定；当前范围与新回执见 [增量说明](SCALAR_PROSE_EXTENSION_20261030.md) 和 [修复说明](LEFT_RECURSION_REVIEW_20261030.md)，不能将候选归为已发布能力。
+> 下文描述已发布 0.3.0 的历史边界。2026-10-30 源码修订已新增左递归支持，后续实现又新增scalar与有限prose绑定；当前范围与新回执见 [增量说明](SCALAR_PROSE_EXTENSION_20261030.md) 和 [修复说明](LEFT_RECURSION_REVIEW_20261030.md)，这些改进不属于已发布 0.3.0。
 
 # 支持范围、边界与失败契约（0.3.0）
 
 适用于已发布的 [MoonABNF 0.3.0](https://mooncakes.io/docs/sundaysebasidian-byte/moonabnf@0.3.0/)。输入树与字段提取从 0.2.0 起已发布，0.3.0 增加有界输入诊断；安装与复现见[输入树上手](INPUT_TREE_QUICKSTART.zh-CN.md)和[技术证据索引](TECHNICAL_EVIDENCE.zh-CN.md)。
 
-历史 0.1.0 仅有文法 AST 与识别；它不代表当前安装版。旧候选记录保留在[原提交](https://github.com/sundaysebasidian-byte/MoonABNF/blob/3af48664afae0bf4414e238f72d64597c7f291ef/docs/BOUNDARIES.zh-CN.md)。
+历史 0.1.0 仅有文法 AST 与识别；它不代表当前安装版。历史源码记录保留在[原提交](https://github.com/sundaysebasidian-byte/MoonABNF/blob/3af48664afae0bf4414e238f72d64597c7f291ef/docs/BOUNDARIES.zh-CN.md)。
 
 ## 文法与输入
 

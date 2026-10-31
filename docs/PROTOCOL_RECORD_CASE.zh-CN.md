@@ -106,7 +106,7 @@ cd consumer
   0.3.0 精确源码绑定 JS 协议步骤与 fresh-clone 已通过远端 CI；实际 registry 的 JS 适配消费另有本地发布回执，二者不混同，见[版本说明](release-0.3.0.zh-CN.md)。
 
 当前正式发布版本为 0.3.0，含有界诊断 API，发布与实际 registry 消费范围见[0.3.0 说明](release-0.3.0.zh-CN.md)。上面的空目录源码方案消费解压快照，不是registry安装；两者要分开记录。JSON适配器仍是需复制的集成示例，不是根包API。RFC来源/许可在[SOURCES.md](../SOURCES.md)，
-AI辅助事实在[AI_USAGE.md](../AI_USAGE.md)。没有替用户撰写诚信声明、提交比赛或承诺获奖。
+AI辅助事实在[AI_USAGE.md](../AI_USAGE.md)。
 
 ## 一键核验实际发布包（2026-10-25 本地补强）
 

@@ -35,4 +35,4 @@ ba46dfba24eaf680adb66b76906c78abc4f01276320249947f9335e7eae2deb0
 
 ## 限制
 
-左递归拒绝、按字节解析、歧义返回一个确定派生见证，`BudgetExceeded` 为未判定。规范例子和自编负例不等于生产流量；JSON 适配器只验 JS。五个独立进程的性能数据仍属于原日期的本地测量，不是 0.3.0 新基准，不推 p95 或跨实现性能领先。评审问题映射见[证据索引](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/REVIEW_EVIDENCE_INDEX.zh-CN.md)；没有比赛提交或获奖承诺。
+左递归拒绝、按字节解析、歧义返回一个确定派生见证，`BudgetExceeded` 为未判定。规范例子和自编负例不等于生产流量；JSON 适配器只验 JS。五个独立进程的性能数据仍属于原日期的本地测量，不是 0.3.0 新基准，不推 p95 或跨实现性能领先。评审问题映射见[证据索引](https://github.com/sundaysebasidian-byte/MoonABNF/blob/de59153173eeb3124bda8923859c6c6026261c4f/docs/REVIEW_EVIDENCE_INDEX.zh-CN.md)；

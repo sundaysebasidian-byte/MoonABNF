@@ -1,10 +1,10 @@
 > Review branch: explicit prose languages now support concatenation, alternatives and repetition; see [composed prose](docs/COMPOSED_PROSE_20261030.md). These changes are available on `review/moonbit-20261030`, not in the registry release.
 
-> 当前复审修订：本目录新增 `parse_numeric`、Unicode scalar独立API、显式有限prose绑定及范围谓词。**已公开于复审分支，未发布新的 registry 版本；旧Bytes API保留。** 用法/限制/新证据见 [scalar与prose增量](docs/SCALAR_PROSE_EXTENSION_20261030.md)。下方旧发布版和先前修复记录仍是历史范围。
+> 当前源码修订：本目录新增 `parse_numeric`、Unicode scalar独立API、显式有限prose绑定及范围谓词。**已公开于源码分支，未发布新的 registry 版本；旧Bytes API保留。** 用法/限制/新证据见 [scalar与prose增量](docs/SCALAR_PROSE_EXTENSION_20261030.md)。下方旧发布版和先前修复记录仍是历史范围。
 
-> 候选复现：本次修复使用 MoonBit **0.10.18+6c83a7f62**，不是旧发布版 0.10.14。请从 `review/moonbit-20261030` 分支或对应源码包运行，不要用下方 `moon add ...@0.3.0` 获取新能力。完整范围与证据见 [复审回应](docs/REVIEW_RESPONSE_20261030.md)。AI 辅助草稿，待本人最终审阅定稿及提交。
+> 源码复现：本次修复使用 MoonBit **0.10.18+6c83a7f62**，不是旧发布版 0.10.14。请从 `review/moonbit-20261030` 分支或对应源码包运行，不要用下方 `moon add ...@0.3.0` 获取新能力。完整范围与证据见 [实现说明](docs/REVIEW_RESPONSE_20261030.md)。
 
-> 2026-10-30 公开复审修订：新增有预算的左递归识别与输入树；未发布新的 registry 版本，不能当作 Mooncakes 0.3.0 能力。详见 [修复与兼容目标](docs/LEFT_RECURSION_REVIEW_20261030.md)。下文发布回执仍指原 0.3.0。
+> 2026-10-30 公开源码修订：新增有预算的左递归识别与输入树；未发布新的 registry 版本，不能当作 Mooncakes 0.3.0 能力。详见 [修复与兼容目标](docs/LEFT_RECURSION_REVIEW_20261030.md)。下文发布回执仍指原 0.3.0。
 
 # MoonABNF
 
@@ -12,18 +12,18 @@
 [![Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节API，当前复审分支另有独立scalar应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
+MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节API，当前源码分支另有独立scalar应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
 
 文法文本 → 文法 AST → 编译校验 → 整段识别 / 输入派生树 → 按规则名取出原字节字段。
 实现依据 [RFC 5234](https://www.rfc-editor.org/rfc/rfc5234)（ABNF）与 [RFC 7405](https://www.rfc-editor.org/rfc/rfc7405)（大小写敏感字符串）。
 
 适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
-**0.3.0 已发布到 mooncakes**，包含输入派生树、字段提取与有界输入失败诊断，版本说明见 [release-0.3.0](docs/release-0.3.0.zh-CN.md)，复审入口见[技术证据索引](docs/TECHNICAL_EVIDENCE.zh-CN.md)。
+**0.3.0 已发布到 mooncakes**，包含输入派生树、字段提取与有界输入失败诊断，版本说明见 [release-0.3.0](docs/release-0.3.0.zh-CN.md)，验证入口见[技术证据索引](docs/TECHNICAL_EVIDENCE.zh-CN.md)。
 
-## 原发布版快速开始（不是本地修复候选）
+## Mooncakes 0.3.0 快速开始
 
-需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，旧发布版锁见保留的原候选包；当前 [TOOLCHAIN.lock](TOOLCHAIN.lock) 锁定修复候选）和 Node.js。
+需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，旧发布版使用其归档工具链锁；当前 [TOOLCHAIN.lock](TOOLCHAIN.lock) 锁定源码修订）和 Node.js。
 
 ```sh
 git clone https://github.com/sundaysebasidian-byte/MoonABNF.git
