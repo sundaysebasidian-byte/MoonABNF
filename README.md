@@ -141,7 +141,7 @@ moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
 | 字符串：默认大小写不敏感，`%i` / `%s`（RFC 7405） | ✅ |
 | 注释、CRLF 行结构 | ✅ |
 | 附录 B 核心规则 ALPHA … WSP（16 条） | ✅ 内置，可被同名规则覆盖 |
-| prose-val `<...>` | 原compile仍拒绝；新增compile_with_prose/compile_scalar接受显式有限词表或单符号范围绑定 |
+| prose-val `<...>` | 原compile仍拒绝；compile_with_prose/compile_scalar接受显式词表、单符号范围及Concat/Alternative/Repetition组合；组合可表达无限语言，但执行仍有预算 |
 
 编译阶段检查未定义规则和重复定义；无有限终结推导的闭合规则视为空语言；左递归 / 可空前缀循环改用有预算不动点识别与输入树路径，不再直接拒绝。
 

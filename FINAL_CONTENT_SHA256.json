@@ -15,10 +15,18 @@
     "AGENTS.md": "8b04acce8cb4af1d79fc7fb05364818f274a0908a4db81ce959f946c7a64b4b7",
     "AI_USAGE.md": "a92e28eaf9c07af4206c8d20df7a56cc740f1515dd8320143983de247d0ae81b",
     "LICENSE": "0aefaa81ec9406a59e67bfa072df18ff6c7337bf6d6e394de6a007401d8871d9",
-    "README.md": "0bfee55a3962f582201946144b3d923f072c5a3a373ac9db218f3f377fd52c70",
+    "README.md": "60f279cf458982948b8a6f51b70f0834f09be614a3d3f4fa8c59db6721179d25",
     "SOURCES.md": "da8c9cb7d5a7b1c40993d5b72a9ca5b078634f1e809a931081f7e1a63f0d0f74",
     "TOOLCHAIN.lock": "1541f8c82c82e5232f52fb360ff36f7eb2ce0897d3e907b002f05a56743c269b",
     "analysis.mbt": "10913616b6b8af1b7e4e67a41919c76531c15fb87cc42131cb5bf3acc6ebfe75",
+    "audit_round01_test.mbt": "a0092d070a9d4e5b9dba8dd033115b8cffc013e8d6ffa8fb2672eaa0ebafb750",
+    "audit_round02_test.mbt": "67b1d115936c1705b73a1c9c4840fa966b2159417bb7bf4e32a685dd16872e7a",
+    "audit_round03_test.mbt": "ef549a58959bbebcf9be364219c1eda96bfc3554212b3487b8616c819544e30b",
+    "audit_round04_test.mbt": "266fe33872badf6097b6c9af59169d3fda715b02ebb5838da901a26d720e6cc6",
+    "audit_round05_test.mbt": "e65ae12d45e2141d2e6e88c77bcbe013a7344f0d945e15048fb98b0c5625bdc9",
+    "audit_round06_test.mbt": "f5478b0266e1352c7930156250ddf4671980397a6f8321c66c134fcd0b2016dc",
+    "audit_round07_test.mbt": "57df74885ffe747e0fc3d4f282d383de15003b8972dcf949b841a412bb1b2562",
+    "audit_round08_test.mbt": "3fb73a6074b0ad55143ecbc13840bf422c20db3036312b6b305c3a0a0197d5f8",
     "benchmarks/moon.pkg": "612acf2b73567914bafe16102c9dee277008dc508ce234ce78f97ba106e39c02",
     "benchmarks/pkg.generated.mbti": "cf1417a91d0a7dc8fb1675750f1512ecdaa65b7f866d964a952487866510c584",
     "benchmarks/workloads_test.mbt": "e290842c593a352c15ba37543af432fc8a76f11354fce1a521fbb6006782b8ab",
@@ -142,7 +150,7 @@
     "scripts/cli_test.py": "2259a7488560012d8f3b5c2387c945aedb4ca410afbd3d298b2ea524fb328f80",
     "scripts/consumer_contract.py": "b1331075cf413d56799d59000ea2855b7eb8ede5e4096d5f8fa20388158e7b40",
     "scripts/diagnostic_cli_test.py": "c2a891948955cc0a6222eb591ef59a624da9e4740f63a05aaec097e949c55335",
-    "scripts/differential.py": "ecd5aaa15e275b1670f1f521a1f7688b95e3eaf2afe6d35af610fa085042d3c7",
+    "scripts/differential.py": "c3c40f9ef86d8b8ca6864d5023b6320b0c48cb4c8ea170eb1cd069cf79a824d7",
     "scripts/downstream.py": "b25c08b118f971742fb4859e998fb14db57500d9b488a7b078d488ae241a7308",
     "scripts/example_request_line.py": "30d32a9dadbe85e63afd3b55b09f529150815b5bb88b0ce6173dbb6ee89badf3",
     "scripts/independent_workloads.py": "9ea2c4505c1bb1ac74ee98a1657ef181cc00ab78d5d71ae62d16a0762037afaf",
@@ -159,5 +167,7 @@
     "symbol_domains.mbt": "346c84f50cf187518e25bab92148ccf6428e2ca114e4a5338b6c69959460a1bd",
     "types.mbt": "bb39d71141ce15ae46f60b25b6b91528577132cbd6362506a34ec2cd45c58022"
   },
-  "functional_source_commit_note": "Parser library matches c89f804; shell entrypoint, filesystem error handling and integration regressions additionally revised in this tree."
+  "functional_source_commit_note": "Parser library matches c89f804; shell entrypoint, filesystem error handling and integration regressions additionally revised in this tree.",
+  "private_audit_baseline": "public review/moonbit-20261030 3c42204b6ee84dc963d688a2379fbfb4139d62f3; local exact-tree ebf836f5563f0d017220537d1c3f49447c8bf290",
+  "private_audit_changes": "2026-10-31 ten distinct independent review rounds; 8 new API test groups, evidence wording correction and README prose coverage precision; no runtime/API change; not published."
 }

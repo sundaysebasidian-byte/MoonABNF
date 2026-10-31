@@ -73,7 +73,7 @@ def run():
     evidence = {'status': 'passed' if not mismatches else 'failed', 'seed': SEED,
                 'grammars': 80, 'comparisons': cases, 'mismatch_count': len(mismatches), 'mismatches': mismatches,
                 'oracle': 'Python stdlib re.fullmatch on bytes, independently generated regular subset',
-                'not_tested': ['third-party full ABNF grammar parser', 'left-recursive recognition (explicitly rejected)', 'general recursive grammars against regex oracle']}
+                'not_tested': ['third-party full ABNF grammar parser', 'left-recursive recognition (outside this regular-subset oracle)', 'general recursive grammars against regex oracle']}
     print(json.dumps(evidence, ensure_ascii=False, indent=2))
     if mismatches: raise SystemExit(1)
 
