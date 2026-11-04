@@ -19,16 +19,18 @@
 
 ## 3. 验证与保留限制
 
-当前组合prose候选四后端 native/js/wasm/wasm-gc 各 **90/90**，独立native/JS加3组反例后各 **93/93**。前序scalar/prose阶段各 **86/86**。实施阶段83组之后，另一独立AI agent追加3组反例并重新运行四后端；完整日志与原始审查回执保存在私有交付材料，不是公开仓库中的相对路径；这些本地结果不等于远程CI。实施者另写121输入状态扫描器对照（不是另一agent的独立审查）。四后端 `moon check --deny-warn` 及公开API示例实际运行均通过。
+历史 `c89f804` 组合 prose 候选四后端 native/js/wasm/wasm-gc 各 **90/90**，当时独立 native/JS 加 3 组反例后各 **93/93**；这些不是后续检出的当前测试数量。前序scalar/prose阶段各 **86/86**。实施阶段83组之后，另一独立AI agent追加3组反例并重新运行四后端；完整日志与原始审查回执保存在私有交付材料，不是公开仓库中的相对路径；这些本地结果不等于远程CI。实施者另写121输入状态扫描器对照（不是另一agent的独立审查）。四后端 `moon check --deny-warn` 及公开API示例实际运行均通过。
 
 左递归前序候选的73组及干净副本73组属于历史证据；前序独立审查含1,364个等价文法输入与127个括号语言输入，并通过AST回放检查树。曾发现可空见证共享破坏树结构，已修复并回归。前序结果不冒充新增scalar/prose验证；有限测试不等于完整标准认证。
 
-预算耗尽返回未判定，不伪称无匹配。左递归失败的局部期待解释尚未实现，scalar也未提供期待列表诊断；不枚举全部歧义树、不提供流式识别。全局左递归标志仍可能使不可达左递归影响路径、预算和解释能力。实现不是高性能通用Earley/GLL的证明，不保证任意大输入预算内完成。
+预算耗尽返回未判定，不伪称无匹配。左递归失败的局部期待解释尚未实现，scalar也未提供期待列表诊断；不枚举全部歧义树、不提供流式识别。当前按入口的静态引用可达性选择求解路径，不相关左递归不会关闭普通入口的解释；真正可达左递归的入口仍不提供局部解释。实现不是高性能通用Earley/GLL的证明，不保证任意大输入预算内完成。
 
 ## 4. 版本绑定与复现
 
-公开基线 `7daa6aa1c523c74a906a87b1bc1271892bccd02e`；已验证功能源码基线为 `c89f80421b9591cb9117e1494e150e87370314fa`；解析库功能基线保持不变，后续已修 shell CLI 构建日志污染 stdout，并加入冷/热 JSONL 回归；新能力属于当前公开源码分支，非Mooncakes0.3.0。旧冻结包保留，不覆盖；文件哈希见根目录 `FINAL_CONTENT_SHA256.json`（明确排除清单自身，不作自引用），包哈希由交付回执另列，避免自引用。
+历史公开基线为 `7daa6aa1c523c74a906a87b1bc1271892bccd02e`，组合 prose 功能阶段为 `c89f80421b9591cb9117e1494e150e87370314fa`；后续 CLI / 运行器修复及本地补丁应按各自对象重新验收，不能继承这些历史计数。新增功能非 Mooncakes 0.3.0 能力。
 
-本次确有算法/API/测试增量；使用已批准隔离SDK **0.10.18+6c83a7f62**。设置MOON_HOME/PATH后执行 `moon check --target native --deny-warn`、`moon test --target native`、`moon run examples/scalar_prose --target native`；其余目标替换为js、wasm、wasm-gc。无需新增库依赖。
+根目录 `FINAL_CONTENT_SHA256.json` 绑定该源码快照的文件内容，排除清单自身以避免自引用；`functional_source_commit` 仅指历史功能阶段，不是当前候选提交。`snapshot_base_commit` 和 `snapshot_scope` 标明当前基线及本地补丁性质。包哈希另见交付回执；完整复现与结果身份核对见[技术证据索引](TECHNICAL_EVIDENCE.zh-CN.md)。
+
+历史源码修订确有算法/API/测试增量；后续入口级路径选择与验收证据改动不增加公开 API。复现使用隔离 SDK **0.10.18+6c83a7f62**。设置MOON_HOME/PATH后执行 `moon check --target native --deny-warn`、`moon test --target native`、`moon run examples/scalar_prose --target native`；其余目标替换为js、wasm、wasm-gc。无需新增库依赖。
 
 来源：[RFC5234](https://www.rfc-editor.org/rfc/rfc5234.html)、[RFC7405](https://www.rfc-editor.org/rfc/rfc7405.html)、[Unicode scalar定义](https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-3/)。是否接受修订由评审决定。

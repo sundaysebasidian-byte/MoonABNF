@@ -1,39 +1,45 @@
-> Review branch: explicit prose languages now support concatenation, alternatives and repetition; see [composed prose](docs/COMPOSED_PROSE_20261030.md). These changes are available on `review/moonbit-20261030`, not in the registry release.
-
-> 当前源码修订：本目录新增 `parse_numeric`、Unicode scalar独立API、显式有限prose绑定及范围谓词。**已公开于源码分支，未发布新的 registry 版本；旧Bytes API保留。** 用法/限制/新证据见 [scalar与prose增量](docs/SCALAR_PROSE_EXTENSION_20261030.md)。下方旧发布版和先前修复记录仍是历史范围。
-
-> 源码复现：本次修复使用 MoonBit **0.10.18+6c83a7f62**，不是旧发布版 0.10.14。请从 `review/moonbit-20261030` 分支或对应源码包运行，不要用下方 `moon add ...@0.3.0` 获取新能力。完整范围与证据见 [实现说明](docs/REVIEW_RESPONSE_20261030.md)。
-
-> 2026-10-30 公开源码修订：新增有预算的左递归识别与输入树；未发布新的 registry 版本，不能当作 Mooncakes 0.3.0 能力。详见 [修复与兼容目标](docs/LEFT_RECURSION_REVIEW_20261030.md)。下文发布回执仍指原 0.3.0。
-
 # MoonABNF
 
 [![CI](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/ci.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/ci.yml)
 [![Fresh clone](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml/badge.svg)](https://github.com/sundaysebasidian-byte/MoonABNF/actions/workflows/fresh-clone.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节API，当前源码分支另有独立scalar应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
+MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节 API，当前源码另有独立 Unicode scalar 应用域。调用方提供文法，编译后可识别完整输入、生成输入派生树并提取字段。
 
 文法文本 → 文法 AST → 编译校验 → 整段识别 / 输入派生树 → 按规则名取出原字节字段。
 实现依据 [RFC 5234](https://www.rfc-editor.org/rfc/rfc5234)（ABNF）与 [RFC 7405](https://www.rfc-editor.org/rfc/rfc7405)（大小写敏感字符串）。
 
 适合：协议字段离线诊断、配置格式校验、二进制 fixture 回归、把 RFC 文法变成可执行的测试。
 
-**0.3.0 已发布到 mooncakes**，包含输入派生树、字段提取与有界输入失败诊断，版本说明见 [release-0.3.0](docs/release-0.3.0.zh-CN.md)，验证入口见[技术证据索引](docs/TECHNICAL_EVIDENCE.zh-CN.md)。
+## 先选择源码还是已发布包
 
-## Mooncakes 0.3.0 快速开始
+| 交付物 | 能力与工具链 | 入口 |
+| --- | --- | --- |
+| 当前源码 | Bytes API、预算内左递归识别 / 输入树、独立 Unicode scalar API、显式组合 prose；工具链锁定 `moonc 0.10.18+6c83a7f62` | [技术证据与复现](docs/TECHNICAL_EVIDENCE.zh-CN.md)、[scalar / prose](docs/SCALAR_PROSE_EXTENSION_20261030.md)、[左递归边界](docs/LEFT_RECURSION_REVIEW_20261030.md) |
+| Mooncakes 0.3.0 | 已发布的 Bytes API、输入派生树、字段提取与有界失败诊断；历史锁定工具链为 `0.10.14+7d59c7ec9` | [0.3.0 版本说明](docs/release-0.3.0.zh-CN.md) |
 
-需要 MoonBit 工具链（CI 锁定 `moonc v0.10.14+7d59c7ec9`，旧发布版使用其归档工具链锁；当前 [TOOLCHAIN.lock](TOOLCHAIN.lock) 锁定源码修订）和 Node.js。
+**源码新增能力不属于已发布的 0.3.0。** 当前源码的 `moon.mod` 仍保留 0.3.0；这个版本字段不是再次发布或覆盖旧包的凭据。源码分支、GitHub Release 和 Mooncakes 发布应分别核验。
+
+## 当前源码快速开始
+
+准备 [TOOLCHAIN.lock](TOOLCHAIN.lock) 中的已有 MoonBit SDK，以及 Node.js、Python 3 和 native 后端需要的 C 工具链。以下示例假定 POSIX shell；不是 Windows 原生执行验证。
 
 ```sh
 git clone https://github.com/sundaysebasidian-byte/MoonABNF.git
 cd MoonABNF
-moon test                                     # 全部单元测试
-moon run examples --target js                 # 协议 / 配置 / 二进制三个小场景
-moon run examples/protocols/cmd --target js   # URI 与 Cookie：输入树和字段提取
+export MOONABNF_SDK=/absolute/path/to/existing/locked-sdk
+scripts/moon-local.sh version --all
+scripts/moon-local.sh test --target js
+scripts/moon-local.sh run examples --target js
+scripts/moon-local.sh run examples/protocols/cmd --target js
+scripts/moon-local.sh run examples/scalar_prose --target native
 ```
 
-在自己的项目里使用：
+`moon-local.sh` 会核对编译器版本。复现特定结果时还须检出对应提交，并保留本地补丁；验收脚本会记录 Git HEAD、工作树状态与源码 SHA-256，不把旧分支日志当作当前源码的测试结果。
+
+## Mooncakes 0.3.0 快速开始
+
+只需已发布功能时，在自己的项目里指定精确版本：
 
 ```sh
 moon add sundaysebasidian-byte/moonabnf@0.3.0
@@ -149,6 +155,7 @@ moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
 
 - **两棵树分开**：文法 AST 描述文法本身，输入派生树描述某段输入怎样被匹配。
 - **ABNF 不是 PEG**：替代分支会保留全部可能的结束位置，不会因为先匹配到短的分支就错判。
+- **按入口选择算法**：只有静态引用可达左递归环的入口使用不动点求解；不相关规则不改变普通入口的预算和局部诊断。已消耗前缀后的左递归仍正确支持，0 次重复不会引入调用。
 - **资源有预算**：输入长度、工作量、状态数、深度、树节点都有上限。预算用完返回 `BudgetExceeded`（未判定），不会被当成“不匹配”。
 - **偏移单位按入口分开**：Bytes树跨度是半开字节区间，ScalarInputTree跨度是scalar索引；文法位置始终是字节。extract使用对应输入类型，不做URI/UTF解码。
 - 不做：任意外部编码/无限整数、自然语言prose解释或通用回调、错误恢复、代码生成、流式输入、歧义全枚举，以及URI/Cookie语义层规则。
@@ -157,18 +164,25 @@ moon run cmd/main --target js -- diagnose grammar.abnf rule input.bin
 
 ## 测试
 
-当前c89f804组合scalar/prose候选四后端各90/90；独立副本增加3组反例后native/JS各93/93（前序86/86仅历史阶段），完整check/示例/原始审查回执保存在私有交付材料，未随公开仓库提供；公开源码可自行复现。下列历史CLI/差分/CI/性能数据未因这次新增入口自动成为新域验证。
+测试结果须绑定实际检出与补丁。历史 `c89f804` 的 90 / 93 组测试不是当前版本的验收结论；当前数量和退出码以本次运行输出为准。[技术证据索引](docs/TECHNICAL_EVIDENCE.zh-CN.md) 给出完整验收、独立源码消费者及证据读取方法。
 
 - 单元与场景测试：解析器、编译器、识别器、输入树、边界、鲁棒性（1024 个变异文法、预算终止）。
 - 差分测试：随机生成 80 个文法、5440 次比对，结果与独立的正则 oracle 一致（`scripts/differential.py`）。
 - 真实协议语料：URI、Cookie、ETag、HTTP 请求行。
-- CI：[ci.yml](.github/workflows/ci.yml) 在官方 SDK 上跑完整验收（JS / Wasm / Wasm GC / native 的 check、build、test，示例、CLI、差分、下游包消费）；[fresh-clone.yml](.github/workflows/fresh-clone.yml) 模拟新用户 `git clone` 后直接 `moon check`、`moon test` 和本页的快速开始。
+- CI：[ci.yml](.github/workflows/ci.yml) 在官方 SDK 上跑完整验收（JS / Wasm / native 的 check、build、test，Wasm GC 的 test，以及示例、CLI、差分、下游包消费）；[fresh-clone.yml](.github/workflows/fresh-clone.yml) 模拟新用户 `git clone` 后直接 `moon check`、`moon test` 和本页的快速开始。
 
-本地完整验收：`python3 scripts/acceptance.py --output /tmp/moonabnf-acceptance`。
+设置上述 `MOONABNF_SDK` 后运行完整验收，输出路径必须尚不存在（包括空目录）：
+
+```sh
+python3 scripts/acceptance.py --output /tmp/moonabnf-acceptance-new-run
+python3 scripts/protocol_record_test.py --diagnostics --output /tmp/moonabnf-protocol-new-run
+```
+
+第一项保存逐阶段原始 stdout / stderr、退出码、`summary.json` 与 `SHA256.json`；超时、监控、Git 元数据或源码读取失败，以及运行前后源码变动，均不能标为通过；须在无并发写入的隔离副本执行。第二项测试实际打包后的源码绑定消费者，**不是 registry 安装**。每次使用新的路径，保留失败回执后再修复重验；不要覆盖历史证据。
 
 ## 性能
 
-`moon bench --release` 实测，每项 5 组取平均；GitHub Actions ubuntu-24.04（AMD EPYC 9V45 96-Core Processor，4 个逻辑 CPU），moonc v0.10.14。
+以下是旧发布版历史性能数据，不是当前源码的重新测量。`moon bench --release` 实测，每项 5 组取平均；GitHub Actions ubuntu-24.04（AMD EPYC 9V45 96-Core Processor，4 个逻辑 CPU），moonc v0.10.14。
 
 | 场景 | 输入 | JS | native |
 | --- | --- | --- | --- |

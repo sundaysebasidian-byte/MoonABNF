@@ -51,9 +51,18 @@ def stop_process_group(child, grace=2):
         except ProcessLookupError:
             pass
         child.wait()
+        # killpg requests termination; delivery to descendants is asynchronous.
+        # Confirm that this task-owned group has no running members before
+        # returning rather than treating the leader's wait as group cleanup.
+        deadline = time.monotonic() + 1
+        while process_group_running(child.pid):
+            if time.monotonic() >= deadline:
+                raise RuntimeError('task-owned process group remained after SIGKILL')
+            time.sleep(.01)
 
 
 def execute(command, cwd, output, name, env=None, seconds=120, rss_mib=512):
+    """Use rss_mib=None for telemetry without a memory cap; default is unchanged."""
     output = Path(output)
     # Fail before launching if the environment cannot monitor resources.
     process_rss(os.getpid())
@@ -67,7 +76,7 @@ def execute(command, cwd, output, name, env=None, seconds=120, rss_mib=512):
         try:
             while child.poll() is None:
                 peak = max(peak, process_rss(child.pid))
-                if peak > rss_mib * 1024 * 1024:
+                if rss_mib is not None and peak > rss_mib * 1024 * 1024:
                     reason = 'RSS limit exceeded'
                     break
                 if time.monotonic() - started > seconds:
@@ -95,7 +104,7 @@ def execute(command, cwd, output, name, env=None, seconds=120, rss_mib=512):
             'status': 'passed' if code == 0 and not reason else 'partial/failed',
             'stop_reason': reason, 'elapsed_seconds': round(time.monotonic()-started, 3),
             'sampled_process_tree_rss_peak_bytes': peak,
-            'rss_limit_bytes': rss_mib * 1024 * 1024,
+            'rss_limit_bytes': None if rss_mib is None else rss_mib * 1024 * 1024,
             'note': 'RSS is sampled sum of this command process tree; not parser nodes or exact OS peak'}
 
 

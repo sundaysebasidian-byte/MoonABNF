@@ -213,7 +213,7 @@ fn TreeRunner::eval(
       for
         w in (if !runner.program.productive.contains(name) {
           []
-        } else if runner.program.left_recursive {
+        } else if runner.generalized {
           let cached = self.chart.get((name, pos)).unwrap_or([])
           for w in cached {
             runner.tick(w.end)
@@ -440,6 +440,7 @@ fn Program::parse_symbols(
     failures: None,
     chart: Map([]),
     program: self,
+    generalized: self.generalized.contains(name),
     input,
     limits: matching,
     work: initial_work,
@@ -457,7 +458,7 @@ fn Program::parse_symbols(
   }
   let mut tree : InputTree? = None
   let status = try {
-    let ends = if self.left_recursive {
+    let ends = if runner.generalized {
       tree_runner.solve(name)
     } else {
       tree_runner.eval(e, 0, 0)

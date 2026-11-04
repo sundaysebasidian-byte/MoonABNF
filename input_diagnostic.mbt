@@ -120,7 +120,7 @@ pub fn Program::diagnose_input(
       explanation_work: 0,
     }
   }
-  if self.left_recursive {
+  if self.generalized.contains(lower_name(start)) {
     return {
       report,
       failure: None,
@@ -147,6 +147,7 @@ pub fn Program::diagnose_input(
   }
   let runner = {
     program: self,
+    generalized: false,
     input: ByteSymbols(input),
     limits: { ..limits, max_work: diagnostic_limits.max_work, },
     work: 0,

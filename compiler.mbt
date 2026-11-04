@@ -3,7 +3,7 @@
 /// mutable AST arrays cannot invalidate the compiled program.
 pub struct Program {
   priv rules : Map[String, Expr]
-  priv left_recursive : Bool
+  priv generalized : Map[String, Bool]
   priv productive : Map[String, Bool]
 }
 
@@ -170,8 +170,8 @@ fn compile_domain(
           validate_references(e, rules, a)
         }
         let productive = fixed_point(rules, false, a)
-        let left_recursive = validate_recursion(rules, a)
-        Ok({ rules, left_recursive, productive, })
+        let generalized = validate_recursion(rules, a)
+        Ok({ rules, generalized, productive, })
       } catch {
         ParseFailure(d) => Err(d)
       }

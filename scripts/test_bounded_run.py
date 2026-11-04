@@ -1,8 +1,8 @@
 """Own process-group regressions. Synthetic sleepers only; never user processes."""
 import json,os,signal,subprocess,sys,tempfile,time,unittest,shlex
 from pathlib import Path
-from unittest.mock import patch
-from bounded_run import execute, process_rss, process_group_running
+from unittest.mock import Mock, call, patch
+from bounded_run import execute, process_rss, process_group_running, stop_process_group
 
 def live(pid):
     p=subprocess.run(['ps','-o','stat=','-p',str(pid)],capture_output=True,text=True)
@@ -57,6 +57,26 @@ class GroupCleanup(unittest.TestCase):
                     with self.assertRaises(subprocess.TimeoutExpired):
                         monitor(os.getpid())
                 self.assertLess(time.monotonic() - start, 10)
+
+    def test_cleanup_waits_for_sigkill_delivery_to_descendants(self):
+        child = Mock(pid=12345)
+        with patch('bounded_run.os.killpg') as kill, \
+             patch('bounded_run.process_group_running', side_effect=[[], [12345], []]) as monitor, \
+             patch('bounded_run.time.sleep') as sleep:
+            stop_process_group(child)
+        self.assertEqual(kill.call_args_list, [call(12345, signal.SIGTERM), call(12345, signal.SIGKILL)])
+        self.assertEqual(monitor.call_count, 3)
+        sleep.assert_called_once_with(.01)
+        child.wait.assert_called_once()
+
+    def test_cleanup_wait_after_sigkill_is_bounded(self):
+        child = Mock(pid=12345)
+        with patch('bounded_run.os.killpg'), \
+             patch('bounded_run.process_group_running', side_effect=[[], [12345]]), \
+             patch('bounded_run.time.monotonic', side_effect=[0, 0, 2]):
+            with self.assertRaisesRegex(RuntimeError, 'remained after SIGKILL'):
+                stop_process_group(child)
+        child.wait.assert_called_once()
 
     def test_monitor_preflight_failure_starts_nothing(self):
         with patch('bounded_run.process_rss',side_effect=OSError('preflight')),patch('bounded_run.subprocess.Popen') as launch:

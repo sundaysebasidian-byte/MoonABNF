@@ -44,6 +44,7 @@ priv suberror MatchStop {
 ///|
 priv struct Runner {
   program : Program
+  generalized : Bool
   input : Symbols
   limits : MatchLimits
   mut work : Int32
@@ -116,7 +117,7 @@ fn Runner::eval(
     Ref(name, _) =>
       if !self.program.productive.contains(name) {
         []
-      } else if self.program.left_recursive {
+      } else if self.generalized {
         let cached = self.chart.get((name, pos)).unwrap_or([])
         for end in cached {
           self.tick(end)
@@ -298,6 +299,7 @@ fn Program::recognize_symbols(
   }
   let runner = {
     program: self,
+    generalized: self.generalized.contains(name),
     input,
     limits,
     work: initial_work,
@@ -307,7 +309,7 @@ fn Program::recognize_symbols(
     chart: Map([]),
   }
   let status = try {
-    let ends = if self.left_recursive {
+    let ends = if runner.generalized {
       runner.solve(name)
     } else {
       runner.eval(e, 0, 0)
