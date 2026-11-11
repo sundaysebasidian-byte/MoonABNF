@@ -48,7 +48,7 @@ ScalarMatchLimits 用 `max_input_scalars`，其余 work/states/depth 与现有�
 ## 直接运行
 
 ```sh
-# 先将 MOON_HOME 设为已有的 0.10.18+6c83a7f62 项目隔离 SDK 目录
+# 先将 MOON_HOME 设为已有的 0.10.20+65efd5b93 项目隔离 SDK 目录
 test -n "$MOON_HOME"
 export PATH="$MOON_HOME/bin:$PATH"
 moon run examples/scalar_prose --target native

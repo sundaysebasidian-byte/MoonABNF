@@ -10,11 +10,12 @@ pub fn grammar() -> Bytes {
 
 ///|
 /// Application adapter metadata; value bytes remain opaque, without unescaping.
+#derive(Eq)
 pub(all) struct TagSpan {
   weak : Bool
   value_start : Int32
   value_end : Int32
-} derive(Eq)
+}
 
 ///|
 pub extend TagSpan with Eq::{equal, not_equal}

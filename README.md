@@ -15,7 +15,7 @@ MoonABNF 用 MoonBit 实现 ABNF 解析，保留字节 API，当前源码另有�
 
 | 交付物 | 能力与工具链 | 入口 |
 | --- | --- | --- |
-| 当前源码 | Bytes API、预算内左递归识别 / 输入树、独立 Unicode scalar API、显式组合 prose；工具链锁定 `moonc 0.10.18+6c83a7f62` | [技术证据与复现](docs/TECHNICAL_EVIDENCE.zh-CN.md)、[scalar / prose](docs/SCALAR_PROSE_EXTENSION_20261030.md)、[左递归边界](docs/LEFT_RECURSION_REVIEW_20261030.md) |
+| 当前源码 | Bytes API、预算内左递归识别 / 输入树、独立 Unicode scalar API、显式组合 prose；工具链锁定 `moonc 0.10.20+65efd5b93`（`moon 0.1.20261104`），需要 MoonBit 0.10.20 及以上 | [技术证据与复现](docs/TECHNICAL_EVIDENCE.zh-CN.md)、[scalar / prose](docs/SCALAR_PROSE_EXTENSION_20261030.md)、[左递归边界](docs/LEFT_RECURSION_REVIEW_20261030.md) |
 | Mooncakes 0.3.0 | 已发布的 Bytes API、输入派生树、字段提取与有界失败诊断；历史锁定工具链为 `0.10.14+7d59c7ec9` | [0.3.0 版本说明](docs/release-0.3.0.zh-CN.md) |
 
 **源码新增能力不属于已发布的 0.3.0。** 当前源码的 `moon.mod` 仍保留 0.3.0；这个版本字段不是再次发布或覆盖旧包的凭据。源码分支、GitHub Release 和 Mooncakes 发布应分别核验。
@@ -35,7 +35,7 @@ scripts/moon-local.sh run examples/protocols/cmd --target js
 scripts/moon-local.sh run examples/scalar_prose --target native
 ```
 
-`moon-local.sh` 会核对编译器版本。复现特定结果时还须检出对应提交，并保留本地补丁；验收脚本会记录 Git HEAD、工作树状态与源码 SHA-256，不把旧分支日志当作当前源码的测试结果。
+`moon-local.sh` 会核对编译器版本（`v0.10.20+65efd5b93`）。**版本要求：MoonBit 0.10.20 及以上**——源码使用该版本的 `#derive` 语法，0.10.18 无法编译；旧的 `derive(...)` 写法在 0.10.20 上会产生 `deprecated_syntax` 告警并使 `moon check --deny-warn` 失败。已发布的 Mooncakes 0.3.0 仍对应其历史工具链。[fresh-clone.yml](.github/workflows/fresh-clone.yml) 同时在锁定 SDK 与最新官方 SDK 上运行，并每周定时执行。复现特定结果时还须检出对应提交，并保留本地补丁；验收脚本会记录 Git HEAD、工作树状态与源码 SHA-256，不把旧分支日志当作当前源码的测试结果。
 
 ## Mooncakes 0.3.0 快速开始
 

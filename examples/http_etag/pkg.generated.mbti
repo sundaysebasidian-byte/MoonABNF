@@ -13,11 +13,12 @@ pub fn grammar() -> Bytes
 // Errors
 
 // Types and methods
+#derive(Eq)
 pub(all) struct TagSpan {
   weak : Bool
   value_start : Int32
   value_end : Int32
-} derive(Eq)
+}
 pub fn TagSpan::equal(Self, Self) -> Bool
 pub fn TagSpan::not_equal(Self, Self) -> Bool
 

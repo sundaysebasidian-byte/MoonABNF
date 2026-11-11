@@ -6,7 +6,7 @@ jobs:
   acceptance:
     runs-on: ubuntu-24.04
     env:
-      MOONBIT_VERSION: 0.10.18+6c83a7f62
+      MOONBIT_VERSION: 0.10.20+65efd5b93
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned official toolchain

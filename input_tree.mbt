@@ -1,5 +1,6 @@
 ///|
 /// A witness of an input derivation, distinct from the grammar Expr AST.
+#derive(Eq, Debug)
 pub(all) enum InputNodeKind {
   RuleNode(String)
   LiteralNode
@@ -7,34 +8,37 @@ pub(all) enum InputNodeKind {
   SequenceNode
   ChoiceNode(Int32)
   RepeatNode(Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Half-open input byte span. source_offset refers to the grammar expression;
 /// implicit core expressions have synthetic offset 0. Children are node IDs.
+#derive(Eq, Debug)
 pub(all) struct InputNode {
   kind : InputNodeKind
   start : Int32
   end : Int32
   source_offset : Int32
   children : Array[Int32]
-} derive(Eq, Debug)
+}
 
 ///|
 /// Flat, reachable-only tree; root is always 0. No input bytes are copied.
+#derive(Eq, Debug)
 pub(all) struct InputTree {
   nodes : Array[InputNode]
   root : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 /// Allocation budgets count all explored witnesses, paths and final compaction,
 /// not only the returned tree. Match limits retain their existing meaning.
+#derive(Eq, Debug)
 pub(all) struct InputTreeLimits {
   matching : MatchLimits
   max_nodes : Int32
   max_edges : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn default_input_tree_limits() -> InputTreeLimits {
@@ -43,6 +47,7 @@ pub fn default_input_tree_limits() -> InputTreeLimits {
 
 ///|
 /// tree is Some exactly when status is Matched. Budget failure discards trees.
+#derive(Eq, Debug)
 pub(all) struct InputTreeReport {
   status : MatchStatus
   tree : InputTree?
@@ -51,7 +56,7 @@ pub(all) struct InputTreeReport {
   states : Int32
   nodes : Int32
   edges : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 priv struct Witness {

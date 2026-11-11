@@ -1,15 +1,17 @@
 ///|
 /// Source positions are zero-based byte offsets; line/column are one-based.
+#derive(Eq, Debug)
 pub(all) struct Diagnostic {
   code : String
   message : String
   offset : Int32
   line : Int32
   column : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 /// Public AST. Repeat maximum None means unbounded; positions refer to source.
+#derive(Eq, Debug)
 pub(all) enum Expr {
   Ref(String, Int32)
   Literal(Bytes, Bool, Int32)
@@ -18,29 +20,32 @@ pub(all) enum Expr {
   Choice(Array[Expr], Int32)
   Repeat(Int32, Int32?, Expr, Int32)
   Prose(String, Int32)
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Rule {
   name : String
   expression : Expr
   incremental : Bool
   offset : Int32
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Grammar {
   rules : Array[Rule]
-} derive(Eq, Debug)
+}
 
 ///|
 /// Hard implementation ceilings prevent caller budgets from risking the stack.
+#derive(Eq, Debug)
 pub(all) struct ParseLimits {
   max_bytes : Int32
   max_rules : Int32
   max_nodes : Int32
   max_depth : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn default_parse_limits() -> ParseLimits {

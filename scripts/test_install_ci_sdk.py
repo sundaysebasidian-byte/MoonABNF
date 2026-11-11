@@ -14,9 +14,9 @@ spec.loader.exec_module(installer)
 class InstallerGuards(unittest.TestCase):
     def test_lock_uses_this_projects_exact_release(self):
         lock = installer.checked_lock(ROOT / 'TOOLCHAIN.lock')
-        self.assertEqual(lock['compiler'], '0.10.18+6c83a7f62')
-        self.assertEqual(lock['sdk_sha256'], '0e4cde1ace98e8ef00552a937738b59c6901c4b8a004ebad71ea0e63688f63f1')
-        self.assertEqual(lock['core_sha256'], '30a8ae1c1e1e8fde478ea742cbc928c8f4ae1f5c00090afe3f10c97be9e5da64')
+        self.assertEqual(lock['compiler'], '0.10.20+65efd5b93')
+        self.assertEqual(lock['sdk_sha256'], '80d987523308fa490eba9f1baf98df996a5a7891e118357553b7c2608c0597c5')
+        self.assertEqual(lock['core_sha256'], '8ec2a2c01335501d703867bb4eef5f92d3cd7e1ae1ee5f7f14d54d16d2c7c2b5')
 
     def test_origin_exactness(self):
         self.assertTrue(installer.official_url('https://cli.moonbitlang.com/a'))

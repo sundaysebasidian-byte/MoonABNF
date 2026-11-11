@@ -1,23 +1,26 @@
 ///|
 /// ByteRange's third value denotes ASCII case-insensitive matching, not Unicode.
+#derive(Eq, Debug)
 pub(all) enum InputExpectation {
   ByteRange(Int32, Int32, Bool)
   EndOfInput
-} derive(Eq, Debug)
+}
 
 ///|
 /// grammar_offset is the terminal expression's original grammar byte offset.
 /// None denotes implicit core terminals or an end-of-input requirement.
+#derive(Eq, Debug)
 pub(all) struct ExpectedInput {
   expectation : InputExpectation
   grammar_offset : Int32?
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct InputDiagnosticLimits {
   max_work : Int32
   max_expectations : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn default_input_diagnostic_limits() -> InputDiagnosticLimits {
@@ -25,22 +28,24 @@ pub fn default_input_diagnostic_limits() -> InputDiagnosticLimits {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct InputFailure {
   offset : Int32
   actual : Int32?
   expected : Array[ExpectedInput]
   truncated : Bool
-} derive(Eq, Debug)
+}
 
 ///|
 /// match is the unchanged recognition result. explanation_status describes only
 /// the separately budgeted explanatory replay (not another acceptance verdict).
+#derive(Eq, Debug)
 pub(all) struct InputDiagnosticReport {
   report : MatchReport
   failure : InputFailure?
   explanation_status : String
   explanation_work : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 priv struct FailureCollector {

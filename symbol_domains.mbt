@@ -30,22 +30,24 @@ fn is_scalar(n : Int32) -> Bool {
 /// Words([]) is the empty language; Words([[]]) matches epsilon. Range matches
 /// exactly one symbol, never epsilon. Concat([]) is epsilon; Alternative([])
 /// is empty. Repetition permits unbounded languages, not executable callbacks.
+#derive(Eq, Debug)
 pub(all) enum ProsePredicate {
   Words(Array[Array[Int32]])
   SymbolRange(Int32, Int32)
   Concat(Array[ProsePredicate])
   Alternative(Array[ProsePredicate])
   Repetition(Int32, Int32?, ProsePredicate)
-} derive(Eq, Debug)
+}
 
 ///|
 /// Names equal the exact ASCII text inside <...>, case and spaces preserved.
 /// Empty names are allowed: <> is a legal prose token. Duplicate and invalid
 /// bindings are errors even if unused. Compiled programs own a lowered copy.
+#derive(Eq, Debug)
 pub(all) struct ProseBinding {
   name : String
   predicate : ProsePredicate
-} derive(Eq, Debug)
+}
 
 ///|
 priv struct Lowering {

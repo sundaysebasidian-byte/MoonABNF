@@ -1,11 +1,12 @@
 ///|
 /// Work counts expression dispatches, byte comparisons and endpoint operations.
+#derive(Eq, Debug)
 pub(all) struct MatchLimits {
   max_input_bytes : Int32
   max_work : Int32
   max_states : Int32
   max_depth : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn default_match_limits() -> MatchLimits {
@@ -18,23 +19,25 @@ pub fn default_match_limits() -> MatchLimits {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum MatchStatus {
   Matched
   NoMatch
   BudgetExceeded(String)
   UnknownRule
   InvalidLimits
-} derive(Eq, Debug)
+}
 
 ///|
 /// offset is a zero-based furthest attempted byte; full match offset is length.
 /// Budget exhaustion is indeterminate, even if an explored branch matched.
+#derive(Eq, Debug)
 pub(all) struct MatchReport {
   status : MatchStatus
   offset : Int32
   work : Int32
   states : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 priv suberror MatchStop {

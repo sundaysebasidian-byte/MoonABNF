@@ -25,17 +25,19 @@ pub fn ScalarProgram::rule_names(self : ScalarProgram) -> Array[String] {
 
 ///|
 /// No UTF-8/UTF-16 decoding is performed: one Int is one scalar value.
+#derive(Eq, Debug)
 pub(all) enum ScalarInputError {
   InvalidScalar(Int32, Int32) // zero-based input index, invalid value
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct ScalarMatchLimits {
   max_input_scalars : Int32
   max_work : Int32
   max_states : Int32
   max_depth : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn default_scalar_match_limits() -> ScalarMatchLimits {
@@ -110,10 +112,11 @@ pub fn ScalarProgram::recognize(
 /// A distinct tree type prevents accidental use of byte extract() with scalar
 /// indices. start/end are scalar positions; source_offset stays a grammar byte
 /// position. Prose bindings are represented by lowered Choice/Sequence/Range.
+#derive(Eq, Debug)
 pub(all) struct ScalarInputTree {
   nodes : Array[InputNode]
   root : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 fn ScalarInputTree::inner(self : ScalarInputTree) -> InputTree {
@@ -165,11 +168,12 @@ pub fn ScalarInputTree::extract(
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct ScalarInputTreeLimits {
   matching : ScalarMatchLimits
   max_nodes : Int32
   max_edges : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn default_scalar_input_tree_limits() -> ScalarInputTreeLimits {
@@ -181,6 +185,7 @@ pub fn default_scalar_input_tree_limits() -> ScalarInputTreeLimits {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct ScalarInputTreeReport {
   status : MatchStatus
   tree : ScalarInputTree?
@@ -189,7 +194,7 @@ pub(all) struct ScalarInputTreeReport {
   states : Int32
   nodes : Int32
   edges : Int32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn ScalarProgram::parse_input(

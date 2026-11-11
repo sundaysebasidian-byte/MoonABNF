@@ -15,7 +15,7 @@
 
 ## 可复现检查
 
-先按 [README](../README.md#当前源码快速开始) 设置 `MOONABNF_SDK`，使用锁定的 `moonc 0.10.18+6c83a7f62`。以下为 POSIX 环境；未声称 Windows 原生验证。
+先按 [README](../README.md#当前源码快速开始) 设置 `MOONABNF_SDK`，使用锁定的 `moonc 0.10.20+65efd5b93`。以下为 POSIX 环境；未声称 Windows 原生验证。
 
 ```sh
 scripts/moon-local.sh version --all

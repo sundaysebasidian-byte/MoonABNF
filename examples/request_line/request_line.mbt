@@ -22,13 +22,14 @@ pub fn grammar() -> Bytes {
 ///|
 /// Fields lifted from a successful `request-line` derivation. Every field is a
 /// `[start, end)` byte span of the original input; nothing is copied or decoded.
+#derive(Eq)
 pub(all) struct RequestLine {
   verb : (Int32, Int32)
   path : (Int32, Int32)
   query : (Int32, Int32)?
   major : Int32
   minor : Int32
-} derive(Eq)
+}
 
 ///|
 pub extend RequestLine with Eq::{equal, not_equal}
